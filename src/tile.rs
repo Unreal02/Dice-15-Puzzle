@@ -23,7 +23,15 @@ impl Object for Tile {
     fn render(&self, args: &RenderArgs, gl: &mut GlGraphics, cache: &mut GlyphCache) {
         use graphics::*;
 
-        const WHITE: [f32; 4] = [1.0, 1.0, 1.0, 1.0];
+        let color: [f32; 4] = if self.number <= 4 {
+            [1.0, 0.0, 0.0, 1.0]
+        } else if self.number <= 8 {
+            [1.0, 1.0, 0.0, 1.0]
+        } else if self.number <= 12 {
+            [0.0, 1.0, 0.0, 1.0]
+        } else {
+            [0.2, 0.2, 1.0, 1.0]
+        };
         const BLACK: [f32; 4] = [0.0, 0.0, 0.0, 1.0];
 
         let square = rectangle::square(0.0, 0.0, 60.0);
@@ -37,10 +45,9 @@ impl Object for Tile {
             // Clear the screen.
             let transform = c.transform.trans(x, y).rot_rad(rotation);
 
-            // Draw a box rotating around the middle of the screen.
-            rectangle(WHITE, square, transform.trans(-30.0, -30.0), gl);
-
             if self.number > 0 {
+                rectangle(color, square, transform.trans(-30.0, -30.0), gl);
+
                 let text_trans_x = if self.number < 10 { -10.0 } else { -15.0 };
                 text.draw(
                     self.number.to_string().as_str(),

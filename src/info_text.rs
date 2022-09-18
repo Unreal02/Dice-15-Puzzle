@@ -12,8 +12,8 @@ impl InfoText {
     pub fn new() -> Self {
         InfoText {
             text: vec![
-                String::from("R: Reset"),
-                String::from("S: Shuffle"),
+                String::from("R: Shuffle"),
+                String::from("V: Solved"),
                 String::from("Esc: Quit"),
             ],
         }

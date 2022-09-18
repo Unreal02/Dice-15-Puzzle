@@ -1,5 +1,6 @@
 use opengl_graphics::{GlGraphics, GlyphCache};
 use piston::{Key, RenderArgs, UpdateArgs};
+use rand::{self, Rng};
 
 use crate::{Object, Tile};
 
@@ -68,7 +69,47 @@ impl Board {
         }
     }
 
-    fn shuffle(&mut self) {}
+    fn shuffle(&mut self) {
+        let mut rng = rand::thread_rng();
+        let mut arr = vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0];
+
+        // shuffle
+        for i in 0..15 {
+            let j = rng.gen_range(i..15);
+            arr.swap(i, j);
+        }
+
+        // count inversion
+        let mut inv = 0;
+        for i in 0..15 {
+            for j in i + 1..15 {
+                if arr[i] > arr[j] {
+                    inv += 1;
+                }
+            }
+        }
+        if inv % 2 != 0 {
+            arr.swap(0, 1);
+        }
+
+        // copy to self.inner
+        for i in 0..4 {
+            for j in 0..4 {
+                self.inner[i][j].number = arr[i * 4 + j];
+            }
+        }
+        self.pos = Position { x: 3, y: 3 };
+
+        // randomize empty space
+        let x = rng.gen_range(0..4);
+        let y = rng.gen_range(0..4);
+        for _ in 0..x {
+            self.move_tile(-1, 0);
+        }
+        for _ in 0..y {
+            self.move_tile(0, -1);
+        }
+    }
 }
 
 impl Object for Board {
@@ -85,11 +126,15 @@ impl Object for Board {
     fn keyboard_press(&mut self, key: Key) {
         match key {
             Key::Up => self.move_tile(-1, 0),
+            Key::W => self.move_tile(-1, 0),
             Key::Down => self.move_tile(1, 0),
+            Key::S => self.move_tile(1, 0),
             Key::Left => self.move_tile(0, -1),
+            Key::A => self.move_tile(0, -1),
             Key::Right => self.move_tile(0, 1),
-            Key::R => self.reset(),
-            Key::S => self.shuffle(),
+            Key::D => self.move_tile(0, 1),
+            Key::R => self.shuffle(),
+            Key::V => self.reset(),
             _ => (),
         }
     }
