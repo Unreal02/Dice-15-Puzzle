@@ -1,22 +1,17 @@
-use std::path::Path;
-
 use glutin_window::GlutinWindow as Window;
-use opengl_graphics::{GlyphCache, OpenGL, TextureSettings};
+use opengl_graphics::{GlGraphics, GlyphCache, OpenGL, TextureSettings};
 use piston::event_loop::{EventSettings, Events};
-use piston::input::{RenderEvent, UpdateEvent};
+use piston::input::RenderEvent;
 use piston::window::WindowSettings;
 use piston::{Button, PressEvent};
+use std::path::Path;
 
-mod app;
 mod board;
 mod info_text;
-mod object;
 mod tile;
 
-pub use app::App;
 pub use board::Board;
 pub use info_text::InfoText;
-pub use object::Object;
 pub use tile::Tile;
 
 fn main() {
@@ -35,21 +30,21 @@ fn main() {
     let settings = TextureSettings::new();
     let ref mut cache = GlyphCache::new(font_path, (), settings).unwrap();
 
-    // Create a new game and run it.
-    let mut app = App::new(vec![Box::new(Board::new()), Box::new(InfoText::new())]);
+    let mut gl = GlGraphics::new(opengl);
+    let mut board = Board::new();
+    let info_text = InfoText::new();
 
     let mut events = Events::new(EventSettings::new());
     while let Some(e) = events.next(&mut window) {
         if let Some(args) = e.render_args() {
-            app.render(&args, cache);
-        }
-
-        if let Some(args) = e.update_args() {
-            app.update(&args);
+            const BLACK: [f32; 4] = [0.0, 0.0, 0.0, 1.0];
+            graphics::clear(BLACK, &mut gl);
+            board.render(&args, &mut gl, cache);
+            info_text.render(&args, &mut gl, cache);
         }
 
         if let Some(Button::Keyboard(key)) = e.press_args() {
-            app.keyboard_press(key);
+            board.keyboard_press(key);
         }
     }
 }

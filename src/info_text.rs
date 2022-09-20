@@ -1,8 +1,6 @@
 use graphics::Transformed;
 use opengl_graphics::{GlGraphics, GlyphCache};
-use piston::{Key, RenderArgs, UpdateArgs};
-
-use crate::Object;
+use piston::RenderArgs;
 
 pub struct InfoText {
     text: Vec<String>,
@@ -18,10 +16,8 @@ impl InfoText {
             ],
         }
     }
-}
 
-impl Object for InfoText {
-    fn render(&self, args: &RenderArgs, gl: &mut GlGraphics, cache: &mut GlyphCache) {
+    pub fn render(&self, args: &RenderArgs, gl: &mut GlGraphics, cache: &mut GlyphCache) {
         gl.draw(args.viewport(), |c, gl| {
             const WHITE: [f32; 4] = [1.0, 1.0, 1.0, 1.0];
             let transform = c.transform.trans(7.5, 320.0);
@@ -39,8 +35,4 @@ impl Object for InfoText {
             }
         });
     }
-
-    fn update(&mut self, _args: &UpdateArgs) {}
-
-    fn keyboard_press(&mut self, _key: Key) {}
 }

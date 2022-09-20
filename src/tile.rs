@@ -1,8 +1,7 @@
 use opengl_graphics::{GlGraphics, GlyphCache};
-use piston::{RenderArgs, UpdateArgs};
+use piston::RenderArgs;
 
-use crate::Object;
-
+#[derive(Clone, Copy, Default)]
 pub struct Tile {
     pub position: [f64; 2],
     pub rotation: f64,
@@ -17,10 +16,8 @@ impl Tile {
             number,
         }
     }
-}
 
-impl Object for Tile {
-    fn render(&self, args: &RenderArgs, gl: &mut GlGraphics, cache: &mut GlyphCache) {
+    pub fn render(&self, args: &RenderArgs, gl: &mut GlGraphics, cache: &mut GlyphCache) {
         use graphics::*;
 
         let color: [f32; 4] = if self.number <= 4 {
@@ -42,7 +39,6 @@ impl Object for Tile {
         let (x, y) = (self.position[0], self.position[1]);
 
         gl.draw(args.viewport(), |c, gl| {
-            // Clear the screen.
             let transform = c.transform.trans(x, y).rot_rad(rotation);
 
             if self.number > 0 {
@@ -60,7 +56,4 @@ impl Object for Tile {
             }
         });
     }
-
-    fn update(&mut self, _args: &UpdateArgs) {}
-    fn keyboard_press(&mut self, _key: piston::Key) {}
 }
