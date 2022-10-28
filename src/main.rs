@@ -6,7 +6,7 @@ use std::{
 
 use bevy::{prelude::*, DefaultPlugins};
 
-const BLOCK_MOVE_TIME: f32 = 0.5;
+const BLOCK_MOVE_TIME: f32 = 0.3;
 
 #[derive(Clone, Eq, PartialEq, Debug, Hash)]
 enum GameState {
@@ -66,7 +66,7 @@ impl Game {
 struct Block {
     entity: Entity,
     number: i32,
-    moving: Option<(i32, i32)>,
+    moving: Option<(i32, i32)>, // (dx, dz)
 }
 
 fn setup(
@@ -177,26 +177,23 @@ fn update_block(
                     transform
                         .rotate_z(dx as f32 * PI * 0.5 * time.delta_seconds() / BLOCK_MOVE_TIME);
                     if timer_finished {
-                        let rotation_round = |i: f32| {
-                            let abs = i.abs();
-                            let sgn = i.signum();
-                            if abs < 0.25 {
-                                0.0
-                            } else if abs < 0.6 {
-                                0.5 * sgn
-                            } else if abs < 0.85 {
-                                (2.0 as f32).sqrt() * 0.5 * sgn
-                            } else {
-                                1.0 * sgn
-                            }
-                        };
-                        transform.translation.x = transform.translation.x.round();
-                        transform.translation.y = transform.translation.y.round();
-                        transform.translation.z = transform.translation.z.round();
-                        transform.rotation.x = rotation_round(transform.rotation.x);
-                        transform.rotation.y = rotation_round(transform.rotation.y);
-                        transform.rotation.z = rotation_round(transform.rotation.z);
-                        transform.rotation.w = rotation_round(transform.rotation.w);
+                        transform.translation =
+                            Vec3::from_array(transform.translation.to_array().map(|i| i.round()));
+                        transform.rotation =
+                            Quat::from_array(transform.rotation.to_array().map(|i: f32| {
+                                // rotation의 값은 0, 0.5, sqrt(2), 1 중 하나
+                                let abs = i.abs();
+                                let sgn = i.signum();
+                                if abs < 0.25 {
+                                    0.0
+                                } else if abs < 0.6 {
+                                    0.5 * sgn
+                                } else if abs < 0.85 {
+                                    (2.0 as f32).sqrt() * 0.5 * sgn
+                                } else {
+                                    1.0 * sgn
+                                }
+                            }));
                         block.moving = None;
                     }
                 }
