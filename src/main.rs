@@ -20,7 +20,7 @@ fn main() {
         .init_resource::<Timer>()
         .add_plugins(DefaultPlugins)
         .add_plugin(WorldInspectorPlugin::new())
-        .register_inspectable::<Game>()
+        .register_inspectable::<GameState>()
         .register_inspectable::<Board>()
         .add_state(PlayState::Playing)
         .add_system_set(SystemSet::on_enter(PlayState::Playing).with_system(setup))
@@ -29,7 +29,7 @@ fn main() {
 }
 
 #[derive(Default, Inspectable, Component)]
-struct Game {
+struct GameState {
     x: i32,
     z: i32,
     board: Board,
@@ -38,7 +38,7 @@ struct Game {
 #[derive(Default, Inspectable, Component)]
 struct Board(Vec<Vec<Option<Block>>>);
 
-impl Game {
+impl GameState {
     pub fn move_block(&mut self, dx: i32, dz: i32, mut move_timer: ResMut<Timer>) {
         if self.x + dx < 0
             || self.x + dx > 3
@@ -82,7 +82,7 @@ fn setup(
     mut materials: ResMut<Assets<StandardMaterial>>,
     mut move_timer: ResMut<Timer>,
 ) {
-    let mut new_game = Game::default();
+    let mut new_game = GameState::default();
 
     let cube_mesh = meshes.add(Mesh::from(shape::Cube { size: 1.0 }));
 
@@ -191,7 +191,7 @@ fn update_block(
     keyboard_input: Res<Input<KeyCode>>,
     mut transforms: Query<&mut Transform>,
     mut move_timer: ResMut<Timer>,
-    mut game_query: Query<&mut Game>,
+    mut game_query: Query<&mut GameState>,
 ) {
     let mut game = game_query.single_mut();
 
