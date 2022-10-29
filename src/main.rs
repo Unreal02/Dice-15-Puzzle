@@ -78,24 +78,62 @@ struct Block {
 
 fn setup(
     mut commands: Commands,
+    asset_server: Res<AssetServer>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
     mut move_timer: ResMut<Timer>,
 ) {
     let mut new_game = GameState::default();
 
-    let cube_mesh = meshes.add(Mesh::from(shape::Cube { size: 1.0 }));
+    let mut mesh = Mesh::from(shape::Cube { size: 1.0 });
+    let uv_modified = vec![
+        // +z
+        [1.0 / 4.0, 3.0 / 3.0],
+        [2.0 / 4.0, 3.0 / 3.0],
+        [2.0 / 4.0, 2.0 / 3.0],
+        [1.0 / 4.0, 2.0 / 3.0],
+        // -z
+        [1.0 / 4.0, 1.0 / 3.0],
+        [2.0 / 4.0, 1.0 / 3.0],
+        [2.0 / 4.0, 0.0 / 3.0],
+        [1.0 / 4.0, 0.0 / 3.0],
+        // +x
+        [3.0 / 4.0, 1.0 / 3.0],
+        [2.0 / 4.0, 1.0 / 3.0],
+        [2.0 / 4.0, 2.0 / 3.0],
+        [3.0 / 4.0, 2.0 / 3.0],
+        // -x
+        [0.0 / 4.0, 2.0 / 3.0],
+        [1.0 / 4.0, 2.0 / 3.0],
+        [1.0 / 4.0, 1.0 / 3.0],
+        [0.0 / 4.0, 1.0 / 3.0],
+        // +y
+        [2.0 / 4.0, 1.0 / 3.0],
+        [1.0 / 4.0, 1.0 / 3.0],
+        [1.0 / 4.0, 2.0 / 3.0],
+        [2.0 / 4.0, 2.0 / 3.0],
+        // -y
+        [3.0 / 4.0, 2.0 / 3.0],
+        [4.0 / 4.0, 2.0 / 3.0],
+        [4.0 / 4.0, 1.0 / 3.0],
+        [3.0 / 4.0, 1.0 / 3.0],
+    ];
+    mesh.insert_attribute(Mesh::ATTRIBUTE_UV_0, uv_modified);
+    let cube_mesh = meshes.add(mesh);
 
     let mut mesh_entities = HashMap::new();
     for x in 0..4 {
         for z in 0..4 {
             if x != 3 || z != 3 {
+                let texture =
+                    asset_server.load(format!("images/image{}.png", x + z * 4 + 1).as_str());
                 mesh_entities.insert(
                     (x, z),
                     commands
                         .spawn_bundle(PbrBundle {
                             mesh: cube_mesh.clone(),
                             material: materials.add(StandardMaterial {
+                                base_color_texture: Some(texture.clone()),
                                 base_color: Color::Rgba {
                                     red: z as f32 / 3.0,
                                     green: x as f32 / 3.0,
