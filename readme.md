@@ -4,8 +4,13 @@
 - Check gitlab wiki for detailed information
 
 # Todo
-- [ ] Add Texture on cubes
-- [ ] Add way to check cube state (Check upperside)
+- [x] Add Texture on cubes
+- [x] Add way to check cube state (Check upperside)
+- [ ] Add game clear check logic
+- [ ] Code refactor to separate file
+- [ ] Add UI
+- [ ] Add puzzle creation logic
+- [ ] Add game reset functionality
 
 # Study Bevy
 - https://bevy-cheatbook.github.io/introduction.html

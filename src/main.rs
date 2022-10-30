@@ -21,7 +21,6 @@ fn main() {
         .add_plugins(DefaultPlugins)
         .add_plugin(WorldInspectorPlugin::new())
         .register_inspectable::<GameState>()
-        .register_inspectable::<Board>()
         .add_state(PlayState::Playing)
         .add_system_set(SystemSet::on_enter(PlayState::Playing).with_system(setup))
         .add_system_set(SystemSet::on_update(PlayState::Playing).with_system(update_block))
@@ -39,7 +38,13 @@ struct GameState {
 struct Board(Vec<Vec<Option<Block>>>);
 
 impl GameState {
-    pub fn move_block(&mut self, dx: i32, dz: i32, mut move_timer: ResMut<Timer>) {
+    pub fn move_block(
+        &mut self,
+        dx: i32,
+        dz: i32,
+        mut move_timer: ResMut<Timer>,
+        direction: KeyCode,
+    ) {
         if self.x + dx < 0
             || self.x + dx > 3
             || self.z + dz < 0
@@ -54,6 +59,7 @@ impl GameState {
         let (x1, z1) = ((self.x + dx) as usize, (self.z + dz) as usize);
         let block = self.board.0[x1][z1].as_mut().unwrap();
         block.moving = Some((dx, dz));
+        block.state = block.state.transition(direction);
         *move_timer = Timer::from_seconds(BLOCK_MOVE_TIME, false);
 
         // swap self.board.0[x0][z0] and self.board.0[x1][z1]
@@ -72,8 +78,64 @@ impl GameState {
 #[derive(Inspectable, Component)]
 struct Block {
     entity: Entity,
-    number: i32,
     moving: Option<(i32, i32)>, // (dx, dz)
+    /// (z * 4 + x + 1) as i32 % 16
+    goal: i32,
+    state: BlockState,
+}
+
+/// Represent the block's upper side state
+/// Dice required to be rotated in stated direction to achieve goal state
+#[derive(Inspectable, Component, Clone, Copy, Debug)]
+enum BlockState {
+    Goal,
+    Left,
+    Right,
+    Up,
+    Down,
+    Back,
+}
+
+impl Default for BlockState {
+    fn default() -> Self {
+        BlockState::Goal
+    }
+}
+
+impl BlockState {
+    fn transition(self, direction: KeyCode) -> Self {
+        match direction {
+            KeyCode::Up => match self {
+                BlockState::Goal => BlockState::Down,
+                BlockState::Up => BlockState::Goal,
+                BlockState::Down => BlockState::Back,
+                BlockState::Back => BlockState::Up,
+                _ => self,
+            },
+            KeyCode::Down => match self {
+                BlockState::Goal => BlockState::Up,
+                BlockState::Up => BlockState::Back,
+                BlockState::Down => BlockState::Goal,
+                BlockState::Back => BlockState::Down,
+                _ => self,
+            },
+            KeyCode::Left => match self {
+                BlockState::Goal => BlockState::Right,
+                BlockState::Left => BlockState::Goal,
+                BlockState::Right => BlockState::Back,
+                BlockState::Back => BlockState::Left,
+                _ => self,
+            },
+            KeyCode::Right => match self {
+                BlockState::Goal => BlockState::Left,
+                BlockState::Left => BlockState::Back,
+                BlockState::Right => BlockState::Goal,
+                BlockState::Back => BlockState::Right,
+                _ => self,
+            },
+            _ => unreachable!("Block transition should be done with direction keyboard input"),
+        }
+    }
 }
 
 fn setup(
@@ -162,8 +224,9 @@ fn setup(
             new_game.board.0[x].push(if x != 3 || z != 3 {
                 Some(Block {
                     entity: mesh_entities.get(&(x, z)).unwrap().clone(),
-                    number: (x * 4 + z + 1) as i32 % 16,
+                    goal: (z * 4 + x + 1) as i32 % 16,
                     moving: None,
+                    state: BlockState::default(),
                 })
             } else {
                 None
@@ -174,6 +237,7 @@ fn setup(
     new_game.z = 3;
     *move_timer = Timer::from_seconds(0.1, false);
 
+    // Spawn Game
     commands
         .spawn()
         .insert_bundle(SpatialBundle::default())
@@ -280,12 +344,12 @@ fn update_block(
     }
 
     if keyboard_input.pressed(KeyCode::Up) {
-        game.move_block(0, 1, move_timer);
+        game.move_block(0, 1, move_timer, KeyCode::Up);
     } else if keyboard_input.pressed(KeyCode::Down) {
-        game.move_block(0, -1, move_timer);
+        game.move_block(0, -1, move_timer, KeyCode::Down);
     } else if keyboard_input.pressed(KeyCode::Left) {
-        game.move_block(1, 0, move_timer);
+        game.move_block(1, 0, move_timer, KeyCode::Left);
     } else if keyboard_input.pressed(KeyCode::Right) {
-        game.move_block(-1, 0, move_timer);
+        game.move_block(-1, 0, move_timer, KeyCode::Right);
     }
 }
