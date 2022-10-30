@@ -127,6 +127,7 @@ fn setup(
             if x != 3 || z != 3 {
                 let texture =
                     asset_server.load(format!("images/image{}.png", x + z * 4 + 1).as_str());
+                let lightness = (x + 1) as f32 / 5.0;
                 mesh_entities.insert(
                     (x, z),
                     commands
@@ -134,11 +135,12 @@ fn setup(
                             mesh: cube_mesh.clone(),
                             material: materials.add(StandardMaterial {
                                 base_color_texture: Some(texture.clone()),
-                                base_color: Color::Rgba {
-                                    red: z as f32 / 3.0,
-                                    green: x as f32 / 3.0,
-                                    blue: 0.5,
-                                    alpha: 0.5,
+                                base_color: match z {
+                                    0 => Color::hsl(0.0, 1.0, lightness),
+                                    1 => Color::hsl(60.0, 1.0, lightness),
+                                    2 => Color::hsl(120.0, 1.0, lightness),
+                                    3 => Color::hsl(240.0, 1.0, lightness),
+                                    _ => Color::BLACK,
                                 },
                                 ..default()
                             }),
