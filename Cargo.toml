@@ -13,3 +13,8 @@ edition = "2021"
 bevy = "0.8.0"
 rand = "*"
 bevy-inspector-egui = "*"
+image = "0.24.0"
+
+[[bin]]
+name = "preprocess"
+path = "preprocess/process_image.rs"
