@@ -2,20 +2,17 @@
 name = "dice_15_puzzle"
 version = "0.1.0"
 edition = "2021"
-default-run = "dice_15_puzzle"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 # Inspertor does not work properly in level 3. Check here https://bevy-cheatbook.github.io/pitfalls/performance.html
-# [profile.dev.package."*"]
-# opt-level = 3
+[profile.dev.package."*"]
+opt-level = 3
 
 [dependencies]
 bevy = "0.8.0"
 rand = "*"
 bevy-inspector-egui = "*"
-image = "0.24.0"
 
-[[bin]]
-name = "preprocess"
-path = "preprocess/process_image.rs"
+[build-dependencies]
+image = "0.24.0"
