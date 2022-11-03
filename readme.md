@@ -6,10 +6,10 @@
 # Todo
 - [x] Add Texture on cubes
 - [x] Add way to check cube state (Check upperside)
-- [ ] Add game clear check logic
-- [ ] Code refactor to separate file
-- [ ] Add UI
+- [x] Code refactor to separate file
 - [ ] Add puzzle creation logic
+- [ ] Add game clear check logic
+- [ ] Add UI
 - [ ] Add game reset functionality
 
 # Study Bevy
