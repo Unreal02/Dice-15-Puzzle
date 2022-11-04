@@ -18,3 +18,14 @@
 
 ## WebAssembly
 - https://bevy-cheatbook.github.io/platforms/wasm.html
+##### Install setup
+```
+rustup target install wasm32-unknown-unknown
+cargo install wasm-server-runner
+cargo install -f wasm-bindgen-cli
+```
+##### Build web version
+```
+cargo build --release --target wasm32-unknown-unknown
+wasm-bindgen --out-dir ./out/ --no-typescript --target web ./target/wasm32-unknown-unknown/release/dice_15_puzzle.wasm
+```
