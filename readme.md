@@ -9,9 +9,12 @@
 - [x] Code refactor to separate file
 - [ ] Add puzzle creation logic
 - [ ] Add game clear check logic
-- [ ] Add UI
+- [x] Add UI
 - [ ] Add game reset functionality
 
 # Study Bevy
 - https://bevy-cheatbook.github.io/introduction.html
 - https://www.youtube.com/watch?v=QgZfxweAxvc&list=PL6uRoaCCw7GN_lJxpKS3j-KXuThRiSXc6
+
+## WebAssembly
+- https://bevy-cheatbook.github.io/platforms/wasm.html
