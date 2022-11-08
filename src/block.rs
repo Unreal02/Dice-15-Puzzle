@@ -1,8 +1,10 @@
 use bevy::{prelude::*, utils::HashMap};
-// use bevy::prelude::{Component, Entity, KeyCode, Commands};
+
+#[cfg(feature = "debug")]
 use bevy_inspector_egui::Inspectable;
 
-#[derive(Inspectable, Component)]
+#[derive(Component)]
+#[cfg_attr(feature = "debug", derive(Inspectable))]
 pub struct Block {
     pub entity: Entity,
     pub moving: Option<(i32, i32)>, // (dx, dz)
@@ -13,7 +15,8 @@ pub struct Block {
 
 /// Represent the block's upper side state
 /// Dice required to be rotated in stated direction to achieve goal state
-#[derive(Inspectable, Component, Clone, Copy, Debug)]
+#[derive(Component, Clone, Copy, Debug)]
+#[cfg_attr(feature = "debug", derive(Inspectable))]
 pub enum BlockState {
     Goal,
     Left,

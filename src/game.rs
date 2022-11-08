@@ -5,6 +5,8 @@ use std::{
 };
 
 use bevy::prelude::*;
+
+#[cfg(feature = "debug")]
 use bevy_inspector_egui::Inspectable;
 
 use crate::{
@@ -16,14 +18,16 @@ const BLOCK_MOVE_TIME: f32 = 0.3;
 
 pub struct GamePlugin;
 
-#[derive(Default, Inspectable, Component)]
+#[derive(Default, Component)]
+#[cfg_attr(feature = "debug", derive(Inspectable))]
 pub struct GameState {
     x: i32,
     z: i32,
     board: Board,
 }
 
-#[derive(Default, Inspectable, Component)]
+#[derive(Default, Component)]
+#[cfg_attr(feature = "debug", derive(Inspectable))]
 struct Board(Vec<Vec<Option<Block>>>);
 
 impl Plugin for GamePlugin {

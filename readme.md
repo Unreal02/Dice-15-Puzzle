@@ -35,3 +35,6 @@ cargo install -f wasm-bindgen-cli
 cargo build --release --target wasm32-unknown-unknown
 wasm-bindgen --out-dir ./out/ --no-typescript --target web ./target/wasm32-unknown-unknown/release/dice_15_puzzle.wasm
 ```
+
+#### How to build with inspector
+- Give --features="debug" option for cargo 
