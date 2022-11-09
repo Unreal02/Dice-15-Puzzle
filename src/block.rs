@@ -7,7 +7,7 @@ use bevy_inspector_egui::Inspectable;
 #[cfg_attr(feature = "debug", derive(Inspectable))]
 pub struct Block {
     pub entity: Entity,
-    pub moving: Option<(i32, i32)>, // (dx, dz)
+    pub moving: Option<(Transform, Transform)>, // previous and next transform
     /// (z * 4 + x + 1) as i32 % 16
     pub goal: i32,
     pub state: BlockState,

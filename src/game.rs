@@ -42,8 +42,10 @@ impl GameState {
         &mut self,
         dx: i32,
         dz: i32,
-        mut move_timer: ResMut<Timer>,
         direction: KeyCode,
+        immediate: bool,
+        mut move_timer: ResMut<Timer>,
+        mut transforms: Query<&mut Transform>,
     ) {
         if self.x + dx < 0
             || self.x + dx > 3
@@ -58,9 +60,26 @@ impl GameState {
         let (x0, z0) = (self.x as usize, self.z as usize);
         let (x1, z1) = ((self.x + dx) as usize, (self.z + dz) as usize);
         let block = self.board.0[x1][z1].as_mut().unwrap();
-        block.moving = Some((dx, dz));
+
+        // next transform of block
+        let mut transform = transforms.get_mut(block.entity).unwrap();
+        let prev_transform = transform.clone();
+        let mut next_transform = prev_transform;
+        next_transform.translation += Vec3 {
+            x: -dx as f32,
+            y: 0.0,
+            z: -dz as f32,
+        };
+        next_transform.rotate_x(-dz as f32 * PI * 0.5);
+        next_transform.rotate_z(dx as f32 * PI * 0.5);
         block.state = block.state.transition(direction);
-        *move_timer = Timer::from_seconds(BLOCK_MOVE_TIME, false);
+
+        if immediate {
+            *transform = next_transform;
+        } else {
+            block.moving = Some((prev_transform, next_transform));
+            *move_timer = Timer::from_seconds(BLOCK_MOVE_TIME, false);
+        }
 
         // swap self.board.0[x0][z0] and self.board.0[x1][z1]
         if x0 == x1 {
@@ -170,42 +189,26 @@ fn update_block(
 
     let timer_finished = move_timer.tick(time.delta()).just_finished();
     let elapsed_secs = move_timer.elapsed_secs();
+
     for arr in game.board.0.iter_mut() {
         for elem in arr {
             if let Some(block) = elem {
-                if let Some((dx, dz)) = block.moving {
+                if let Some((prev_transform, next_transform)) = block.moving {
+                    // rotate block
                     let mut transform = transforms.get_mut(block.entity).unwrap();
-                    let move_dist =
-                        (2.0 as f32).sqrt() * 0.25 * PI * time.delta_seconds() / BLOCK_MOVE_TIME;
-                    let move_angle = PI * 0.5 * (0.5 - elapsed_secs / BLOCK_MOVE_TIME);
-                    transform.translation += Vec3 {
-                        x: -dx as f32 * move_dist * move_angle.cos(),
-                        y: move_dist * move_angle.sin(),
-                        z: -dz as f32 * move_dist * move_angle.cos(),
-                    };
-                    transform
-                        .rotate_x(-dz as f32 * PI * 0.5 * time.delta_seconds() / BLOCK_MOVE_TIME);
-                    transform
-                        .rotate_z(dx as f32 * PI * 0.5 * time.delta_seconds() / BLOCK_MOVE_TIME);
                     if timer_finished {
-                        transform.translation =
-                            Vec3::from_array(transform.translation.to_array().map(|i| i.round()));
-                        transform.rotation =
-                            Quat::from_array(transform.rotation.to_array().map(|i: f32| {
-                                // rotation의 값은 0, 0.5, sqrt(2), 1 중 하나
-                                let abs = i.abs();
-                                let sgn = i.signum();
-                                if abs < 0.25 {
-                                    0.0
-                                } else if abs < 0.6 {
-                                    0.5 * sgn
-                                } else if abs < 0.85 {
-                                    (2.0 as f32).sqrt() * 0.5 * sgn
-                                } else {
-                                    1.0 * sgn
-                                }
-                            }));
+                        *transform = next_transform;
                         block.moving = None;
+                    } else {
+                        transform.rotation = prev_transform
+                            .rotation
+                            .slerp(next_transform.rotation, elapsed_secs / BLOCK_MOVE_TIME);
+                        let angle = PI / 4.0 + elapsed_secs / BLOCK_MOVE_TIME * PI / 2.0;
+                        transform.translation = prev_transform.translation.lerp(
+                            next_transform.translation,
+                            -angle.cos() * (0.5 as f32).sqrt() + 0.5,
+                        );
+                        transform.translation.y = angle.sin() * (0.5 as f32).sqrt() - 0.5;
                     }
                 }
             }
@@ -213,12 +216,12 @@ fn update_block(
     }
 
     if keyboard_input.pressed(KeyCode::Up) {
-        game.move_block(0, 1, move_timer, KeyCode::Up);
+        game.move_block(0, 1, KeyCode::Up, false, move_timer, transforms);
     } else if keyboard_input.pressed(KeyCode::Down) {
-        game.move_block(0, -1, move_timer, KeyCode::Down);
+        game.move_block(0, -1, KeyCode::Down, false, move_timer, transforms);
     } else if keyboard_input.pressed(KeyCode::Left) {
-        game.move_block(1, 0, move_timer, KeyCode::Left);
+        game.move_block(1, 0, KeyCode::Left, false, move_timer, transforms);
     } else if keyboard_input.pressed(KeyCode::Right) {
-        game.move_block(-1, 0, move_timer, KeyCode::Right);
+        game.move_block(-1, 0, KeyCode::Right, false, move_timer, transforms);
     }
 }
