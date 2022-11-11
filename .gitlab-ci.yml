@@ -1,9 +1,10 @@
 image: rust:latest
 
 cache:
-  key: cargo
+  key: build_cache
   paths:
     - $CARGO_HOME
+    - target
 
 stages:
   - build
@@ -20,9 +21,8 @@ build:
     - cp -r assets/ web_build/assets/
     - cp ./index.html ./web_build/
   artifacts:
-    name: target
+    name: web_build
     paths:
-      - target
       - web_build
 
 # GitLab Pages Deploy
@@ -37,9 +37,8 @@ docker-daegunju:
     - docker-compose down
     - docker-compose up --build -d
   artifacts:
-    name: target
+    name: web_build
     paths:
-      - target
       - web_build
   tags:
     - dind
