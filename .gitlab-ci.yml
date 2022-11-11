@@ -20,14 +20,14 @@ docker-daegunju:
   services:
     - docker:19.03.8-dind
   dependencies:
-    - web
+    - build
   script:
     - docker-compose down
     - docker-compose up --build -d
   artifacts:
     name: $EXPORT_NAME-$CI_JOB_NAME
     paths:
-      - build/web
+      - web_build
   tags:
     - dind
     - daegunju-docker
