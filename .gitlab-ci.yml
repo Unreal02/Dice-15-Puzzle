@@ -1,5 +1,9 @@
 image: rust:latest
 
+cache:
+  paths:
+    - .cargo
+
 stages:
   - build
   - deploy
@@ -12,6 +16,11 @@ build:
     - cargo install -f wasm-bindgen-cli
     - cargo build --release --target wasm32-unknown-unknown
     - wasm-bindgen --out-dir ./web_build/ --no-typescript --target web ./target/wasm32-unknown-unknown/release/dice_15_puzzle.wasm
+    - cp ./index.html ./web_build/
+  artifacts:
+    name: web_build
+    paths:
+      - web_build
 
 # GitLab Pages Deploy
 docker-daegunju:
@@ -25,7 +34,7 @@ docker-daegunju:
     - docker-compose down
     - docker-compose up --build -d
   artifacts:
-    name: $EXPORT_NAME-$CI_JOB_NAME
+    name: web_build
     paths:
       - web_build
   tags:
