@@ -1,5 +1,7 @@
 use bevy::prelude::*;
 
+use crate::{game::GameState, player::PlayerState};
+
 const NORMAL_COLOR: Color = Color::rgb(1.0, 1.0, 1.0);
 const PRESSED_COLOR: Color = Color::rgb(0.8, 0.8, 0.8);
 
@@ -14,7 +16,7 @@ pub struct GameUIPlugin;
 impl Plugin for GameUIPlugin {
     fn build(&self, app: &mut App) {
         app.add_startup_system(setup_buttons)
-            .add_system(button_system);
+            .add_system_set(SystemSet::on_update(PlayerState::Playing).with_system(button_system));
     }
 }
 
@@ -23,13 +25,17 @@ fn button_system(
         (&Interaction, &mut UiColor, &MyButtons),
         (Changed<Interaction>, With<Button>),
     >,
+    mut transforms: Query<&mut Transform>,
+    mut move_timer: ResMut<Timer>,
+    mut game_query: Query<&mut GameState>,
 ) {
+    let mut game = game_query.single_mut();
     for (interaction, mut color, buttons) in &mut interaction_query {
         match *interaction {
             Interaction::Clicked => {
                 match buttons {
                     MyButtons::Reset => println!("reset"),
-                    MyButtons::Shuffle => println!("shuffle"),
+                    MyButtons::Shuffle => game.shuffle(&mut move_timer, &mut transforms),
                 }
                 *color = PRESSED_COLOR.into();
             }

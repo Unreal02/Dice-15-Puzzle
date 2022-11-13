@@ -8,6 +8,7 @@ use bevy::prelude::*;
 
 #[cfg(feature = "debug")]
 use bevy_inspector_egui::Inspectable;
+use rand::random;
 
 use crate::{
     block::{spawn_meshes, Block, BlockState},
@@ -38,14 +39,17 @@ impl Plugin for GamePlugin {
 }
 
 impl GameState {
+    /// Move block.
+    ///
+    /// `move_timer` has value only when `immediate` is `false`.
     pub fn move_block(
         &mut self,
         dx: i32,
         dz: i32,
         direction: KeyCode,
         immediate: bool,
-        mut move_timer: ResMut<Timer>,
-        mut transforms: Query<&mut Transform>,
+        move_timer: &mut ResMut<Timer>,
+        transforms: &mut Query<&mut Transform>,
     ) {
         if self.x + dx < 0
             || self.x + dx > 3
@@ -78,7 +82,7 @@ impl GameState {
             *transform = next_transform;
         } else {
             block.moving = Some((prev_transform, next_transform));
-            *move_timer = Timer::from_seconds(BLOCK_MOVE_TIME, false);
+            **move_timer = Timer::from_seconds(BLOCK_MOVE_TIME, false);
         }
 
         // swap self.board.0[x0][z0] and self.board.0[x1][z1]
@@ -91,6 +95,22 @@ impl GameState {
         }
         self.x += dx;
         self.z += dz;
+    }
+
+    pub fn shuffle(
+        &mut self,
+        move_timer: &mut ResMut<Timer>,
+        transforms: &mut Query<&mut Transform>,
+    ) {
+        for _ in 0..1000 {
+            match random::<u32>() % 4 {
+                0 => self.move_block(0, 1, KeyCode::Up, true, move_timer, transforms),
+                1 => self.move_block(0, -1, KeyCode::Down, true, move_timer, transforms),
+                2 => self.move_block(1, 0, KeyCode::Left, true, move_timer, transforms),
+                3 => self.move_block(-1, 0, KeyCode::Right, true, move_timer, transforms),
+                _ => unreachable!(),
+            }
+        }
     }
 }
 
@@ -216,12 +236,26 @@ fn update_block(
     }
 
     if keyboard_input.pressed(KeyCode::Up) {
-        game.move_block(0, 1, KeyCode::Up, false, move_timer, transforms);
+        game.move_block(0, 1, KeyCode::Up, false, &mut move_timer, &mut transforms);
     } else if keyboard_input.pressed(KeyCode::Down) {
-        game.move_block(0, -1, KeyCode::Down, false, move_timer, transforms);
+        game.move_block(
+            0,
+            -1,
+            KeyCode::Down,
+            false,
+            &mut move_timer,
+            &mut transforms,
+        );
     } else if keyboard_input.pressed(KeyCode::Left) {
-        game.move_block(1, 0, KeyCode::Left, false, move_timer, transforms);
+        game.move_block(1, 0, KeyCode::Left, false, &mut move_timer, &mut transforms);
     } else if keyboard_input.pressed(KeyCode::Right) {
-        game.move_block(-1, 0, KeyCode::Right, false, move_timer, transforms);
+        game.move_block(
+            -1,
+            0,
+            KeyCode::Right,
+            false,
+            &mut move_timer,
+            &mut transforms,
+        );
     }
 }
