@@ -34,7 +34,7 @@ fn button_system(
         match *interaction {
             Interaction::Clicked => {
                 match buttons {
-                    MyButtons::Reset => println!("reset"),
+                    MyButtons::Reset => game.reset(&mut move_timer, &mut transforms),
                     MyButtons::Shuffle => game.shuffle(&mut move_timer, &mut transforms),
                 }
                 *color = PRESSED_COLOR.into();

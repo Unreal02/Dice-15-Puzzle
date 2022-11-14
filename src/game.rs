@@ -4,7 +4,7 @@ use std::{
     mem::swap,
 };
 
-use bevy::prelude::*;
+use bevy::{math::vec3, prelude::*};
 
 #[cfg(feature = "debug")]
 use bevy_inspector_egui::Inspectable;
@@ -39,6 +39,17 @@ impl Plugin for GamePlugin {
 }
 
 impl GameState {
+    /// swap `self.board.0[x0][z0]` and `self.board.0[x1][z1]`
+    fn swap(&mut self, x0: usize, z0: usize, x1: usize, z1: usize) {
+        if x0 == x1 {
+            let arr = &mut self.board.0[x0];
+            arr.swap(z0, z1);
+        } else {
+            let (a1, a2) = self.board.0.split_at_mut(max(x0, x1));
+            swap(&mut a1[min(x0, x1)][z0], &mut a2[0][z1]);
+        }
+    }
+
     /// Move block.
     ///
     /// `move_timer` has value only when `immediate` is `false`.
@@ -85,16 +96,42 @@ impl GameState {
             **move_timer = Timer::from_seconds(BLOCK_MOVE_TIME, false);
         }
 
-        // swap self.board.0[x0][z0] and self.board.0[x1][z1]
-        if x0 == x1 {
-            let asdf = &mut self.board.0[x0];
-            asdf.swap(z0, z1);
-        } else {
-            let (a1, a2) = self.board.0.split_at_mut(max(x0, x1));
-            swap(&mut a1[min(x0, x1)][z0], &mut a2[0][z0]);
-        }
+        self.swap(x0, z0, x1, z1);
         self.x += dx;
         self.z += dz;
+    }
+
+    pub fn reset(
+        &mut self,
+        move_timer: &mut ResMut<Timer>,
+        transforms: &mut Query<&mut Transform>,
+    ) {
+        if !move_timer.finished() {
+            return;
+        }
+        for x in 0..4 {
+            for z in 0..4 {
+                loop {
+                    let (x1, z1) = match &self.board.0[x][z] {
+                        Some(block) => {
+                            let (goal_x, goal_z) =
+                                ((block.goal as usize - 1) % 4, (block.goal as usize - 1) / 4);
+                            let mut transform = transforms.get_mut(block.entity).unwrap();
+                            transform.translation = vec3(goal_x as f32, 0.0, goal_z as f32);
+                            transform.rotation = Quat::IDENTITY;
+                            (goal_x, goal_z)
+                        }
+                        None => (3, 3),
+                    };
+                    if x == x1 && z == z1 {
+                        break;
+                    }
+                    self.swap(x, z, x1, z1);
+                }
+            }
+        }
+        self.x = 3;
+        self.z = 3;
     }
 
     pub fn shuffle(
