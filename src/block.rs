@@ -1,4 +1,4 @@
-use bevy::{prelude::*, utils::HashMap};
+use bevy::{math::vec3, prelude::*, utils::HashMap};
 
 #[cfg(feature = "debug")]
 use bevy_inspector_egui::Inspectable;
@@ -135,9 +135,7 @@ pub fn spawn_meshes(
                                 },
                                 ..default()
                             }),
-                            transform: Transform::from_translation(Vec3::new(
-                                x as f32, 0.0, z as f32,
-                            )),
+                            transform: Transform::from_translation(vec3(x as f32, 0.0, z as f32)),
                             ..default()
                         })
                         .id(),

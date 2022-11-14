@@ -80,11 +80,7 @@ impl GameState {
         let mut transform = transforms.get_mut(block.entity).unwrap();
         let prev_transform = transform.clone();
         let mut next_transform = prev_transform;
-        next_transform.translation += Vec3 {
-            x: -dx as f32,
-            y: 0.0,
-            z: -dz as f32,
-        };
+        next_transform.translation += vec3(-dx as f32, 0.0, -dz as f32);
         next_transform.rotate_x(-dz as f32 * PI * 0.5);
         next_transform.rotate_z(dx as f32 * PI * 0.5);
         block.state = block.state.transition(direction);
@@ -214,7 +210,7 @@ fn setup(
             ..default()
         },
         transform: Transform {
-            translation: Vec3::new(0.0, 0.0, 0.0),
+            translation: vec3(0.0, 0.0, 0.0),
             rotation: Quat::from_rotation_x(-std::f32::consts::FRAC_PI_4),
             ..default()
         },
@@ -223,14 +219,7 @@ fn setup(
 
     // camera
     commands.spawn_bundle(Camera3dBundle {
-        transform: Transform::from_xyz(1.5, 5.0, 6.5).looking_at(
-            Vec3 {
-                x: 1.5,
-                y: 0.0,
-                z: 1.5,
-            },
-            Vec3::Y,
-        ),
+        transform: Transform::from_xyz(1.5, 5.0, 6.5).looking_at(vec3(1.5, 0.0, 1.5), Vec3::Y),
         ..default()
     });
 }
