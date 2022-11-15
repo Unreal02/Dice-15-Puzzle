@@ -73,15 +73,15 @@ fn main() {
                 let goal_small_pixel =
                     *img_goal_small.get_pixel(x + (i % 4) * 128, y + (i / 4) * 128);
                 // up
-                img.put_pixel(511 - (64 + x), 255 - (64 + y), goal_small_pixel);
+                img.put_pixel(256 + 64 + x, 64 + y, goal_small_pixel);
                 // down
-                img.put_pixel(256 + (64 + x), 512 + (64 + y), goal_small_pixel);
+                img.put_pixel(256 + 64 + x, 512 + 64 + y, goal_small_pixel);
                 // left
-                img.put_pixel(256 - (64 + y), 256 + (64 + x), goal_small_pixel);
+                img.put_pixel(64 + x, 256 + 64 + y, goal_small_pixel);
                 // right
-                img.put_pixel(512 + (64 + y), 511 - (64 + x), goal_small_pixel);
+                img.put_pixel(512 + 64 + x, 256 + 64 + y, goal_small_pixel);
                 // back
-                img.put_pixel(768 + (64 + x), 256 + (64 + y), goal_small_pixel);
+                img.put_pixel(768 + 64 + x, 256 + 64 + y, goal_small_pixel);
             }
         }
         img.save(format!("assets/images/image{}.png", i + 1))
