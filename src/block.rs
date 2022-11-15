@@ -122,7 +122,7 @@ pub fn spawn_meshes(
                 mesh_entities.insert(
                     (x, z),
                     commands
-                        .spawn_bundle(PbrBundle {
+                        .spawn(PbrBundle {
                             mesh: cube_mesh.clone(),
                             material: materials.add(StandardMaterial {
                                 base_color_texture: Some(texture.clone()),

@@ -17,6 +17,9 @@ use crate::{
 
 const BLOCK_MOVE_TIME: f32 = 0.3;
 
+#[derive(Resource, Default)]
+pub struct MyTimer(Timer);
+
 pub struct GamePlugin;
 
 #[derive(Default, Component)]
@@ -51,22 +54,20 @@ impl GameState {
     }
 
     /// Move block.
-    ///
-    /// `move_timer` has value only when `immediate` is `false`.
     pub fn move_block(
         &mut self,
         dx: i32,
         dz: i32,
         direction: KeyCode,
         immediate: bool,
-        move_timer: &mut ResMut<Timer>,
+        move_timer: &mut ResMut<MyTimer>,
         transforms: &mut Query<&mut Transform>,
     ) {
         if self.x + dx < 0
             || self.x + dx > 3
             || self.z + dz < 0
             || self.z + dz > 3
-            || !move_timer.finished()
+            || !move_timer.0.finished()
         {
             return;
         }
@@ -89,7 +90,7 @@ impl GameState {
             *transform = next_transform;
         } else {
             block.moving = Some((prev_transform, next_transform));
-            **move_timer = Timer::from_seconds(BLOCK_MOVE_TIME, false);
+            **move_timer = MyTimer(Timer::from_seconds(BLOCK_MOVE_TIME, TimerMode::Once));
         }
 
         self.swap(x0, z0, x1, z1);
@@ -99,10 +100,10 @@ impl GameState {
 
     pub fn reset(
         &mut self,
-        move_timer: &mut ResMut<Timer>,
+        move_timer: &mut ResMut<MyTimer>,
         transforms: &mut Query<&mut Transform>,
     ) {
-        if !move_timer.finished() {
+        if !move_timer.0.finished() {
             return;
         }
         for x in 0..4 {
@@ -132,7 +133,7 @@ impl GameState {
 
     pub fn shuffle(
         &mut self,
-        move_timer: &mut ResMut<Timer>,
+        move_timer: &mut ResMut<MyTimer>,
         transforms: &mut Query<&mut Transform>,
     ) {
         for _ in 0..1000 {
@@ -152,7 +153,7 @@ fn setup(
     asset_server: Res<AssetServer>,
     meshes: ResMut<Assets<Mesh>>,
     materials: ResMut<Assets<StandardMaterial>>,
-    mut move_timer: ResMut<Timer>,
+    mut move_timer: ResMut<MyTimer>,
 ) {
     let mut new_game = GameState::default();
 
@@ -176,14 +177,11 @@ fn setup(
     }
     new_game.x = 3;
     new_game.z = 3;
-    *move_timer = Timer::from_seconds(0.1, false);
+    *move_timer = MyTimer(Timer::from_seconds(0.1, TimerMode::Once));
 
     // Spawn Game
     commands
-        .spawn()
-        .insert_bundle(SpatialBundle::default())
-        .insert(new_game)
-        .insert(Name::new("GAME"))
+        .spawn((SpatialBundle::default(), new_game, Name::new("GAME")))
         .push_children(
             mesh_entities
                 .iter()
@@ -194,7 +192,7 @@ fn setup(
 
     // light
     const HALF_SIZE: f32 = 10.0;
-    commands.spawn_bundle(DirectionalLightBundle {
+    commands.spawn(DirectionalLightBundle {
         directional_light: DirectionalLight {
             // Configure the projection to better fit the scene
             shadow_projection: OrthographicProjection {
@@ -218,7 +216,7 @@ fn setup(
     });
 
     // camera
-    commands.spawn_bundle(Camera3dBundle {
+    commands.spawn(Camera3dBundle {
         transform: Transform::from_xyz(1.5, 5.0, 6.5).looking_at(vec3(1.5, 0.0, 1.5), Vec3::Y),
         ..default()
     });
@@ -228,13 +226,13 @@ fn update_block(
     time: Res<Time>,
     keyboard_input: Res<Input<KeyCode>>,
     mut transforms: Query<&mut Transform>,
-    mut move_timer: ResMut<Timer>,
+    mut move_timer: ResMut<MyTimer>,
     mut game_query: Query<&mut GameState>,
 ) {
     let mut game = game_query.single_mut();
 
-    let timer_finished = move_timer.tick(time.delta()).just_finished();
-    let elapsed_secs = move_timer.elapsed_secs();
+    let timer_finished = move_timer.0.tick(time.delta()).just_finished();
+    let elapsed_secs = move_timer.0.elapsed_secs();
 
     for arr in game.board.0.iter_mut() {
         for elem in arr {

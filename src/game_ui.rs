@@ -1,6 +1,9 @@
 use bevy::prelude::*;
 
-use crate::{game::GameState, player::PlayerState};
+use crate::{
+    game::{GameState, MyTimer},
+    player::PlayerState,
+};
 
 const NORMAL_COLOR: Color = Color::rgb(1.0, 1.0, 1.0);
 const PRESSED_COLOR: Color = Color::rgb(0.8, 0.8, 0.8);
@@ -22,11 +25,11 @@ impl Plugin for GameUIPlugin {
 
 fn button_system(
     mut interaction_query: Query<
-        (&Interaction, &mut UiColor, &MyButtons),
+        (&Interaction, &mut BackgroundColor, &MyButtons),
         (Changed<Interaction>, With<Button>),
     >,
     mut transforms: Query<&mut Transform>,
-    mut move_timer: ResMut<Timer>,
+    mut move_timer: ResMut<MyTimer>,
     mut game_query: Query<&mut GameState>,
 ) {
     let mut game = game_query.single_mut();
@@ -48,22 +51,21 @@ fn setup_buttons(mut commands: Commands, asset_server: Res<AssetServer>) {
     let font = asset_server.load("fonts/Quicksand-Bold.ttf");
 
     commands
-        .spawn()
-        .insert_bundle(NodeBundle {
-            style: Style {
-                size: Size::new(Val::Percent(100.0), Val::Percent(100.0)),
-                justify_content: JustifyContent::SpaceBetween,
+        .spawn((
+            NodeBundle {
+                style: Style {
+                    size: Size::new(Val::Percent(100.0), Val::Percent(100.0)),
+                    justify_content: JustifyContent::SpaceBetween,
+                    ..default()
+                },
                 ..default()
             },
-            color: Color::NONE.into(),
-            ..default()
-        })
-        .insert_bundle(SpatialBundle::default())
-        .insert(Name::new("GAME_UI"))
+            Name::new("GAME_UI"),
+        ))
         .with_children(|parent| {
             // reset button
             parent
-                .spawn_bundle(ButtonBundle {
+                .spawn(ButtonBundle {
                     style: Style {
                         align_self: AlignSelf::Center,
                         align_items: AlignItems::Center,
@@ -78,11 +80,10 @@ fn setup_buttons(mut commands: Commands, asset_server: Res<AssetServer>) {
                         margin: UiRect::all(Val::Auto),
                         ..default()
                     },
-                    color: NORMAL_COLOR.into(),
                     ..default()
                 })
                 .with_children(|parent| {
-                    parent.spawn_bundle(TextBundle::from_section(
+                    parent.spawn(TextBundle::from_section(
                         "Reset",
                         TextStyle {
                             font: font.clone(),
@@ -95,7 +96,7 @@ fn setup_buttons(mut commands: Commands, asset_server: Res<AssetServer>) {
 
             // shuffle button
             parent
-                .spawn_bundle(ButtonBundle {
+                .spawn(ButtonBundle {
                     style: Style {
                         align_self: AlignSelf::Center,
                         align_items: AlignItems::Center,
@@ -110,11 +111,10 @@ fn setup_buttons(mut commands: Commands, asset_server: Res<AssetServer>) {
                         margin: UiRect::all(Val::Auto),
                         ..default()
                     },
-                    color: NORMAL_COLOR.into(),
                     ..default()
                 })
                 .with_children(|parent| {
-                    parent.spawn_bundle(TextBundle::from_section(
+                    parent.spawn(TextBundle::from_section(
                         "Shuffle",
                         TextStyle {
                             font: font.clone(),

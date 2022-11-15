@@ -4,14 +4,14 @@ mod game_ui;
 mod player;
 
 use bevy::{prelude::*, DefaultPlugins};
-use game::GamePlugin;
+use game::{GamePlugin, MyTimer};
 use game_ui::GameUIPlugin;
 use player::PlayerPlugin;
 
 #[cfg(not(feature = "debug"))]
 fn main() {
     App::new()
-        .init_resource::<Timer>()
+        .init_resource::<MyTimer>()
         .add_plugins(DefaultPlugins)
         .add_plugin(PlayerPlugin)
         .add_plugin(GamePlugin)
@@ -24,7 +24,7 @@ fn main() {
     use bevy_inspector_egui::{RegisterInspectable, WorldInspectorPlugin};
     use game::GameState;
     App::new()
-        .init_resource::<Timer>()
+        .init_resource::<MyTimer>()
         .add_plugins(DefaultPlugins)
         .add_plugin(WorldInspectorPlugin::new())
         .register_inspectable::<GameState>()
