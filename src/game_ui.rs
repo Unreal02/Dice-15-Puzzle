@@ -19,7 +19,9 @@ pub struct GameUIPlugin;
 impl Plugin for GameUIPlugin {
     fn build(&self, app: &mut App) {
         app.add_startup_system(setup_buttons)
-            .add_system_set(SystemSet::on_update(PlayerState::Playing).with_system(button_system));
+            .add_system_set(SystemSet::on_update(PlayerState::Playing).with_system(button_system))
+            .add_system_set(SystemSet::on_enter(PlayerState::GameClear).with_system(print_result))
+            .add_system_set(SystemSet::on_update(PlayerState::GameClear).with_system(clear_ui));
     }
 }
 
@@ -37,8 +39,14 @@ fn button_system(
         match *interaction {
             Interaction::Clicked => {
                 match buttons {
-                    MyButtons::Reset => game.reset(&mut move_timer, &mut transforms),
-                    MyButtons::Shuffle => game.shuffle(&mut move_timer, &mut transforms),
+                    MyButtons::Reset => {
+                        game.reset(&mut move_timer, &mut transforms);
+                        // game.is_shuffled = true; // uncomment it to develop game clear part
+                    }
+                    MyButtons::Shuffle => {
+                        game.shuffle(&mut move_timer, &mut transforms);
+                        game.is_shuffled = false;
+                    }
                 }
                 *color = PRESSED_COLOR.into();
             }
@@ -125,4 +133,12 @@ fn setup_buttons(mut commands: Commands, asset_server: Res<AssetServer>) {
                 })
                 .insert(MyButtons::Shuffle);
         });
+}
+
+pub fn print_result() {
+    println!("GAME CLEAR")
+}
+
+pub fn clear_ui() {
+    println!("CLEAR UI")
 }

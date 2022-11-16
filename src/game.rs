@@ -11,7 +11,7 @@ use bevy_inspector_egui::Inspectable;
 use rand::random;
 
 use crate::{
-    block::{spawn_meshes, Block, BlockState},
+    block::{spawn_meshes, Block, BlockMesh, BlockState},
     player::PlayerState,
 };
 
@@ -28,16 +28,31 @@ pub struct GameState {
     x: i32,
     z: i32,
     board: Board,
+    pub is_shuffled: bool,
 }
 
 #[derive(Default, Component)]
 #[cfg_attr(feature = "debug", derive(Inspectable))]
 struct Board(Vec<Vec<Option<Block>>>);
 
+#[derive(SystemLabel)]
+enum GameStages {
+    UpdateBlock,
+    CheckClear,
+}
+
 impl Plugin for GamePlugin {
     fn build(&self, app: &mut App) {
         app.add_system_set(SystemSet::on_enter(PlayerState::Playing).with_system(setup))
-            .add_system_set(SystemSet::on_update(PlayerState::Playing).with_system(update_block));
+            .add_system_set(
+                SystemSet::on_update(PlayerState::Playing)
+                    .with_system(update_block.label(GameStages::UpdateBlock))
+                    .with_system(
+                        check_clear
+                            .after(GameStages::UpdateBlock)
+                            .label(GameStages::CheckClear),
+                    ),
+            );
     }
 }
 
@@ -281,5 +296,41 @@ fn update_block(
             &mut move_timer,
             &mut transforms,
         );
+    }
+}
+
+fn check_clear(
+    block_transforms: Query<&Transform, With<BlockMesh>>,
+    mut app_state: ResMut<State<PlayerState>>,
+    game_query: Query<&GameState>,
+) {
+    let game = game_query.single();
+
+    if !game.is_shuffled {
+        return;
+    }
+
+    let mut is_clear = true;
+    for x in 0..4 {
+        for z in 0..4 {
+            let curr = (z * 4 + x + 1) as i32 % 16;
+            if let Some(block) = &game.board.0[x][z] {
+                if (block.goal == curr) && block.moving.is_none() {
+                    if let Ok(block_transform) = block_transforms.get(block.entity) {
+                        if block_transform.rotation != Quat::IDENTITY {
+                            is_clear = false;
+                            break;
+                        }
+                    }
+                }
+            } else {
+                is_clear = (x == 3) && (z == 3);
+                break;
+            }
+        }
+    }
+
+    if is_clear {
+        let _ = app_state.set(PlayerState::GameClear);
     }
 }

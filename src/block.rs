@@ -4,6 +4,9 @@ use bevy::{math::vec3, prelude::*, utils::HashMap};
 use bevy_inspector_egui::Inspectable;
 
 #[derive(Component)]
+pub struct BlockMesh;
+
+#[derive(Component)]
 #[cfg_attr(feature = "debug", derive(Inspectable))]
 pub struct Block {
     pub entity: Entity,
@@ -137,6 +140,7 @@ pub fn spawn_meshes(
                             transform: Transform::from_translation(vec3(x as f32, 0.0, z as f32)),
                             ..default()
                         })
+                        .insert(BlockMesh)
                         .id(),
                 );
             }
