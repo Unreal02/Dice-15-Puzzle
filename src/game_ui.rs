@@ -20,8 +20,10 @@ impl Plugin for GameUIPlugin {
     fn build(&self, app: &mut App) {
         app.add_startup_system(setup_buttons)
             .add_system_set(SystemSet::on_update(PlayerState::Playing).with_system(button_system))
-            .add_system_set(SystemSet::on_enter(PlayerState::GameClear).with_system(print_result))
-            .add_system_set(SystemSet::on_update(PlayerState::GameClear).with_system(clear_ui));
+            .add_system_set(SystemSet::on_enter(PlayerState::GameClear).with_system(init_clear_ui))
+            .add_system_set(
+                SystemSet::on_update(PlayerState::GameClear).with_system(clear_ui_stystem),
+            );
     }
 }
 
@@ -135,10 +137,10 @@ fn setup_buttons(mut commands: Commands, asset_server: Res<AssetServer>) {
         });
 }
 
-pub fn print_result() {
+fn init_clear_ui() {
     println!("GAME CLEAR")
 }
 
-pub fn clear_ui() {
+fn clear_ui_stystem() {
     println!("CLEAR UI")
 }

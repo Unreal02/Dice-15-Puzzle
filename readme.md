@@ -19,6 +19,16 @@
 - [ ] Add game clear check logic
 - [x] Add UI
 - [x] Add game reset functionality
+- [x] Add Game clear logic
+  - [ ] Add Game clear UI
+- [ ] Add Game Play info & UI (Timer, Move Count)
+- [ ] Add Buffer Input
+  - [ ] Add Input inversion
+
+# Maybe
+- [ ] Add Ranking
+- [ ] Add Credit
+
 
 # Study Bevy
 
