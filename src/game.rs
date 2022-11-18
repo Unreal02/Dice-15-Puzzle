@@ -13,7 +13,7 @@ use rand::random;
 use crate::{
     block::{spawn_meshes, Block, BlockMesh, BlockState},
     buffered_input::{InputBuffer, MoveImmediate},
-    player::PlayerState,
+    player::{PlayerInfo, PlayerState},
 };
 
 const BLOCK_MOVE_TIME: f32 = 0.3;
@@ -245,6 +245,7 @@ fn update_block(
     mut game_query: Query<&mut GameState>,
     mut input_buffer: Query<&mut InputBuffer>,
     move_immediate: Query<&MoveImmediate>,
+    mut player_info: Query<&mut PlayerInfo>,
 ) {
     let mut game = game_query.single_mut();
 
@@ -280,6 +281,7 @@ fn update_block(
 
     if new_move_flag {
         if let Some(input) = input_buffer.single_mut().pop() {
+            player_info.single_mut().add_move_count();
             game.move_block(
                 input.dx(),
                 input.dy(),

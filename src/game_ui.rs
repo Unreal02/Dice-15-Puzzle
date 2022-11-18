@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 use crate::{
     game::{GameState, MoveTimer},
-    player::PlayerState,
+    player::{PlayerInfo, PlayerState},
 };
 
 const NORMAL_COLOR: Color = Color::rgb(1.0, 1.0, 1.0);
@@ -35,6 +35,7 @@ fn button_system(
     mut transforms: Query<&mut Transform>,
     mut move_timer: ResMut<MoveTimer>,
     mut game_query: Query<&mut GameState>,
+    mut player_info: Query<&mut PlayerInfo>,
 ) {
     let mut game = game_query.single_mut();
     for (interaction, mut color, buttons) in &mut interaction_query {
@@ -43,11 +44,13 @@ fn button_system(
                 match buttons {
                     MyButtons::Reset => {
                         game.reset(&mut move_timer, &mut transforms);
-                        // game.is_shuffled = true; // uncomment it to develop game clear part
+                        player_info.single_mut().reset();
+                        game.is_shuffled = false;
                     }
                     MyButtons::Shuffle => {
                         game.shuffle(&mut move_timer, &mut transforms);
-                        game.is_shuffled = false;
+                        player_info.single_mut().start_tracking();
+                        game.is_shuffled = true;
                     }
                 }
                 *color = PRESSED_COLOR.into();
