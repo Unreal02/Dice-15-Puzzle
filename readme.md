@@ -23,7 +23,7 @@
   - [ ] Add Game clear UI
 - [x] Add Game Play info
   - [ ] UI (Timer, Move Count)
-- [x] Add Buffer Input -> Bug exists. Input not ordered
+- [x] Add Buffer Input
   - [ ] Add Input inversion UI
 
 # Maybe

@@ -1,18 +1,19 @@
+use std::collections::VecDeque;
+
 use bevy::prelude::*;
 
-use crate::{game::GameStages, player::PlayerState};
+use crate::player::PlayerState;
 
 pub struct CustomInputPlugin;
 
 impl Plugin for CustomInputPlugin {
     fn build(&self, app: &mut App) {
-        app.add_startup_system(setup_input).add_system_set(
-            SystemSet::on_update(PlayerState::Playing)
-                .with_system(enqueue_input.before(GameStages::UpdateBlock)),
-        );
+        app.add_startup_system(setup_input)
+            .add_system_set(SystemSet::on_update(PlayerState::Playing).with_system(enqueue_input));
     }
 }
 
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum GameInput {
     Up(i32, i32),
     Down(i32, i32),
@@ -52,7 +53,11 @@ impl GameInput {
 const BUFFER_MAX: usize = 3;
 
 #[derive(Component)]
-pub struct InputBuffer(Vec<GameInput>);
+pub struct InputBuffer {
+    buffer: VecDeque<GameInput>,
+    last_input: Option<GameInput>,
+}
+
 #[derive(Component)]
 pub struct InputInversionFlag(bool);
 #[derive(Component)]
@@ -61,19 +66,42 @@ pub struct MoveImmediate(pub bool);
 pub struct InputTimer(Timer);
 
 impl InputBuffer {
-    pub fn push(&mut self, value: GameInput) {
-        self.0.push(value)
+    fn new() -> Self {
+        Self {
+            buffer: VecDeque::new(),
+            last_input: None,
+        }
+    }
+
+    fn push(&mut self, value: GameInput) {
+        self.buffer.push_back(value);
+        self.last_input = Some(value);
     }
 
     pub fn pop(&mut self) -> Option<GameInput> {
-        self.0.pop()
+        self.buffer.pop_front()
+    }
+
+    fn try_push(&mut self, value: GameInput, input_timer: &mut ResMut<InputTimer>) {
+        if let Some(last_input) = self.last_input {
+            if last_input == value {
+                if input_timer.0.finished() {
+                    self.push(value);
+                    input_timer.0.reset();
+                }
+            } else {
+                self.push(value)
+            }
+        } else {
+            self.push(value)
+        }
     }
 }
 
 fn setup_input(mut commands: Commands, mut input_timer: ResMut<InputTimer>) {
     commands.spawn((
         Name::new("InputSystem"),
-        InputBuffer(Vec::new()),
+        InputBuffer::new(),
         InputInversionFlag(false),
         MoveImmediate(false),
     ));
@@ -94,35 +122,32 @@ fn enqueue_input(
     time: Res<Time>,
 ) {
     let (mut input_buffer, inversion_flag) = input_system.single_mut();
-    if just_pressed(&keyboard_input) && input_timer.0.finished() {
-        input_timer.0.reset();
-        if input_buffer.0.len() > BUFFER_MAX {
-            return;
-        }
-
-        if keyboard_input.pressed(KeyCode::Up) {
-            if inversion_flag.0 {
-                input_buffer.push(GameInput::Down(0, -1))
-            } else {
-                input_buffer.0.push(GameInput::Up(0, 1))
-            }
-        } else if keyboard_input.pressed(KeyCode::Down) {
-            if inversion_flag.0 {
-                input_buffer.0.push(GameInput::Up(0, 1))
-            } else {
-                input_buffer.0.push(GameInput::Down(0, -1))
-            }
-        } else if keyboard_input.pressed(KeyCode::Left) {
-            if inversion_flag.0 {
-                input_buffer.0.push(GameInput::Right(-1, 0))
-            } else {
-                input_buffer.0.push(GameInput::Left(1, 0))
-            }
-        } else if keyboard_input.pressed(KeyCode::Right) {
-            if inversion_flag.0 {
-                input_buffer.0.push(GameInput::Left(1, 0))
-            } else {
-                input_buffer.0.push(GameInput::Right(-1, 0))
+    if just_pressed(&keyboard_input) {
+        if input_buffer.buffer.len() < BUFFER_MAX {
+            if keyboard_input.pressed(KeyCode::Up) {
+                if inversion_flag.0 {
+                    input_buffer.try_push(GameInput::Down(0, -1), &mut input_timer)
+                } else {
+                    input_buffer.try_push(GameInput::Up(0, 1), &mut input_timer);
+                }
+            } else if keyboard_input.pressed(KeyCode::Down) {
+                if inversion_flag.0 {
+                    input_buffer.try_push(GameInput::Up(0, 1), &mut input_timer)
+                } else {
+                    input_buffer.try_push(GameInput::Down(0, -1), &mut input_timer);
+                }
+            } else if keyboard_input.pressed(KeyCode::Left) {
+                if inversion_flag.0 {
+                    input_buffer.try_push(GameInput::Right(-1, 0), &mut input_timer)
+                } else {
+                    input_buffer.try_push(GameInput::Left(1, 0), &mut input_timer);
+                }
+            } else if keyboard_input.pressed(KeyCode::Right) {
+                if inversion_flag.0 {
+                    input_buffer.try_push(GameInput::Left(1, 0), &mut input_timer)
+                } else {
+                    input_buffer.try_push(GameInput::Right(-1, 0), &mut input_timer);
+                }
             }
         }
     }
