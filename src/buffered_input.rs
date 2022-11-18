@@ -124,25 +124,25 @@ fn enqueue_input(
     let (mut input_buffer, inversion_flag) = input_system.single_mut();
     if just_pressed(&keyboard_input) {
         if input_buffer.buffer.len() < BUFFER_MAX {
-            if keyboard_input.pressed(KeyCode::Up) {
+            if keyboard_input.just_pressed(KeyCode::Up) {
                 if inversion_flag.0 {
                     input_buffer.try_push(GameInput::Down(0, -1), &mut input_timer)
                 } else {
                     input_buffer.try_push(GameInput::Up(0, 1), &mut input_timer);
                 }
-            } else if keyboard_input.pressed(KeyCode::Down) {
+            } else if keyboard_input.just_pressed(KeyCode::Down) {
                 if inversion_flag.0 {
                     input_buffer.try_push(GameInput::Up(0, 1), &mut input_timer)
                 } else {
                     input_buffer.try_push(GameInput::Down(0, -1), &mut input_timer);
                 }
-            } else if keyboard_input.pressed(KeyCode::Left) {
+            } else if keyboard_input.just_pressed(KeyCode::Left) {
                 if inversion_flag.0 {
                     input_buffer.try_push(GameInput::Right(-1, 0), &mut input_timer)
                 } else {
                     input_buffer.try_push(GameInput::Left(1, 0), &mut input_timer);
                 }
-            } else if keyboard_input.pressed(KeyCode::Right) {
+            } else if keyboard_input.just_pressed(KeyCode::Right) {
                 if inversion_flag.0 {
                     input_buffer.try_push(GameInput::Left(1, 0), &mut input_timer)
                 } else {
