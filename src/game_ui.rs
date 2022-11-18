@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
 use crate::{
-    game::{GameState, MyTimer},
+    game::{GameState, MoveTimer},
     player::PlayerState,
 };
 
@@ -33,7 +33,7 @@ fn button_system(
         (Changed<Interaction>, With<Button>),
     >,
     mut transforms: Query<&mut Transform>,
-    mut move_timer: ResMut<MyTimer>,
+    mut move_timer: ResMut<MoveTimer>,
     mut game_query: Query<&mut GameState>,
 ) {
     let mut game = game_query.single_mut();

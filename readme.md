@@ -22,8 +22,8 @@
 - [x] Add Game clear logic
   - [ ] Add Game clear UI
 - [ ] Add Game Play info & UI (Timer, Move Count)
-- [ ] Add Buffer Input
-  - [ ] Add Input inversion
+- [x] Add Buffer Input
+  - [ ] Add Input inversion UI
 
 # Maybe
 - [ ] Add Ranking

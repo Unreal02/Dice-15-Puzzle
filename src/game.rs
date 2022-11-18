@@ -12,13 +12,14 @@ use rand::random;
 
 use crate::{
     block::{spawn_meshes, Block, BlockMesh, BlockState},
+    buffered_input::{InputBuffer, MoveImmediate},
     player::PlayerState,
 };
 
 const BLOCK_MOVE_TIME: f32 = 0.3;
 
 #[derive(Resource, Default)]
-pub struct MyTimer(Timer);
+pub struct MoveTimer(Timer);
 
 pub struct GamePlugin;
 
@@ -36,7 +37,7 @@ pub struct GameState {
 struct Board(Vec<Vec<Option<Block>>>);
 
 #[derive(SystemLabel)]
-enum GameStages {
+pub enum GameStages {
     UpdateBlock,
     CheckClear,
 }
@@ -75,7 +76,7 @@ impl GameState {
         dz: i32,
         direction: KeyCode,
         immediate: bool,
-        move_timer: &mut ResMut<MyTimer>,
+        move_timer: &mut ResMut<MoveTimer>,
         transforms: &mut Query<&mut Transform>,
     ) {
         if self.x + dx < 0
@@ -105,7 +106,7 @@ impl GameState {
             *transform = next_transform;
         } else {
             block.moving = Some((prev_transform, next_transform));
-            **move_timer = MyTimer(Timer::from_seconds(BLOCK_MOVE_TIME, TimerMode::Once));
+            **move_timer = MoveTimer(Timer::from_seconds(BLOCK_MOVE_TIME, TimerMode::Once));
         }
 
         self.swap(x0, z0, x1, z1);
@@ -115,7 +116,7 @@ impl GameState {
 
     pub fn reset(
         &mut self,
-        move_timer: &mut ResMut<MyTimer>,
+        move_timer: &mut ResMut<MoveTimer>,
         transforms: &mut Query<&mut Transform>,
     ) {
         if !move_timer.0.finished() {
@@ -148,7 +149,7 @@ impl GameState {
 
     pub fn shuffle(
         &mut self,
-        move_timer: &mut ResMut<MyTimer>,
+        move_timer: &mut ResMut<MoveTimer>,
         transforms: &mut Query<&mut Transform>,
     ) {
         for _ in 0..1000 {
@@ -168,7 +169,7 @@ fn setup(
     asset_server: Res<AssetServer>,
     meshes: ResMut<Assets<Mesh>>,
     materials: ResMut<Assets<StandardMaterial>>,
-    mut move_timer: ResMut<MyTimer>,
+    mut move_timer: ResMut<MoveTimer>,
 ) {
     let mut new_game = GameState::default();
 
@@ -192,7 +193,7 @@ fn setup(
     }
     new_game.x = 3;
     new_game.z = 3;
-    *move_timer = MyTimer(Timer::from_seconds(0.1, TimerMode::Once));
+    *move_timer = MoveTimer(Timer::from_seconds(0.1, TimerMode::Once));
 
     // Spawn Game
     commands
@@ -239,16 +240,18 @@ fn setup(
 
 fn update_block(
     time: Res<Time>,
-    keyboard_input: Res<Input<KeyCode>>,
     mut transforms: Query<&mut Transform>,
-    mut move_timer: ResMut<MyTimer>,
+    mut move_timer: ResMut<MoveTimer>,
     mut game_query: Query<&mut GameState>,
+    mut input_buffer: Query<&mut InputBuffer>,
+    move_immediate: Query<&MoveImmediate>,
 ) {
     let mut game = game_query.single_mut();
 
     let timer_finished = move_timer.0.tick(time.delta()).just_finished();
     let elapsed_secs = move_timer.0.elapsed_secs();
 
+    let mut new_move_flag = true;
     for arr in game.board.0.iter_mut() {
         for elem in arr {
             if let Some(block) = elem {
@@ -268,34 +271,24 @@ fn update_block(
                             -angle.cos() * (0.5 as f32).sqrt() + 0.5,
                         );
                         transform.translation.y = angle.sin() * (0.5 as f32).sqrt() - 0.5;
+                        new_move_flag = false;
                     }
                 }
             }
         }
     }
 
-    if keyboard_input.pressed(KeyCode::Up) {
-        game.move_block(0, 1, KeyCode::Up, false, &mut move_timer, &mut transforms);
-    } else if keyboard_input.pressed(KeyCode::Down) {
-        game.move_block(
-            0,
-            -1,
-            KeyCode::Down,
-            false,
-            &mut move_timer,
-            &mut transforms,
-        );
-    } else if keyboard_input.pressed(KeyCode::Left) {
-        game.move_block(1, 0, KeyCode::Left, false, &mut move_timer, &mut transforms);
-    } else if keyboard_input.pressed(KeyCode::Right) {
-        game.move_block(
-            -1,
-            0,
-            KeyCode::Right,
-            false,
-            &mut move_timer,
-            &mut transforms,
-        );
+    if new_move_flag {
+        if let Some(input) = input_buffer.single_mut().pop() {
+            game.move_block(
+                input.dx(),
+                input.dy(),
+                input.get_keycode(),
+                move_immediate.single().0,
+                &mut move_timer,
+                &mut transforms,
+            );
+        }
     }
 }
 
