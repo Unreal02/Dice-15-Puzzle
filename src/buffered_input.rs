@@ -77,7 +77,14 @@ fn setup_input(mut commands: Commands, mut input_timer: ResMut<InputTimer>) {
         InputInversionFlag(false),
         MoveImmediate(false),
     ));
-    *input_timer = InputTimer(Timer::from_seconds(0.02, TimerMode::Once));
+    *input_timer = InputTimer(Timer::from_seconds(0.03, TimerMode::Once));
+}
+
+fn just_pressed(keyboard_input: &Res<Input<KeyCode>>) -> bool {
+    keyboard_input.just_pressed(KeyCode::Up)
+        || keyboard_input.just_pressed(KeyCode::Down)
+        || keyboard_input.just_pressed(KeyCode::Left)
+        || keyboard_input.just_pressed(KeyCode::Right)
 }
 
 fn enqueue_input(
@@ -87,7 +94,7 @@ fn enqueue_input(
     time: Res<Time>,
 ) {
     let (mut input_buffer, inversion_flag) = input_system.single_mut();
-    if input_timer.0.just_finished() {
+    if just_pressed(&keyboard_input) && input_timer.0.finished() {
         input_timer.0.reset();
         if input_buffer.0.len() > BUFFER_MAX {
             return;
