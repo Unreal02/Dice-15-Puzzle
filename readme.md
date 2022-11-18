@@ -21,8 +21,9 @@
 - [x] Add game reset functionality
 - [x] Add Game clear logic
   - [ ] Add Game clear UI
-- [ ] Add Game Play info & UI (Timer, Move Count)
-- [x] Add Buffer Input
+- [x] Add Game Play info
+  - [ ] UI (Timer, Move Count)
+- [x] Add Buffer Input -> Bug exists. Input not ordered
   - [ ] Add Input inversion UI
 
 # Maybe

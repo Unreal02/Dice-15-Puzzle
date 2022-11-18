@@ -20,9 +20,6 @@ impl Plugin for PlayerPlugin {
 }
 
 #[derive(Component)]
-pub struct PlayTrackFlag(bool);
-
-#[derive(Component)]
 pub struct PlayerInfo {
     play_timer: Stopwatch,
     move_count: usize,
@@ -59,7 +56,6 @@ impl PlayerInfo {
 fn setup_playerinfo(mut commands: Commands) {
     commands
         .spawn(Name::new("PlayerInfo"))
-        .insert(PlayTrackFlag(false))
         .insert(PlayerInfo::new());
 }
 
