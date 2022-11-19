@@ -16,7 +16,6 @@
 - [x] Code refactor to separate file
 - [x] Add puzzle creation logic
   - [ ] Optimize puzzle creation logic
-- [ ] Add game clear check logic
 - [x] Add UI
 - [x] Add game reset functionality
 - [x] Add Game clear logic
@@ -25,11 +24,15 @@
   - [ ] UI (Timer, Move Count)
 - [x] Add Buffer Input
   - [ ] Add Input inversion UI
+- [x] Add animation toggle button
+- [ ] Add game mode
+  - [x] normal
+  - [ ] speed solving
+  - [ ] daily puzzle
 
-# Maybe
+## Maybe
 - [ ] Add Ranking
-- [ ] Add Credit
-
+- [ ] Add Credit (External site)
 
 # Study Bevy
 
