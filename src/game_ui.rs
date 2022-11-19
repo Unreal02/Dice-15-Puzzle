@@ -1,18 +1,25 @@
 use bevy::prelude::*;
 
 use crate::{
+    buffered_input::MoveImmediate,
     game::{GameState, MoveTimer},
     player::{PlayerInfo, PlayerState},
 };
 
+const TEXT_SIZE: f32 = 40.0;
+
 const NORMAL_COLOR: Color = Color::rgb(1.0, 1.0, 1.0);
 const PRESSED_COLOR: Color = Color::rgb(0.8, 0.8, 0.8);
 
-#[derive(Component)]
+#[derive(Component, PartialEq, Eq)]
 enum MyButtons {
     Reset,
     Shuffle,
+    AnimationToggle,
 }
+
+#[derive(Component)]
+struct AnimationToggleButton;
 
 pub struct GameUIPlugin;
 
@@ -35,7 +42,9 @@ fn button_system(
     mut transforms: Query<&mut Transform>,
     mut move_timer: ResMut<MoveTimer>,
     mut game_query: Query<&mut GameState>,
+    mut move_immediate: Query<&mut MoveImmediate>,
     mut player_info: Query<&mut PlayerInfo>,
+    mut animation_toggle_button_text: Query<&mut Text, With<AnimationToggleButton>>,
 ) {
     let mut game = game_query.single_mut();
     for (interaction, mut color, buttons) in &mut interaction_query {
@@ -51,6 +60,18 @@ fn button_system(
                         game.shuffle(&mut move_timer, &mut transforms);
                         player_info.single_mut().start_tracking();
                         game.is_shuffled = true;
+                    }
+                    MyButtons::AnimationToggle => {
+                        let mut move_immediate = move_immediate.single_mut();
+                        match move_immediate.0 {
+                            true => move_immediate.0 = false,
+                            false => move_immediate.0 = true,
+                        }
+                        animation_toggle_button_text.single_mut().sections[0].value =
+                            match move_immediate.0 {
+                                true => "Animation\nOff".to_string(),
+                                false => "Animation\nOn".to_string(),
+                            };
                     }
                 }
                 *color = PRESSED_COLOR.into();
@@ -77,66 +98,43 @@ fn setup_buttons(mut commands: Commands, asset_server: Res<AssetServer>) {
         ))
         .with_children(|parent| {
             // reset button
-            parent
-                .spawn(ButtonBundle {
-                    style: Style {
-                        align_self: AlignSelf::Center,
-                        align_items: AlignItems::Center,
-                        justify_content: JustifyContent::Center,
-                        size: Size::new(Val::Px(200.0), Val::Px(100.0)),
-                        position_type: PositionType::Absolute,
-                        position: UiRect {
-                            right: Val::Px(50.0),
-                            bottom: Val::Px(50.0),
-                            ..default()
-                        },
-                        margin: UiRect::all(Val::Auto),
-                        ..default()
-                    },
+            add_button(
+                parent,
+                UiRect {
+                    right: Val::Px(50.0),
+                    bottom: Val::Px(50.0),
                     ..default()
-                })
-                .with_children(|parent| {
-                    parent.spawn(TextBundle::from_section(
-                        "Reset",
-                        TextStyle {
-                            font: font.clone(),
-                            font_size: 48.0,
-                            color: Color::BLACK,
-                        },
-                    ));
-                })
-                .insert(MyButtons::Reset);
+                },
+                "Reset".to_string(),
+                font.clone(),
+                MyButtons::Reset,
+            );
 
             // shuffle button
-            parent
-                .spawn(ButtonBundle {
-                    style: Style {
-                        align_self: AlignSelf::Center,
-                        align_items: AlignItems::Center,
-                        justify_content: JustifyContent::Center,
-                        size: Size::new(Val::Px(200.0), Val::Px(100.0)),
-                        position_type: PositionType::Absolute,
-                        position: UiRect {
-                            right: Val::Px(50.0),
-                            bottom: Val::Px(200.0),
-                            ..default()
-                        },
-                        margin: UiRect::all(Val::Auto),
-                        ..default()
-                    },
+            add_button(
+                parent,
+                UiRect {
+                    right: Val::Px(50.0),
+                    bottom: Val::Px(200.0),
                     ..default()
-                })
-                .with_children(|parent| {
-                    parent.spawn(TextBundle::from_section(
-                        "Shuffle",
-                        TextStyle {
-                            font: font.clone(),
-                            font_size: 48.0,
-                            color: Color::BLACK,
-                        },
-                    ));
-                })
-                .insert(MyButtons::Shuffle);
+                },
+                "Shuffle".to_string(),
+                font.clone(),
+                MyButtons::Shuffle,
+            );
+
+            // animation toggle button
+            add_button(
+                parent,
+                UiRect {
+                    right: Val::Px(50.0),
+                    bottom: Val::Px(350.0),
+                    ..default()
+                },
+                "Animation\nOn".to_string(),
+                font.clone(),
+                MyButtons::AnimationToggle,
+            );
         });
 }
 
@@ -146,4 +144,44 @@ fn init_clear_ui() {
 
 fn clear_ui_stystem() {
     println!("CLEAR UI")
+}
+
+fn add_button(
+    parent: &mut ChildBuilder,
+    position: UiRect,
+    text: String,
+    font: Handle<Font>,
+    button_type: MyButtons,
+) -> impl Bundle {
+    parent
+        .spawn(ButtonBundle {
+            style: Style {
+                align_self: AlignSelf::Center,
+                align_items: AlignItems::Center,
+                justify_content: JustifyContent::Center,
+                size: Size::new(Val::Px(200.0), Val::Px(100.0)),
+                position_type: PositionType::Absolute,
+                position,
+                margin: UiRect::all(Val::Auto),
+                ..default()
+            },
+            ..default()
+        })
+        .with_children(|parent| {
+            let mut entity_commands = parent.spawn(
+                TextBundle::from_section(
+                    text,
+                    TextStyle {
+                        font,
+                        font_size: TEXT_SIZE,
+                        color: Color::BLACK,
+                    },
+                )
+                .with_text_alignment(TextAlignment::CENTER),
+            );
+            if button_type == MyButtons::AnimationToggle {
+                entity_commands.insert(AnimationToggleButton);
+            }
+        })
+        .insert(button_type);
 }
