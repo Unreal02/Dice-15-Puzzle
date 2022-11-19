@@ -1,8 +1,8 @@
-use std::iter::Sum;
-
 use image::imageops::FilterType;
 use image::io::Reader as ImageReader;
 use image::{imageops, ImageBuffer, Rgb, RgbImage};
+
+const BORDER_WIDTH: u32 = 5;
 
 fn main() {
     // generate image textures from
@@ -26,6 +26,7 @@ fn main() {
         .unwrap()
         .to_rgb8();
 
+    // put in side faces
     let mut img_goal_small = imageops::resize(&img_goal, 512, 512, FilterType::Nearest);
     for x in 0..512 {
         for y in 0..512 {
@@ -37,6 +38,7 @@ fn main() {
         }
     }
 
+    // output image
     let mut img: RgbImage = ImageBuffer::new(1024, 768);
     for x in 0..1024 {
         for y in 0..768 {
@@ -44,6 +46,7 @@ fn main() {
         }
     }
 
+    // sides
     for x in 0..256 {
         for y in 0..256 {
             let side_pixel = *img_side.get_pixel(x, y);
@@ -60,12 +63,41 @@ fn main() {
         }
     }
 
+    // border
+    for i in 0..BORDER_WIDTH {
+        let black = Rgb::from([32, 32, 32]);
+        for x in 0..1024 {
+            img.put_pixel(x, i, black);
+            img.put_pixel(x, 255 - i, black);
+            img.put_pixel(x, 256 + i, black);
+            img.put_pixel(x, 511 - i, black);
+            img.put_pixel(x, 512 + i, black);
+            img.put_pixel(x, 767 - i, black);
+        }
+        for y in 0..768 {
+            img.put_pixel(i, y, black);
+            img.put_pixel(255 - i, y, black);
+            img.put_pixel(256 + i, y, black);
+            img.put_pixel(511 - i, y, black);
+            img.put_pixel(512 + i, y, black);
+            img.put_pixel(767 - i, y, black);
+            img.put_pixel(768 + i, y, black);
+            img.put_pixel(1023 - i, y, black);
+        }
+    }
+
     for i in 0..15 {
         for x in 0..256 {
             for y in 0..256 {
                 let goal_pixel = *img_goal.get_pixel(x + (i % 4) * 256, y + (i / 4) * 256);
                 // goal
-                img.put_pixel(x + 256, y + 256, goal_pixel);
+                if x >= BORDER_WIDTH
+                    && x < 256 - BORDER_WIDTH
+                    && y >= BORDER_WIDTH
+                    && y < 256 - BORDER_WIDTH
+                {
+                    img.put_pixel(x + 256, y + 256, goal_pixel);
+                }
             }
         }
         for x in 0..128 {
