@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
 use crate::{
-    buffered_input::MoveImmediate,
+    buffered_input::{InputInversionFlag, MoveImmediate},
     game::{GameState, MoveTimer},
     player::{PlayerInfo, PlayerState},
 };
@@ -16,10 +16,14 @@ enum MyButtons {
     Reset,
     Shuffle,
     AnimationToggle,
+    InputInversion,
 }
 
 #[derive(Component)]
 struct AnimationToggleButton;
+
+#[derive(Component)]
+struct InputInversionButton;
 
 pub struct GameUIPlugin;
 
@@ -42,9 +46,12 @@ fn button_system(
     mut transforms: Query<&mut Transform>,
     mut move_timer: ResMut<MoveTimer>,
     mut game_query: Query<&mut GameState>,
-    mut move_immediate: Query<&mut MoveImmediate>,
+    mut input_system: Query<(&mut InputInversionFlag, &mut MoveImmediate)>,
     mut player_info: Query<&mut PlayerInfo>,
-    mut animation_toggle_button_text: Query<&mut Text, With<AnimationToggleButton>>,
+    mut button_text_set: ParamSet<(
+        Query<(&mut Text, &mut AnimationToggleButton)>,
+        Query<(&mut Text, &mut InputInversionButton)>,
+    )>,
 ) {
     let mut game = game_query.single_mut();
     for (interaction, mut color, buttons) in &mut interaction_query {
@@ -62,15 +69,27 @@ fn button_system(
                         game.is_shuffled = true;
                     }
                     MyButtons::AnimationToggle => {
-                        let mut move_immediate = move_immediate.single_mut();
+                        let (_, mut move_immediate) = input_system.single_mut();
                         match move_immediate.0 {
                             true => move_immediate.0 = false,
                             false => move_immediate.0 = true,
                         }
-                        animation_toggle_button_text.single_mut().sections[0].value =
+                        button_text_set.p0().single_mut().0.sections[0].value =
                             match move_immediate.0 {
                                 true => "Animation\nOff".to_string(),
                                 false => "Animation\nOn".to_string(),
+                            };
+                    }
+                    MyButtons::InputInversion => {
+                        let (mut input_reveresion_flag, _) = input_system.single_mut();
+                        match input_reveresion_flag.0 {
+                            true => input_reveresion_flag.0 = false,
+                            false => input_reveresion_flag.0 = true,
+                        }
+                        button_text_set.p1().single_mut().0.sections[0].value =
+                            match input_reveresion_flag.0 {
+                                true => "Input\nInverse".to_string(),
+                                false => "Input\nNormal".to_string(),
                             };
                     }
                 }
@@ -115,7 +134,7 @@ fn setup_buttons(mut commands: Commands, asset_server: Res<AssetServer>) {
                 parent,
                 UiRect {
                     right: Val::Px(50.0),
-                    bottom: Val::Px(200.0),
+                    bottom: Val::Px(175.0),
                     ..default()
                 },
                 "Shuffle".to_string(),
@@ -128,12 +147,25 @@ fn setup_buttons(mut commands: Commands, asset_server: Res<AssetServer>) {
                 parent,
                 UiRect {
                     right: Val::Px(50.0),
-                    bottom: Val::Px(350.0),
+                    bottom: Val::Px(300.0),
                     ..default()
                 },
                 "Animation\nOn".to_string(),
                 font.clone(),
                 MyButtons::AnimationToggle,
+            );
+
+            // input inversion button
+            add_button(
+                parent,
+                UiRect {
+                    right: Val::Px(50.0),
+                    bottom: Val::Px(425.0),
+                    ..default()
+                },
+                "Input\nNormal".to_string(),
+                font.clone(),
+                MyButtons::InputInversion,
             );
         });
 }
@@ -179,8 +211,14 @@ fn add_button(
                 )
                 .with_text_alignment(TextAlignment::CENTER),
             );
-            if button_type == MyButtons::AnimationToggle {
-                entity_commands.insert(AnimationToggleButton);
+            match button_type {
+                MyButtons::AnimationToggle => {
+                    entity_commands.insert(AnimationToggleButton);
+                }
+                MyButtons::InputInversion => {
+                    entity_commands.insert(InputInversionButton);
+                }
+                _ => (),
             }
         })
         .insert(button_type);

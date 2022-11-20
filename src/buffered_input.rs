@@ -59,7 +59,7 @@ pub struct InputBuffer {
 }
 
 #[derive(Component)]
-pub struct InputInversionFlag(bool);
+pub struct InputInversionFlag(pub bool);
 #[derive(Component)]
 pub struct MoveImmediate(pub bool);
 #[derive(Resource, Default)]

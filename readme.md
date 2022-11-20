@@ -23,7 +23,7 @@
 - [x] Add Game Play info
   - [ ] UI (Timer, Move Count)
 - [x] Add Buffer Input
-  - [ ] Add Input inversion UI
+  - [x] Add Input inversion UI
 - [x] Add animation toggle button
 - [ ] Add game mode
   - [x] normal
