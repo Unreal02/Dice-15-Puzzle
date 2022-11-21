@@ -8,6 +8,7 @@ use bevy::{math::vec3, prelude::*};
 
 #[cfg(feature = "debug")]
 use bevy_inspector_egui::Inspectable;
+use bevy_mod_picking::PickingCameraBundle;
 use rand::random;
 
 use crate::{
@@ -26,8 +27,8 @@ pub struct GamePlugin;
 #[derive(Default, Component)]
 #[cfg_attr(feature = "debug", derive(Inspectable))]
 pub struct GameState {
-    x: i32,
-    z: i32,
+    pub x: i32,
+    pub z: i32,
     board: Board,
     pub is_shuffled: bool,
 }
@@ -232,10 +233,13 @@ fn setup(
     });
 
     // camera
-    commands.spawn(Camera3dBundle {
-        transform: Transform::from_xyz(1.5, 5.0, 6.5).looking_at(vec3(1.5, 0.0, 1.5), Vec3::Y),
-        ..default()
-    });
+    commands.spawn((
+        Camera3dBundle {
+            transform: Transform::from_xyz(1.5, 5.0, 6.5).looking_at(vec3(1.5, 0.0, 1.5), Vec3::Y),
+            ..default()
+        },
+        PickingCameraBundle::default(),
+    ));
 }
 
 fn update_block(

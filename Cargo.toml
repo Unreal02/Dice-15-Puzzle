@@ -11,6 +11,7 @@ opt-level = 3
 
 [dependencies]
 bevy = "0.9.*"
+bevy_mod_picking = "0.10.*"
 rand = "*"
 bevy-inspector-egui = "*"
 

@@ -2,6 +2,7 @@ use bevy::{math::vec3, prelude::*, utils::HashMap};
 
 #[cfg(feature = "debug")]
 use bevy_inspector_egui::Inspectable;
+use bevy_mod_picking::{Highlighting, PickableBundle};
 
 #[derive(Component)]
 pub struct BlockMesh;
@@ -121,26 +122,38 @@ pub fn spawn_meshes(
             if x != 3 || z != 3 {
                 let texture =
                     asset_server.load(format!("images/image{}.png", x + z * 4 + 1).as_str());
+                let material = materials.add(StandardMaterial {
+                    base_color_texture: Some(texture.clone()),
+                    base_color: match z {
+                        0 => Color::hsl(0.0, 1.0, 0.6),
+                        1 => Color::hsl(60.0, 1.0, 0.6),
+                        2 => Color::hsl(120.0, 1.0, 0.6),
+                        3 => Color::hsl(240.0, 1.0, 0.6),
+                        _ => Color::BLACK,
+                    },
+                    ..default()
+                });
                 mesh_entities.insert(
                     (x, z),
                     commands
-                        .spawn(PbrBundle {
-                            mesh: cube_mesh.clone(),
-                            material: materials.add(StandardMaterial {
-                                base_color_texture: Some(texture.clone()),
-                                base_color: match z {
-                                    0 => Color::hsl(0.0, 1.0, 0.6),
-                                    1 => Color::hsl(60.0, 1.0, 0.6),
-                                    2 => Color::hsl(120.0, 1.0, 0.6),
-                                    3 => Color::hsl(240.0, 1.0, 0.6),
-                                    _ => Color::BLACK,
-                                },
+                        .spawn((
+                            PbrBundle {
+                                mesh: cube_mesh.clone(),
+                                material: material.clone(),
+                                transform: Transform::from_translation(vec3(
+                                    x as f32, 0.0, z as f32,
+                                )),
                                 ..default()
-                            }),
-                            transform: Transform::from_translation(vec3(x as f32, 0.0, z as f32)),
-                            ..default()
-                        })
-                        .insert(BlockMesh)
+                            },
+                            PickableBundle::default(),
+                            Highlighting {
+                                initial: material.clone(),
+                                hovered: Some(material.clone()),
+                                pressed: Some(material.clone()),
+                                selected: Some(material.clone()),
+                            },
+                            BlockMesh,
+                        ))
                         .id(),
                 );
             }

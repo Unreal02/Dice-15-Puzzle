@@ -5,6 +5,7 @@ mod game_ui;
 mod player;
 
 use bevy::{prelude::*, DefaultPlugins};
+use bevy_mod_picking::DefaultPickingPlugins;
 use buffered_input::CustomInputPlugin;
 use game::{GamePlugin, MoveTimer};
 use game_ui::GameUIPlugin;
@@ -18,6 +19,7 @@ fn main() {
         .init_resource::<MoveTimer>()
         .init_resource::<InputTimer>()
         .add_plugins(DefaultPlugins)
+        .add_plugins(DefaultPickingPlugins)
         .add_plugin(PlayerPlugin)
         .add_plugin(GamePlugin)
         .add_plugin(GameUIPlugin)
