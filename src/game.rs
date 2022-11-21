@@ -321,6 +321,9 @@ fn check_clear(
                             break;
                         }
                     }
+                } else {
+                    is_clear = false;
+                    break;
                 }
             } else {
                 if (x != 3) || (z != 3) {
