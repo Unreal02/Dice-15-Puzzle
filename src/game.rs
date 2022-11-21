@@ -319,8 +319,10 @@ fn check_clear(
                     }
                 }
             } else {
-                is_clear = (x == 3) && (z == 3);
-                break;
+                if (x != 3) || (z != 3) {
+                    is_clear = false;
+                    break;
+                }
             }
         }
     }
