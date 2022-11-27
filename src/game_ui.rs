@@ -25,6 +25,9 @@ struct AnimationToggleButton;
 #[derive(Component)]
 struct InputInversionButton;
 
+#[derive(Component)]
+struct PlayerInfoUI;
+
 pub struct GameUIPlugin;
 
 impl Plugin for GameUIPlugin {
@@ -48,12 +51,15 @@ fn button_system(
     mut game_query: Query<&mut GameState>,
     mut input_system: Query<(&mut InputInversionFlag, &mut MoveImmediate)>,
     mut player_info: Query<&mut PlayerInfo>,
-    mut button_text_set: ParamSet<(
+    mut text_set: ParamSet<(
         Query<(&mut Text, &mut AnimationToggleButton)>,
         Query<(&mut Text, &mut InputInversionButton)>,
+        Query<(&mut Text, &PlayerInfoUI)>,
     )>,
 ) {
     let mut game = game_query.single_mut();
+
+    // button interactions
     for (interaction, mut color, buttons) in &mut interaction_query {
         match *interaction {
             Interaction::Clicked => {
@@ -74,11 +80,10 @@ fn button_system(
                             true => move_immediate.0 = false,
                             false => move_immediate.0 = true,
                         }
-                        button_text_set.p0().single_mut().0.sections[0].value =
-                            match move_immediate.0 {
-                                true => "Animation\nOff".to_string(),
-                                false => "Animation\nOn".to_string(),
-                            };
+                        text_set.p0().single_mut().0.sections[0].value = match move_immediate.0 {
+                            true => "Animation\nOff".to_string(),
+                            false => "Animation\nOn".to_string(),
+                        };
                     }
                     MyButtons::InputInversion => {
                         let (mut input_reveresion_flag, _) = input_system.single_mut();
@@ -86,7 +91,7 @@ fn button_system(
                             true => input_reveresion_flag.0 = false,
                             false => input_reveresion_flag.0 = true,
                         }
-                        button_text_set.p1().single_mut().0.sections[0].value =
+                        text_set.p1().single_mut().0.sections[0].value =
                             match input_reveresion_flag.0 {
                                 true => "Input\nInverse".to_string(),
                                 false => "Input\nNormal".to_string(),
@@ -98,6 +103,17 @@ fn button_system(
             _ => *color = NORMAL_COLOR.into(),
         }
     }
+
+    // player info
+    let play_time = player_info.single().get_play_timer();
+    let move_count = player_info.single().get_move_count();
+    text_set.p2().single_mut().0.sections[0].value = format!(
+        "Time: {:02}:{:02}.{:02}\nMoves: {}",
+        play_time.as_secs() / 60,
+        play_time.as_secs() % 60,
+        play_time.subsec_millis() / 10,
+        move_count
+    );
 }
 
 fn setup_buttons(mut commands: Commands, asset_server: Res<AssetServer>) {
@@ -147,7 +163,7 @@ fn setup_buttons(mut commands: Commands, asset_server: Res<AssetServer>) {
                 parent,
                 UiRect {
                     right: Val::Px(50.0),
-                    bottom: Val::Px(300.0),
+                    top: Val::Px(50.0),
                     ..default()
                 },
                 "Animation\nOn".to_string(),
@@ -160,13 +176,34 @@ fn setup_buttons(mut commands: Commands, asset_server: Res<AssetServer>) {
                 parent,
                 UiRect {
                     right: Val::Px(50.0),
-                    bottom: Val::Px(425.0),
+                    top: Val::Px(175.0),
                     ..default()
                 },
                 "Input\nNormal".to_string(),
                 font.clone(),
                 MyButtons::InputInversion,
             );
+
+            // play timer
+            parent.spawn((
+                TextBundle::from_section(
+                    "Time: 00:00.00\nMoves: 0",
+                    TextStyle {
+                        font: font.clone(),
+                        font_size: TEXT_SIZE,
+                        color: Color::BLACK,
+                    },
+                )
+                .with_style(Style {
+                    position: UiRect {
+                        left: Val::Px(50.0),
+                        top: Val::Px(50.0),
+                        ..default()
+                    },
+                    ..default()
+                }),
+                PlayerInfoUI,
+            ));
         });
 }
 

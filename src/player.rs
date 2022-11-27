@@ -1,4 +1,5 @@
 use bevy::{prelude::*, time::Stopwatch};
+use std::time::Duration;
 
 /// PlayerState represent state shift of player from game start to end
 /// So, PlayerPlugin would control such state transitions of player.
@@ -50,6 +51,14 @@ impl PlayerInfo {
         self.play_timer.pause();
         self.play_timer.reset();
         self.move_count = 0;
+    }
+
+    pub fn get_play_timer(&self) -> Duration {
+        self.play_timer.elapsed()
+    }
+
+    pub fn get_move_count(&self) -> usize {
+        self.move_count
     }
 }
 
