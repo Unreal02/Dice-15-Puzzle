@@ -316,7 +316,7 @@ fn check_clear(
             if let Some(block) = &game.board.0[x][z] {
                 if (block.goal == curr) && block.moving.is_none() {
                     if let Ok(block_transform) = block_transforms.get(block.entity) {
-                        if block_transform.rotation != Quat::IDENTITY {
+                        if !block_transform.rotation.is_near_identity() {
                             is_clear = false;
                             break;
                         }
