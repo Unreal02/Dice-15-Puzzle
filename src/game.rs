@@ -45,16 +45,15 @@ pub enum GameStages {
 
 impl Plugin for GamePlugin {
     fn build(&self, app: &mut App) {
-        app.add_system_set(SystemSet::on_enter(PlayerState::Playing).with_system(setup))
-            .add_system_set(
-                SystemSet::on_update(PlayerState::Playing)
-                    .with_system(update_block.label(GameStages::UpdateBlock))
-                    .with_system(
-                        check_clear
-                            .after(GameStages::UpdateBlock)
-                            .label(GameStages::CheckClear),
-                    ),
-            );
+        app.add_startup_system(setup).add_system_set(
+            SystemSet::on_update(PlayerState::Playing)
+                .with_system(update_block.label(GameStages::UpdateBlock))
+                .with_system(
+                    check_clear
+                        .after(GameStages::UpdateBlock)
+                        .label(GameStages::CheckClear),
+                ),
+        );
     }
 }
 

@@ -14,8 +14,9 @@ pub struct PlayerPlugin;
 
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
-        app.add_state(PlayerState::Playing)
-            .add_system_set(SystemSet::on_enter(PlayerState::Playing).with_system(setup_playerinfo))
+        app.add_startup_system(setup_playerinfo)
+            .add_state(PlayerState::Playing)
+            .add_system_set(SystemSet::on_enter(PlayerState::Playing).with_system(init_playerinfo))
             .add_system_set(SystemSet::on_update(PlayerState::Playing).with_system(tick_timer));
     }
 }
@@ -66,6 +67,10 @@ fn setup_playerinfo(mut commands: Commands) {
     commands
         .spawn(Name::new("PlayerInfo"))
         .insert(PlayerInfo::new());
+}
+
+fn init_playerinfo(mut player_info: Query<&mut PlayerInfo>) {
+    player_info.single_mut().reset();
 }
 
 fn tick_timer(time: Res<Time>, mut player_info: Query<&mut PlayerInfo>) {

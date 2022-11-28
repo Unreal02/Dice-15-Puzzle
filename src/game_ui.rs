@@ -20,6 +20,9 @@ enum MyButtons {
 }
 
 #[derive(Component)]
+struct GameUI;
+
+#[derive(Component)]
 struct AnimationToggleButton;
 
 #[derive(Component)]
@@ -28,15 +31,23 @@ struct InputInversionButton;
 #[derive(Component)]
 struct PlayerInfoUI;
 
+#[derive(Component)]
+struct GameClearUI;
+
 pub struct GameUIPlugin;
 
 impl Plugin for GameUIPlugin {
     fn build(&self, app: &mut App) {
         app.add_startup_system(setup_buttons)
             .add_system_set(SystemSet::on_update(PlayerState::Playing).with_system(button_system))
-            .add_system_set(SystemSet::on_enter(PlayerState::GameClear).with_system(init_clear_ui))
+            .add_system_set(SystemSet::on_enter(PlayerState::GameClear).with_system(spawn_clear_ui))
             .add_system_set(
-                SystemSet::on_update(PlayerState::GameClear).with_system(clear_ui_stystem),
+                SystemSet::on_update(PlayerState::GameClear)
+                    .with_system(clear_ui_stystem)
+                    .with_system(button_system),
+            )
+            .add_system_set(
+                SystemSet::on_exit(PlayerState::GameClear).with_system(despawn_clear_ui),
             );
     }
 }
@@ -56,6 +67,7 @@ fn button_system(
         Query<(&mut Text, &mut InputInversionButton)>,
         Query<(&mut Text, &PlayerInfoUI)>,
     )>,
+    mut app_state: ResMut<State<PlayerState>>,
 ) {
     let mut game = game_query.single_mut();
 
@@ -68,11 +80,17 @@ fn button_system(
                         game.reset(&mut move_timer, &mut transforms);
                         player_info.single_mut().reset();
                         game.is_shuffled = false;
+                        if *app_state.current() == PlayerState::GameClear {
+                            let _ = app_state.set(PlayerState::Playing);
+                        }
                     }
                     MyButtons::Shuffle => {
                         game.shuffle(&mut move_timer, &mut transforms);
                         player_info.single_mut().start_tracking();
                         game.is_shuffled = true;
+                        if *app_state.current() == PlayerState::GameClear {
+                            let _ = app_state.set(PlayerState::Playing);
+                        }
                     }
                     MyButtons::AnimationToggle => {
                         let (_, mut move_immediate) = input_system.single_mut();
@@ -130,6 +148,7 @@ fn setup_buttons(mut commands: Commands, asset_server: Res<AssetServer>) {
                 ..default()
             },
             Name::new("GAME_UI"),
+            GameUI,
         ))
         .with_children(|parent| {
             // reset button
@@ -207,12 +226,43 @@ fn setup_buttons(mut commands: Commands, asset_server: Res<AssetServer>) {
         });
 }
 
-fn init_clear_ui() {
-    println!("GAME CLEAR")
+fn spawn_clear_ui(
+    mut commands: Commands,
+    game_ui: Query<Entity, With<GameUI>>,
+    asset_server: Res<AssetServer>,
+) {
+    let font = asset_server.load("fonts/Quicksand-Bold.ttf");
+
+    commands.entity(game_ui.single()).with_children(|parent| {
+        parent.spawn((
+            TextBundle::from_section(
+                "Clear!!",
+                TextStyle {
+                    font: font.clone(),
+                    font_size: TEXT_SIZE,
+                    color: Color::BLACK,
+                },
+            )
+            .with_style(Style {
+                position: UiRect {
+                    left: Val::Px(50.0),
+                    top: Val::Px(175.0),
+                    ..default()
+                },
+                position_type: PositionType::Absolute,
+                ..default()
+            }),
+            GameClearUI,
+        ));
+    });
 }
 
 fn clear_ui_stystem() {
-    println!("CLEAR UI")
+    // println!("CLEAR UI")
+}
+
+fn despawn_clear_ui(mut commands: Commands, clear_ui: Query<Entity, With<GameClearUI>>) {
+    commands.entity(clear_ui.single()).despawn_recursive();
 }
 
 fn add_button(
