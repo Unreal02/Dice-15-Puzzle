@@ -19,9 +19,9 @@
 - [x] Add UI
 - [x] Add game reset functionality
 - [x] Add Game clear logic
-  - [ ] Add Game clear UI
+  - [x] Add Game clear UI
 - [x] Add Game Play info
-  - [ ] UI (Timer, Move Count)
+  - [x] UI (Timer, Move Count)
 - [x] Add Buffer Input
   - [x] Add Input inversion UI
 - [x] Add animation toggle button

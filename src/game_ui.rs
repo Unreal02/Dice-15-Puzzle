@@ -123,8 +123,7 @@ fn button_system(
     }
 
     // player info
-    let play_time = player_info.single().get_play_timer();
-    let move_count = player_info.single().get_move_count();
+    let (play_time, move_count) = player_info.single().get_player_info();
     text_set.p2().single_mut().0.sections[0].value = format!(
         "Time: {:02}:{:02}.{:02}\nMoves: {}",
         play_time.as_secs() / 60,

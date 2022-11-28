@@ -54,12 +54,8 @@ impl PlayerInfo {
         self.move_count = 0;
     }
 
-    pub fn get_play_timer(&self) -> Duration {
-        self.play_timer.elapsed()
-    }
-
-    pub fn get_move_count(&self) -> usize {
-        self.move_count
+    pub fn get_player_info(&self) -> (Duration, usize) {
+        (self.play_timer.elapsed(), self.move_count)
     }
 }
 
