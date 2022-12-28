@@ -12,7 +12,7 @@ use bevy_mod_picking::PickingCameraBundle;
 use rand::random;
 
 use crate::{
-    block::{spawn_meshes, Block, BlockMesh, BlockState},
+    block::{spawn_meshes, Block, BlockMesh},
     buffered_input::{InputBuffer, MoveImmediate},
     player::{PlayerInfo, PlayerState},
 };
@@ -74,7 +74,6 @@ impl GameState {
         &mut self,
         dx: i32,
         dz: i32,
-        direction: KeyCode,
         immediate: bool,
         move_timer: &mut ResMut<MoveTimer>,
         transforms: &mut Query<&mut Transform>,
@@ -100,7 +99,6 @@ impl GameState {
         next_transform.translation += vec3(-dx as f32, 0.0, -dz as f32);
         next_transform.rotate_x(-dz as f32 * PI * 0.5);
         next_transform.rotate_z(dx as f32 * PI * 0.5);
-        block.state = block.state.transition(direction);
 
         if immediate {
             *transform = next_transform;
@@ -154,10 +152,10 @@ impl GameState {
     ) {
         for _ in 0..1000 {
             match random::<u32>() % 4 {
-                0 => self.move_block(0, 1, KeyCode::Up, true, move_timer, transforms),
-                1 => self.move_block(0, -1, KeyCode::Down, true, move_timer, transforms),
-                2 => self.move_block(1, 0, KeyCode::Left, true, move_timer, transforms),
-                3 => self.move_block(-1, 0, KeyCode::Right, true, move_timer, transforms),
+                0 => self.move_block(0, 1, true, move_timer, transforms),
+                1 => self.move_block(0, -1, true, move_timer, transforms),
+                2 => self.move_block(1, 0, true, move_timer, transforms),
+                3 => self.move_block(-1, 0, true, move_timer, transforms),
                 _ => unreachable!(),
             }
         }
@@ -184,7 +182,6 @@ fn setup(
                     entity: mesh_entities.get(&(x, z)).unwrap().clone(),
                     goal: (z * 4 + x + 1) as i32 % 16,
                     moving: None,
-                    state: BlockState::default(),
                 })
             } else {
                 None
@@ -288,7 +285,6 @@ fn update_block(
             game.move_block(
                 input.dx(),
                 input.dy(),
-                input.get_keycode(),
                 move_immediate.single().0,
                 &mut move_timer,
                 &mut transforms,

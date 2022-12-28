@@ -14,62 +14,6 @@ pub struct Block {
     pub moving: Option<(Transform, Transform)>, // previous and next transform
     /// (z * 4 + x + 1) as i32 % 16
     pub goal: i32,
-    pub state: BlockState,
-}
-
-/// Represent the block's upper side state
-/// Dice required to be rotated in stated direction to achieve goal state
-#[derive(Component, Clone, Copy, Debug)]
-#[cfg_attr(feature = "debug", derive(Inspectable))]
-pub enum BlockState {
-    Goal,
-    Left,
-    Right,
-    Up,
-    Down,
-    Back,
-}
-
-impl Default for BlockState {
-    fn default() -> Self {
-        BlockState::Goal
-    }
-}
-
-impl BlockState {
-    pub fn transition(self, direction: KeyCode) -> Self {
-        match direction {
-            KeyCode::Up => match self {
-                BlockState::Goal => BlockState::Down,
-                BlockState::Up => BlockState::Goal,
-                BlockState::Down => BlockState::Back,
-                BlockState::Back => BlockState::Up,
-                _ => self,
-            },
-            KeyCode::Down => match self {
-                BlockState::Goal => BlockState::Up,
-                BlockState::Up => BlockState::Back,
-                BlockState::Down => BlockState::Goal,
-                BlockState::Back => BlockState::Down,
-                _ => self,
-            },
-            KeyCode::Left => match self {
-                BlockState::Goal => BlockState::Right,
-                BlockState::Left => BlockState::Goal,
-                BlockState::Right => BlockState::Back,
-                BlockState::Back => BlockState::Left,
-                _ => self,
-            },
-            KeyCode::Right => match self {
-                BlockState::Goal => BlockState::Left,
-                BlockState::Left => BlockState::Back,
-                BlockState::Right => BlockState::Goal,
-                BlockState::Back => BlockState::Right,
-                _ => self,
-            },
-            _ => unreachable!("Block transition should be done with direction keyboard input"),
-        }
-    }
 }
 
 /// Spawn Mesh for blocks and return entity ids

@@ -26,15 +26,6 @@ pub enum GameInput {
 }
 
 impl GameInput {
-    pub fn get_keycode(&self) -> KeyCode {
-        match self {
-            GameInput::Up(_, _) => KeyCode::Up,
-            GameInput::Down(_, _) => KeyCode::Down,
-            GameInput::Left(_, _) => KeyCode::Left,
-            GameInput::Right(_, _) => KeyCode::Right,
-        }
-    }
-
     pub fn dx(&self) -> i32 {
         match self {
             GameInput::Up(dx, _) => *dx,
