@@ -7,7 +7,7 @@ use std::time::Duration;
 pub enum PlayerState {
     Playing,
     GameClear,
-    ModeSelection,
+    ModeSelectionPopup,
 }
 
 pub struct PlayerPlugin;

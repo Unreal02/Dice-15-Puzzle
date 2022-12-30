@@ -6,10 +6,10 @@ use crate::{
     player::{PlayerInfo, PlayerState},
 };
 
-const TEXT_SIZE: f32 = 40.0;
+pub const TEXT_SIZE: f32 = 40.0;
 
-const NORMAL_COLOR: Color = Color::rgb(1.0, 1.0, 1.0);
-const PRESSED_COLOR: Color = Color::rgb(0.8, 0.8, 0.8);
+pub const BUTTON_NORMAL_COLOR: Color = Color::rgb(1.0, 1.0, 1.0);
+pub const BUTTON_PRESSED_COLOR: Color = Color::rgb(0.8, 0.8, 0.8);
 
 #[derive(Component, PartialEq, Eq)]
 enum MyButtonType {
@@ -21,7 +21,7 @@ enum MyButtonType {
 }
 
 #[derive(Component)]
-struct GameUI;
+pub struct GameUI;
 
 #[derive(Component)]
 struct PlayerInfoUI;
@@ -64,11 +64,11 @@ fn button_system(
     let mut game = game_query.single_mut();
 
     // button interactions
-    for (interaction, mut color, buttons, children) in &mut interaction_query {
+    for (interaction, mut color, button_type, children) in &mut interaction_query {
         match *interaction {
             Interaction::Clicked => {
                 let mut text = text_query.get_mut(children[0]).unwrap();
-                match buttons {
+                match button_type {
                     MyButtonType::Reset => {
                         game.reset(&mut move_timer, &mut transforms);
                         player_info.single_mut().reset();
@@ -108,12 +108,12 @@ fn button_system(
                         };
                     }
                     MyButtonType::ModeSelection => {
-                        println!("mode selection button");
+                        let _ = player_state.set(PlayerState::ModeSelectionPopup);
                     }
                 }
-                *color = PRESSED_COLOR.into();
+                *color = BUTTON_PRESSED_COLOR.into();
             }
-            _ => *color = NORMAL_COLOR.into(),
+            _ => *color = BUTTON_NORMAL_COLOR.into(),
         }
     }
 
@@ -136,7 +136,8 @@ fn setup_buttons(mut commands: Commands, asset_server: Res<AssetServer>) {
             NodeBundle {
                 style: Style {
                     size: Size::new(Val::Percent(100.0), Val::Percent(100.0)),
-                    justify_content: JustifyContent::SpaceBetween,
+                    align_items: AlignItems::Center,
+                    justify_content: JustifyContent::Center,
                     ..default()
                 },
                 ..default()
@@ -146,7 +147,7 @@ fn setup_buttons(mut commands: Commands, asset_server: Res<AssetServer>) {
         ))
         .with_children(|parent| {
             // reset button
-            create_button(
+            spawn_button(
                 parent,
                 UiRect {
                     right: Val::Px(50.0),
@@ -159,7 +160,7 @@ fn setup_buttons(mut commands: Commands, asset_server: Res<AssetServer>) {
             );
 
             // shuffle button
-            create_button(
+            spawn_button(
                 parent,
                 UiRect {
                     right: Val::Px(50.0),
@@ -172,7 +173,7 @@ fn setup_buttons(mut commands: Commands, asset_server: Res<AssetServer>) {
             );
 
             // animation toggle button
-            create_button(
+            spawn_button(
                 parent,
                 UiRect {
                     right: Val::Px(50.0),
@@ -185,7 +186,7 @@ fn setup_buttons(mut commands: Commands, asset_server: Res<AssetServer>) {
             );
 
             // input inversion button
-            create_button(
+            spawn_button(
                 parent,
                 UiRect {
                     right: Val::Px(50.0),
@@ -198,7 +199,7 @@ fn setup_buttons(mut commands: Commands, asset_server: Res<AssetServer>) {
             );
 
             // mode selection button
-            create_button(
+            spawn_button(
                 parent,
                 UiRect {
                     left: Val::Px(50.0),
@@ -221,6 +222,7 @@ fn setup_buttons(mut commands: Commands, asset_server: Res<AssetServer>) {
                     },
                 )
                 .with_style(Style {
+                    position_type: PositionType::Absolute,
                     position: UiRect {
                         left: Val::Px(50.0),
                         top: Val::Px(175.0),
@@ -251,12 +253,12 @@ fn spawn_clear_ui(
                 },
             )
             .with_style(Style {
+                position_type: PositionType::Absolute,
                 position: UiRect {
                     left: Val::Px(50.0),
-                    top: Val::Px(175.0),
+                    top: Val::Px(275.0),
                     ..default()
                 },
-                position_type: PositionType::Absolute,
                 ..default()
             }),
             GameClearUI,
@@ -272,7 +274,7 @@ fn despawn_clear_ui(mut commands: Commands, clear_ui: Query<Entity, With<GameCle
     commands.entity(clear_ui.single()).despawn_recursive();
 }
 
-fn create_button(
+fn spawn_button(
     parent: &mut ChildBuilder,
     position: UiRect,
     text: String,
@@ -283,13 +285,11 @@ fn create_button(
         .spawn((
             ButtonBundle {
                 style: Style {
-                    align_self: AlignSelf::Center,
                     align_items: AlignItems::Center,
                     justify_content: JustifyContent::Center,
                     size: Size::new(Val::Px(200.0), Val::Px(100.0)),
                     position_type: PositionType::Absolute,
                     position,
-                    margin: UiRect::all(Val::Auto),
                     ..default()
                 },
                 ..default()
