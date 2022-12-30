@@ -5,9 +5,9 @@ use std::time::Duration;
 /// So, PlayerPlugin would control such state transitions of player.
 #[derive(Clone, Eq, PartialEq, Debug, Hash)]
 pub enum PlayerState {
-    Title,
     Playing,
     GameClear,
+    ModeSelection,
 }
 
 pub struct PlayerPlugin;

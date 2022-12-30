@@ -12,21 +12,16 @@ const NORMAL_COLOR: Color = Color::rgb(1.0, 1.0, 1.0);
 const PRESSED_COLOR: Color = Color::rgb(0.8, 0.8, 0.8);
 
 #[derive(Component, PartialEq, Eq)]
-enum MyButtons {
+enum MyButtonType {
     Reset,
     Shuffle,
     AnimationToggle,
     InputInversion,
+    ModeSelection,
 }
 
 #[derive(Component)]
 struct GameUI;
-
-#[derive(Component)]
-struct AnimationToggleButton;
-
-#[derive(Component)]
-struct InputInversionButton;
 
 #[derive(Component)]
 struct PlayerInfoUI;
@@ -54,7 +49,7 @@ impl Plugin for GameUIPlugin {
 
 fn button_system(
     mut interaction_query: Query<
-        (&Interaction, &mut BackgroundColor, &MyButtons),
+        (&Interaction, &mut BackgroundColor, &MyButtonType, &Children),
         (Changed<Interaction>, With<Button>),
     >,
     mut transforms: Query<&mut Transform>,
@@ -62,58 +57,58 @@ fn button_system(
     mut game_query: Query<&mut GameState>,
     mut input_system: Query<(&mut InputInversionFlag, &mut MoveImmediate)>,
     mut player_info: Query<&mut PlayerInfo>,
-    mut text_set: ParamSet<(
-        Query<(&mut Text, &mut AnimationToggleButton)>,
-        Query<(&mut Text, &mut InputInversionButton)>,
-        Query<(&mut Text, &PlayerInfoUI)>,
-    )>,
-    mut app_state: ResMut<State<PlayerState>>,
+    mut text_query: Query<&mut Text, Without<PlayerInfoUI>>,
+    mut player_info_text_query: Query<&mut Text, With<PlayerInfoUI>>,
+    mut player_state: ResMut<State<PlayerState>>,
 ) {
     let mut game = game_query.single_mut();
 
     // button interactions
-    for (interaction, mut color, buttons) in &mut interaction_query {
+    for (interaction, mut color, buttons, children) in &mut interaction_query {
         match *interaction {
             Interaction::Clicked => {
+                let mut text = text_query.get_mut(children[0]).unwrap();
                 match buttons {
-                    MyButtons::Reset => {
+                    MyButtonType::Reset => {
                         game.reset(&mut move_timer, &mut transforms);
                         player_info.single_mut().reset();
                         game.is_shuffled = false;
-                        if *app_state.current() == PlayerState::GameClear {
-                            let _ = app_state.set(PlayerState::Playing);
+                        if *player_state.current() == PlayerState::GameClear {
+                            let _ = player_state.set(PlayerState::Playing);
                         }
                     }
-                    MyButtons::Shuffle => {
+                    MyButtonType::Shuffle => {
                         game.shuffle(&mut move_timer, &mut transforms);
                         player_info.single_mut().start_tracking();
                         game.is_shuffled = true;
-                        if *app_state.current() == PlayerState::GameClear {
-                            let _ = app_state.set(PlayerState::Playing);
+                        if *player_state.current() == PlayerState::GameClear {
+                            let _ = player_state.set(PlayerState::Playing);
                         }
                     }
-                    MyButtons::AnimationToggle => {
+                    MyButtonType::AnimationToggle => {
                         let (_, mut move_immediate) = input_system.single_mut();
                         match move_immediate.0 {
                             true => move_immediate.0 = false,
                             false => move_immediate.0 = true,
                         }
-                        text_set.p0().single_mut().0.sections[0].value = match move_immediate.0 {
+                        text.sections[0].value = match move_immediate.0 {
                             true => "Animation\nOff".to_string(),
                             false => "Animation\nOn".to_string(),
                         };
                     }
-                    MyButtons::InputInversion => {
+                    MyButtonType::InputInversion => {
                         let (mut input_reveresion_flag, _) = input_system.single_mut();
                         match input_reveresion_flag.0 {
                             true => input_reveresion_flag.0 = false,
                             false => input_reveresion_flag.0 = true,
                         }
-                        text_set.p1().single_mut().0.sections[0].value =
-                            match input_reveresion_flag.0 {
-                                true => "Input\nInverse".to_string(),
-                                false => "Input\nNormal".to_string(),
-                            };
+                        text.sections[0].value = match input_reveresion_flag.0 {
+                            true => "Input\nInverse".to_string(),
+                            false => "Input\nNormal".to_string(),
+                        };
+                    }
+                    MyButtonType::ModeSelection => {
+                        println!("mode selection button");
                     }
                 }
                 *color = PRESSED_COLOR.into();
@@ -124,7 +119,7 @@ fn button_system(
 
     // player info
     let (play_time, move_count) = player_info.single().get_player_info();
-    text_set.p2().single_mut().0.sections[0].value = format!(
+    player_info_text_query.single_mut().sections[0].value = format!(
         "Time: {:02}:{:02}.{:02}\nMoves: {}",
         play_time.as_secs() / 60,
         play_time.as_secs() % 60,
@@ -151,7 +146,7 @@ fn setup_buttons(mut commands: Commands, asset_server: Res<AssetServer>) {
         ))
         .with_children(|parent| {
             // reset button
-            add_button(
+            create_button(
                 parent,
                 UiRect {
                     right: Val::Px(50.0),
@@ -160,11 +155,11 @@ fn setup_buttons(mut commands: Commands, asset_server: Res<AssetServer>) {
                 },
                 "Reset".to_string(),
                 font.clone(),
-                MyButtons::Reset,
+                MyButtonType::Reset,
             );
 
             // shuffle button
-            add_button(
+            create_button(
                 parent,
                 UiRect {
                     right: Val::Px(50.0),
@@ -173,11 +168,11 @@ fn setup_buttons(mut commands: Commands, asset_server: Res<AssetServer>) {
                 },
                 "Shuffle".to_string(),
                 font.clone(),
-                MyButtons::Shuffle,
+                MyButtonType::Shuffle,
             );
 
             // animation toggle button
-            add_button(
+            create_button(
                 parent,
                 UiRect {
                     right: Val::Px(50.0),
@@ -186,11 +181,11 @@ fn setup_buttons(mut commands: Commands, asset_server: Res<AssetServer>) {
                 },
                 "Animation\nOn".to_string(),
                 font.clone(),
-                MyButtons::AnimationToggle,
+                MyButtonType::AnimationToggle,
             );
 
             // input inversion button
-            add_button(
+            create_button(
                 parent,
                 UiRect {
                     right: Val::Px(50.0),
@@ -199,10 +194,23 @@ fn setup_buttons(mut commands: Commands, asset_server: Res<AssetServer>) {
                 },
                 "Input\nNormal".to_string(),
                 font.clone(),
-                MyButtons::InputInversion,
+                MyButtonType::InputInversion,
             );
 
-            // play timer
+            // mode selection button
+            create_button(
+                parent,
+                UiRect {
+                    left: Val::Px(50.0),
+                    top: Val::Px(50.0),
+                    ..default()
+                },
+                "Mode\nNormal".to_string(),
+                font.clone(),
+                MyButtonType::ModeSelection,
+            );
+
+            // player info
             parent.spawn((
                 TextBundle::from_section(
                     "Time: 00:00.00\nMoves: 0",
@@ -215,7 +223,7 @@ fn setup_buttons(mut commands: Commands, asset_server: Res<AssetServer>) {
                 .with_style(Style {
                     position: UiRect {
                         left: Val::Px(50.0),
-                        top: Val::Px(50.0),
+                        top: Val::Px(175.0),
                         ..default()
                     },
                     ..default()
@@ -264,29 +272,32 @@ fn despawn_clear_ui(mut commands: Commands, clear_ui: Query<Entity, With<GameCle
     commands.entity(clear_ui.single()).despawn_recursive();
 }
 
-fn add_button(
+fn create_button(
     parent: &mut ChildBuilder,
     position: UiRect,
     text: String,
     font: Handle<Font>,
-    button_type: MyButtons,
-) -> impl Bundle {
+    button_type: MyButtonType,
+) {
     parent
-        .spawn(ButtonBundle {
-            style: Style {
-                align_self: AlignSelf::Center,
-                align_items: AlignItems::Center,
-                justify_content: JustifyContent::Center,
-                size: Size::new(Val::Px(200.0), Val::Px(100.0)),
-                position_type: PositionType::Absolute,
-                position,
-                margin: UiRect::all(Val::Auto),
+        .spawn((
+            ButtonBundle {
+                style: Style {
+                    align_self: AlignSelf::Center,
+                    align_items: AlignItems::Center,
+                    justify_content: JustifyContent::Center,
+                    size: Size::new(Val::Px(200.0), Val::Px(100.0)),
+                    position_type: PositionType::Absolute,
+                    position,
+                    margin: UiRect::all(Val::Auto),
+                    ..default()
+                },
                 ..default()
             },
-            ..default()
-        })
+            button_type,
+        ))
         .with_children(|parent| {
-            let mut entity_commands = parent.spawn(
+            parent.spawn(
                 TextBundle::from_section(
                     text,
                     TextStyle {
@@ -297,15 +308,5 @@ fn add_button(
                 )
                 .with_text_alignment(TextAlignment::CENTER),
             );
-            match button_type {
-                MyButtons::AnimationToggle => {
-                    entity_commands.insert(AnimationToggleButton);
-                }
-                MyButtons::InputInversion => {
-                    entity_commands.insert(InputInversionButton);
-                }
-                _ => (),
-            }
-        })
-        .insert(button_type);
+        });
 }
