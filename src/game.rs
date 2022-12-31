@@ -29,13 +29,13 @@ pub struct GamePlugin;
 pub struct GameState {
     pub x: i32,
     pub z: i32,
-    board: Board,
+    pub board: Board,
     pub is_shuffled: bool,
 }
 
 #[derive(Default, Component)]
 #[cfg_attr(feature = "debug", derive(Inspectable))]
-struct Board(Vec<Vec<Option<Block>>>);
+pub struct Board(pub Vec<Vec<Option<Block>>>);
 
 #[derive(SystemLabel)]
 pub enum GameStages {

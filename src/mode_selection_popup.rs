@@ -86,7 +86,7 @@ fn spawn_mode_selection_popup(
                             // mode selection text
                             parent.spawn(
                                 TextBundle::from_section(
-                                    "Mode Selection (Not implemented!)",
+                                    "Mode Selection",
                                     TextStyle {
                                         font: font.clone(),
                                         font_size: TEXT_SIZE,

@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 
 use crate::{
+    board_string::board_to_string,
     buffered_input::{InputInversionFlag, MoveImmediate},
     game::{GameState, MoveTimer},
     player::{PlayerInfo, PlayerState},
@@ -19,6 +20,7 @@ enum MyButtonType {
     AnimationToggle,
     InputInversion,
     ModeSelection,
+    Share,
 }
 
 #[derive(Component)]
@@ -110,6 +112,10 @@ fn button_system(
                     }
                     MyButtonType::ModeSelection => {
                         let _ = player_state.set(PlayerState::ModeSelectionPopup);
+                    }
+                    MyButtonType::Share => {
+                        let board_string = board_to_string(&transforms, &mut game);
+                        println!("{:?}", board_string);
                     }
                 }
                 *color = BUTTON_PRESS_COLOR.into();
@@ -208,9 +214,22 @@ fn setup_buttons(mut commands: Commands, asset_server: Res<AssetServer>) {
                     top: Val::Px(50.0),
                     ..default()
                 },
-                "Mode\nNormal".to_string(),
+                "Mode (WIP)\nPractice".to_string(),
                 font.clone(),
                 MyButtonType::ModeSelection,
+            );
+
+            // share button
+            spawn_button(
+                parent,
+                UiRect {
+                    left: Val::Px(50.0),
+                    bottom: Val::Px(50.0),
+                    ..default()
+                },
+                "Share\n(WIP)".to_string(),
+                font.clone(),
+                MyButtonType::Share,
             );
 
             // player info
