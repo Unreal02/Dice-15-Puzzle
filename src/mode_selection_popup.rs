@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
 use crate::{
-    game_ui::{GameUI, BUTTON_NORMAL_COLOR, BUTTON_PRESSED_COLOR, TEXT_SIZE},
+    game_ui::{GameUI, BUTTON_HOVER_COLOR, BUTTON_NORMAL_COLOR, BUTTON_PRESS_COLOR, TEXT_SIZE},
     player::PlayerState,
 };
 
@@ -28,7 +28,7 @@ impl Plugin for ModeSelectionPopupPlugin {
         )
         .add_system_set(
             SystemSet::on_update(PlayerState::ModeSelectionPopup)
-                .with_system(mode_selection_button_system),
+                .with_system(mode_selection_system),
         )
         .add_system_set(
             SystemSet::on_exit(PlayerState::ModeSelectionPopup)
@@ -149,11 +149,13 @@ fn spawn_mode_selection_popup(
 fn despawn_mode_selection_popup(
     mut commands: Commands,
     popup_query: Query<Entity, With<ModeSelectionPopup>>,
+    mut mouse: ResMut<Input<MouseButton>>,
 ) {
     commands.entity(popup_query.single()).despawn_recursive();
+    mouse.reset_all(); // prevent input after state change
 }
 
-fn mode_selection_button_system(
+fn mode_selection_system(
     mut interaction_query: Query<
         (&Interaction, &mut BackgroundColor, &ModeButtonType),
         (Changed<Interaction>, With<Button>),
@@ -169,10 +171,11 @@ fn mode_selection_button_system(
                     ModeButtonType::MinimalMovement => println!("minimal movement"),
                     ModeButtonType::DailyPuzzle => println!("daily puzzle"),
                 }
-                *color = BUTTON_PRESSED_COLOR.into();
+                *color = BUTTON_PRESS_COLOR.into();
                 let _ = player_state.set(PlayerState::Playing);
             }
-            _ => *color = BUTTON_NORMAL_COLOR.into(),
+            Interaction::Hovered => *color = BUTTON_HOVER_COLOR.into(),
+            Interaction::None => *color = BUTTON_NORMAL_COLOR.into(),
         }
     }
 }
@@ -185,6 +188,7 @@ fn spawn_button_and_description(
     font: Handle<Font>,
     button_type: ModeButtonType,
 ) {
+    // button
     parent
         .spawn((
             ButtonBundle {
@@ -205,6 +209,7 @@ fn spawn_button_and_description(
             button_type,
         ))
         .with_children(|parent| {
+            // button text
             parent.spawn(
                 TextBundle::from_section(
                     button_text,
@@ -222,6 +227,7 @@ fn spawn_button_and_description(
             );
         });
 
+    // description text
     parent.spawn(
         TextBundle::from_section(
             description_text,

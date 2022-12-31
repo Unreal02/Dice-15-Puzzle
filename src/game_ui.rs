@@ -9,7 +9,8 @@ use crate::{
 pub const TEXT_SIZE: f32 = 40.0;
 
 pub const BUTTON_NORMAL_COLOR: Color = Color::rgb(1.0, 1.0, 1.0);
-pub const BUTTON_PRESSED_COLOR: Color = Color::rgb(0.8, 0.8, 0.8);
+pub const BUTTON_HOVER_COLOR: Color = Color::rgb(0.8, 0.8, 0.8);
+pub const BUTTON_PRESS_COLOR: Color = Color::rgb(0.5, 0.5, 0.5);
 
 #[derive(Component, PartialEq, Eq)]
 enum MyButtonType {
@@ -111,9 +112,10 @@ fn button_system(
                         let _ = player_state.set(PlayerState::ModeSelectionPopup);
                     }
                 }
-                *color = BUTTON_PRESSED_COLOR.into();
+                *color = BUTTON_PRESS_COLOR.into();
             }
-            _ => *color = BUTTON_NORMAL_COLOR.into(),
+            Interaction::Hovered => *color = BUTTON_HOVER_COLOR.into(),
+            Interaction::None => *color = BUTTON_NORMAL_COLOR.into(),
         }
     }
 
