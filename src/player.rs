@@ -25,6 +25,7 @@ impl Plugin for PlayerPlugin {
 pub struct PlayerInfo {
     play_timer: Stopwatch,
     move_count: usize,
+    time_measure_flag: bool,
 }
 
 impl PlayerInfo {
@@ -34,6 +35,7 @@ impl PlayerInfo {
         Self {
             play_timer: stopwatch,
             move_count: 0,
+            time_measure_flag: false,
         }
     }
 
@@ -48,10 +50,17 @@ impl PlayerInfo {
         }
     }
 
+    pub fn try_start_timer(&mut self) {
+        if self.time_measure_flag == false && self.move_count > 0 {
+            self.time_measure_flag = true
+        }
+    }
+
     pub fn reset(&mut self) {
         self.play_timer.pause();
         self.play_timer.reset();
         self.move_count = 0;
+        self.time_measure_flag = false;
     }
 
     pub fn get_player_info(&self) -> (Duration, usize) {
@@ -71,5 +80,7 @@ fn init_playerinfo(mut player_info: Query<&mut PlayerInfo>) {
 
 fn tick_timer(time: Res<Time>, mut player_info: Query<&mut PlayerInfo>) {
     let mut info = player_info.single_mut();
-    info.play_timer.tick(time.delta());
+    if info.time_measure_flag {
+        info.play_timer.tick(time.delta());
+    }
 }

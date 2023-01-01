@@ -281,7 +281,9 @@ fn update_block(
 
     if new_move_flag {
         if let Some(input) = input_buffer.single_mut().pop() {
-            player_info.single_mut().add_move_count();
+            let mut player_info = player_info.single_mut();
+            player_info.add_move_count();
+            player_info.try_start_timer();
             game.move_block(
                 input.dx(),
                 input.dy(),
