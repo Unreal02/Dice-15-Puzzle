@@ -11,7 +11,7 @@
 
 # Todo
 - [ ] Puzzle Encoder/Decoder
-  - [ ] Puzzle Encoder: Puzzle (Board & Block State) to PuzzleString (24byte)
+  - [x] Puzzle Encoder: Puzzle (Board & Block State) to PuzzleString (24byte)
   - [ ] Puzzle Decoder: PuzzleString (24byte) to Puzzle (Board & Block State)
 
 - [ ] Puzzle Share & Load
@@ -30,12 +30,14 @@
     - [ ] Save rawdata & restore redis from rawdata
 
 - [ ] UI
-  - [ ] Mode selection
+  - [x] Mode selection
   - [ ] ClearUI with play info (Time, Movement, undo 했는지 표시)
-  - [ ] Load & Store button 
+  - [ ] Load button
+  - [x] Store button
   - [ ] Undo Button
 
 - [ ] Game Logic
+  - [ ] Problem fix: timer reset after mode selection
   - [ ] Undo
   - [x] Measure time after first move
   - [ ] Daily Puzzle

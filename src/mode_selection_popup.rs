@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 
 use crate::{
+    game_mode_ui::GameMode,
     game_ui::{GameUI, BUTTON_HOVER_COLOR, BUTTON_NORMAL_COLOR, BUTTON_PRESS_COLOR, TEXT_SIZE},
     player::PlayerState,
 };
@@ -9,14 +10,6 @@ const POPUP_BACKGROUND_COLOR: Color = Color::rgb(0.1, 0.1, 0.1);
 
 #[derive(Component)]
 struct ModeSelectionPopup;
-
-#[derive(Component, PartialEq, Eq)]
-enum ModeButtonType {
-    Practice,
-    TimeAttack,
-    MinimalMovement,
-    DailyPuzzle,
-}
 
 pub struct ModeSelectionPopupPlugin;
 
@@ -109,7 +102,7 @@ fn spawn_mode_selection_popup(
                                 "Practice".to_string(),
                                 "Practice with\nundo and snapshots".to_string(),
                                 font.clone(),
-                                ModeButtonType::Practice,
+                                GameMode::Practice,
                             );
 
                             // time attack mode button
@@ -119,7 +112,7 @@ fn spawn_mode_selection_popup(
                                 "Time Attack".to_string(),
                                 "Solve as fast\nas you can".to_string(),
                                 font.clone(),
-                                ModeButtonType::TimeAttack,
+                                GameMode::TimeAttack,
                             );
 
                             // minimal movement mode button
@@ -129,7 +122,7 @@ fn spawn_mode_selection_popup(
                                 "Minimal Movement".to_string(),
                                 "Solve with\nminimal movement".to_string(),
                                 font.clone(),
-                                ModeButtonType::MinimalMovement,
+                                GameMode::MinimalMovement,
                             );
 
                             // daily puzzle mode button
@@ -139,7 +132,7 @@ fn spawn_mode_selection_popup(
                                 "Daily Puzzle".to_string(),
                                 "Puzzle for\neveryday life".to_string(),
                                 font.clone(),
-                                ModeButtonType::DailyPuzzle,
+                                GameMode::DailyPuzzle,
                             );
                         });
                 });
@@ -157,19 +150,17 @@ fn despawn_mode_selection_popup(
 
 fn mode_selection_system(
     mut interaction_query: Query<
-        (&Interaction, &mut BackgroundColor, &ModeButtonType),
+        (&Interaction, &mut BackgroundColor, &GameMode),
         (Changed<Interaction>, With<Button>),
     >,
     mut player_state: ResMut<State<PlayerState>>,
+    mut game_mode: ResMut<State<GameMode>>,
 ) {
     for (interaction, mut color, button_type) in &mut interaction_query {
         match *interaction {
             Interaction::Clicked => {
-                match button_type {
-                    ModeButtonType::Practice => println!("practice"),
-                    ModeButtonType::TimeAttack => println!("time attack"),
-                    ModeButtonType::MinimalMovement => println!("minimal movement"),
-                    ModeButtonType::DailyPuzzle => println!("daily puzzle"),
+                if button_type != game_mode.current() {
+                    let _ = game_mode.set(*button_type);
                 }
                 *color = BUTTON_PRESS_COLOR.into();
                 let _ = player_state.set(PlayerState::Playing);
@@ -186,7 +177,7 @@ fn spawn_button_and_description(
     button_text: String,
     description_text: String,
     font: Handle<Font>,
-    button_type: ModeButtonType,
+    button_type: GameMode,
 ) {
     // button
     parent

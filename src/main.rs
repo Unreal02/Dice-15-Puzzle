@@ -2,6 +2,7 @@ mod block;
 mod board_string;
 mod buffered_input;
 mod game;
+mod game_mode_ui;
 mod game_ui;
 mod mode_selection_popup;
 mod player;
@@ -10,6 +11,7 @@ use bevy::{prelude::*, DefaultPlugins};
 use bevy_mod_picking::DefaultPickingPlugins;
 use buffered_input::CustomInputPlugin;
 use game::{GamePlugin, MoveTimer};
+use game_mode_ui::GameModeUIPlugin;
 use game_ui::GameUIPlugin;
 use mode_selection_popup::ModeSelectionPopupPlugin;
 use player::PlayerPlugin;
@@ -28,6 +30,7 @@ fn main() {
         .add_plugin(GameUIPlugin)
         .add_plugin(CustomInputPlugin)
         .add_plugin(ModeSelectionPopupPlugin)
+        .add_plugin(GameModeUIPlugin)
         .run();
 }
 

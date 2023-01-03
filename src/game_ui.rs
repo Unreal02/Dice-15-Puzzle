@@ -4,6 +4,7 @@ use crate::{
     board_string::board_to_string,
     buffered_input::{InputInversionFlag, MoveImmediate},
     game::{GameState, MoveTimer},
+    game_mode_ui::GameMode,
     player::{PlayerInfo, PlayerState},
 };
 
@@ -63,14 +64,15 @@ fn button_system(
     mut text_query: Query<&mut Text, Without<PlayerInfoUI>>,
     mut player_info_text_query: Query<&mut Text, With<PlayerInfoUI>>,
     mut player_state: ResMut<State<PlayerState>>,
+    game_mode: Res<State<GameMode>>,
 ) {
     let mut game = game_query.single_mut();
 
     // button interactions
     for (interaction, mut color, button_type, children) in &mut interaction_query {
+        let mut text = text_query.get_mut(children[0]).unwrap();
         match *interaction {
             Interaction::Clicked => {
-                let mut text = text_query.get_mut(children[0]).unwrap();
                 match button_type {
                     MyButtonType::Reset => {
                         game.reset(&mut move_timer, &mut transforms);
@@ -122,6 +124,15 @@ fn button_system(
             }
             Interaction::Hovered => *color = BUTTON_HOVER_COLOR.into(),
             Interaction::None => *color = BUTTON_NORMAL_COLOR.into(),
+        }
+        if *button_type == MyButtonType::ModeSelection {
+            text.sections[0].value = "Mode (WIP)\n".to_string()
+                + match game_mode.current() {
+                    GameMode::Practice => "Practice",
+                    GameMode::TimeAttack => "Time Attack",
+                    GameMode::MinimalMovement => "Min Move",
+                    GameMode::DailyPuzzle => "Daily Puzzle",
+                };
         }
     }
 
