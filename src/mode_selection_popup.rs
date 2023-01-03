@@ -57,6 +57,7 @@ fn spawn_mode_selection_popup(
                             ..default()
                         },
                         background_color: Color::rgba(0.0, 0.0, 0.0, 0.7).into(),
+                        z_index: ZIndex::Global(1),
                         ..default()
                     },
                     ModeSelectionPopup,
