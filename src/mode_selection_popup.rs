@@ -164,7 +164,7 @@ fn mode_selection_system(
                     let _ = game_mode.set(*button_type);
                 }
                 *color = BUTTON_PRESS_COLOR.into();
-                let _ = player_state.set(PlayerState::Playing);
+                let _ = player_state.pop();
             }
             Interaction::Hovered => *color = BUTTON_HOVER_COLOR.into(),
             Interaction::None => *color = BUTTON_NORMAL_COLOR.into(),

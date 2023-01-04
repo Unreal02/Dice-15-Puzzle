@@ -113,7 +113,7 @@ fn button_system(
                         };
                     }
                     MyButtonType::ModeSelection => {
-                        let _ = player_state.set(PlayerState::ModeSelectionPopup);
+                        let _ = player_state.push(PlayerState::ModeSelectionPopup);
                     }
                     MyButtonType::Share => {
                         let board_string = board_to_string(&transforms, &mut game);
