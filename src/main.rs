@@ -3,19 +3,20 @@ mod board_string;
 mod buffered_input;
 mod game;
 mod player;
+mod statistics_manager;
 mod ui;
 
 use bevy::{prelude::*, DefaultPlugins};
 use bevy_mod_picking::DefaultPickingPlugins;
 use buffered_input::CustomInputPlugin;
+use buffered_input::InputTimer;
 use game::{GamePlugin, MoveTimer};
 use player::PlayerPlugin;
+use statistics_manager::StatisticsManagerPlugin;
 use ui::*;
 
 #[cfg(not(feature = "debug"))]
 fn main() {
-    use buffered_input::InputTimer;
-
     App::new()
         .init_resource::<MoveTimer>()
         .init_resource::<InputTimer>()
@@ -27,6 +28,7 @@ fn main() {
         .add_plugin(CustomInputPlugin)
         .add_plugin(ModeSelectionPopupPlugin)
         .add_plugin(GameModeUIPlugin)
+        .add_plugin(StatisticsManagerPlugin)
         .run();
 }
 
