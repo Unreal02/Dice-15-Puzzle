@@ -150,6 +150,7 @@ fn mode_selection_popup_system(
     >,
     mut player_state: ResMut<State<PlayerState>>,
     mut game_mode: ResMut<State<GameMode>>,
+    keyboard_input: Res<Input<KeyCode>>,
 ) {
     for (interaction, mut color, button_type) in &mut interaction_query {
         match *interaction {
@@ -163,6 +164,11 @@ fn mode_selection_popup_system(
             Interaction::Hovered => *color = BUTTON_HOVER_COLOR.into(),
             Interaction::None => *color = BUTTON_NORMAL_COLOR.into(),
         }
+    }
+
+    // press Esc: popup close
+    if keyboard_input.just_pressed(KeyCode::Escape) {
+        let _ = player_state.pop();
     }
 }
 

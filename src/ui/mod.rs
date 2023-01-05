@@ -25,6 +25,9 @@ pub enum MyButtonType {
     Share,
     Undo,
     Redo,
+    Statistics,
+    DateSelection,
+    Rankings,
 }
 
 #[derive(Debug, Component, PartialEq, Eq, Clone, Copy)]
@@ -34,4 +37,5 @@ pub enum MyTextType {
     ModeSelection,
     PlayerInfo,
     GameClear,
+    Date,
 }

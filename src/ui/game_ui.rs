@@ -184,7 +184,7 @@ fn despawn_clear_ui(mut commands: Commands, my_ui_query: Query<(Entity, &MyTextT
     }
 }
 
-fn spawn_button(
+pub fn spawn_button(
     parent: &mut ChildBuilder,
     position: UiRect,
     text: String,

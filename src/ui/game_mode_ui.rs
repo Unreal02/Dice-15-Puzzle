@@ -4,6 +4,7 @@ use bevy::{prelude::*, ui::FocusPolicy};
 
 use crate::ui::TEXT_SIZE;
 use crate::MyButtonType;
+use crate::{spawn_button, MyTextType};
 
 #[derive(Component, PartialEq, Eq, Debug, Hash, Clone, Copy)]
 pub enum GameMode {
@@ -106,52 +107,26 @@ fn spawn_game_mode_ui(
                     MyButtonType::Redo,
                 ));
             }
-            GameMode::TimeAttack => {
-                parent.spawn(
-                    TextBundle::from_section(
-                        "Time Attack Mode UI Test",
-                        TextStyle {
-                            font: font.clone(),
-                            font_size: TEXT_SIZE,
-                            color: Color::BLACK,
-                        },
-                    )
-                    .with_style(Style {
-                        position_type: PositionType::Absolute,
-                        position: UiRect {
-                            left: Val::Px(275.0),
-                            top: Val::Px(50.0),
-                            ..default()
-                        },
+            GameMode::TimeAttack | GameMode::MinimalMovement => {
+                // statistics button
+                spawn_button(
+                    parent,
+                    UiRect {
+                        top: Val::Px(275.0),
+                        left: Val::Px(50.0),
                         ..default()
-                    }),
-                );
-            }
-            GameMode::MinimalMovement => {
-                parent.spawn(
-                    TextBundle::from_section(
-                        "Minimal Movement Mode UI Test",
-                        TextStyle {
-                            font: font.clone(),
-                            font_size: TEXT_SIZE,
-                            color: Color::BLACK,
-                        },
-                    )
-                    .with_style(Style {
-                        position_type: PositionType::Absolute,
-                        position: UiRect {
-                            left: Val::Px(275.0),
-                            top: Val::Px(50.0),
-                            ..default()
-                        },
-                        ..default()
-                    }),
+                    },
+                    "Statistics\n(WIP)".to_string(),
+                    font.clone(),
+                    MyButtonType::Statistics,
+                    None,
                 );
             }
             GameMode::DailyPuzzle => {
-                parent.spawn(
+                // date text
+                parent.spawn((
                     TextBundle::from_section(
-                        "Daily Puzzle Mode UI Test",
+                        "Date: 2023. 0. 0.",
                         TextStyle {
                             font: font.clone(),
                             font_size: TEXT_SIZE,
@@ -161,12 +136,41 @@ fn spawn_game_mode_ui(
                     .with_style(Style {
                         position_type: PositionType::Absolute,
                         position: UiRect {
-                            left: Val::Px(275.0),
-                            top: Val::Px(50.0),
+                            top: Val::Px(260.0),
+                            left: Val::Px(50.0),
                             ..default()
                         },
                         ..default()
                     }),
+                    MyTextType::Date,
+                ));
+
+                // date selection button
+                spawn_button(
+                    parent,
+                    UiRect {
+                        bottom: Val::Px(300.0),
+                        left: Val::Px(50.0),
+                        ..default()
+                    },
+                    "Date\nSelection".to_string(),
+                    font.clone(),
+                    MyButtonType::DateSelection,
+                    None,
+                );
+
+                // rankings button
+                spawn_button(
+                    parent,
+                    UiRect {
+                        bottom: Val::Px(175.0),
+                        left: Val::Px(50.0),
+                        ..default()
+                    },
+                    "Rankings".to_string(),
+                    font.clone(),
+                    MyButtonType::Rankings,
+                    None,
                 );
             }
         });
