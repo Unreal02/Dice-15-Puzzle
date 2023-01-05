@@ -34,11 +34,11 @@
   - [ ] ClearUI with play info (Time, Movement, undo 했는지 표시)
   - [ ] Load button
   - [x] Store button
-  - [ ] Undo Button
+  - [x] Undo/Redo Button
 
 - [ ] Game Logic
   - [ ] Problem fix: timer reset after mode selection
-  - [ ] Undo
+  - [x] Undo / Redo
   - [x] Measure time after first move
   - [ ] Daily Puzzle
     - [ ] Daily Puzzle creation & DB update
