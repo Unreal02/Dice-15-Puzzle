@@ -22,6 +22,12 @@ const BLOCK_MOVE_TIME: f32 = 0.3;
 #[derive(Resource, Default)]
 pub struct MoveTimer(Timer);
 
+pub enum GameError {
+    BufFull,
+    AbnormalInput,
+    InvalidInput,
+}
+
 pub struct GamePlugin;
 
 #[derive(Default, Component)]

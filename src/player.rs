@@ -1,5 +1,7 @@
 use bevy::{prelude::*, time::Stopwatch};
-use std::time::Duration;
+use std::{collections::VecDeque, time::Duration};
+
+use crate::buffered_input::GameInput;
 
 /// PlayerState represent state shift of player from game start to end
 /// So, PlayerPlugin would control such state transitions of player.
@@ -14,10 +16,45 @@ pub struct PlayerPlugin;
 
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
-        app.add_startup_system(setup_playerinfo)
+        app.add_startup_system(setup_playinfo)
             .add_state(PlayerState::Playing)
             .add_system_set(SystemSet::on_enter(PlayerState::Playing).with_system(init_playerinfo))
             .add_system_set(SystemSet::on_update(PlayerState::Playing).with_system(tick_timer));
+    }
+}
+
+#[derive(Component, Default)]
+pub struct PlayLog {
+    play_log: VecDeque<GameInput>,
+    redo_buffer: VecDeque<GameInput>,
+    pub undo_used: bool,
+}
+
+impl PlayLog {
+    pub fn add_log(&mut self, input: GameInput) {
+        self.play_log.push_back(input);
+    }
+
+    pub fn add_redo(&mut self, input: GameInput) {
+        self.redo_buffer.push_back(input);
+    }
+
+    pub fn undo(&mut self) -> Option<GameInput> {
+        self.play_log.pop_back()
+    }
+
+    pub fn redo(&mut self) -> Option<GameInput> {
+        self.redo_buffer.pop_back()
+    }
+
+    pub fn reset(&mut self) {
+        self.play_log.clear();
+        self.redo_buffer.clear();
+        self.undo_used = false;
+    }
+
+    pub fn clear_redo_buf(&mut self) {
+        self.redo_buffer.clear()
     }
 }
 
@@ -68,10 +105,14 @@ impl PlayerInfo {
     }
 }
 
-fn setup_playerinfo(mut commands: Commands) {
+fn setup_playinfo(mut commands: Commands) {
     commands
         .spawn(Name::new("PlayerInfo"))
         .insert(PlayerInfo::new());
+
+    commands
+        .spawn(Name::new("PlayLog"))
+        .insert(PlayLog::default());
 }
 
 fn init_playerinfo(mut player_info: Query<&mut PlayerInfo>) {
