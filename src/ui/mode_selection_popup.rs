@@ -1,10 +1,4 @@
-use bevy::prelude::*;
-
-use crate::{
-    player::PlayerState,
-    ui::game_mode_ui::GameMode,
-    ui::game_ui::{GameUI, BUTTON_HOVER_COLOR, BUTTON_NORMAL_COLOR, BUTTON_PRESS_COLOR, TEXT_SIZE},
-};
+use crate::{player::PlayerState, ui::*};
 
 const POPUP_BACKGROUND_COLOR: Color = Color::rgb(0.1, 0.1, 0.1);
 
@@ -21,7 +15,7 @@ impl Plugin for ModeSelectionPopupPlugin {
         )
         .add_system_set(
             SystemSet::on_update(PlayerState::ModeSelectionPopup)
-                .with_system(mode_selection_system),
+                .with_system(mode_selection_popup_system),
         )
         .add_system_set(
             SystemSet::on_exit(PlayerState::ModeSelectionPopup)
@@ -149,7 +143,7 @@ fn despawn_mode_selection_popup(
     mouse.reset_all(); // prevent input after state change
 }
 
-fn mode_selection_system(
+fn mode_selection_popup_system(
     mut interaction_query: Query<
         (&Interaction, &mut BackgroundColor, &GameMode),
         (Changed<Interaction>, With<Button>),

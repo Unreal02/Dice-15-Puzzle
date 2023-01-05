@@ -2,7 +2,8 @@
 
 use bevy::{prelude::*, ui::FocusPolicy};
 
-use crate::ui::game_ui::TEXT_SIZE;
+use crate::ui::TEXT_SIZE;
+use crate::MyButtonType;
 
 #[derive(Component, PartialEq, Eq, Debug, Hash, Clone, Copy)]
 pub enum GameMode {
@@ -67,25 +68,43 @@ fn spawn_game_mode_ui(
         ))
         .with_children(|parent| match game_mode.current() {
             GameMode::Practice => {
-                parent.spawn(
-                    TextBundle::from_section(
-                        "Practice Mode UI Test",
-                        TextStyle {
-                            font: font.clone(),
-                            font_size: TEXT_SIZE,
-                            color: Color::BLACK,
-                        },
-                    )
-                    .with_style(Style {
-                        position_type: PositionType::Absolute,
-                        position: UiRect {
-                            left: Val::Px(275.0),
-                            top: Val::Px(50.0),
+                // undo button
+                parent.spawn((
+                    ButtonBundle {
+                        style: Style {
+                            size: Size::new(Val::Px(87.5), Val::Px(87.5)),
+                            position_type: PositionType::Absolute,
+                            position: UiRect {
+                                bottom: Val::Px(300.0),
+                                right: Val::Px(162.5),
+                                ..default()
+                            },
                             ..default()
                         },
+                        image: asset_server.load("images/button_undo.png").into(),
                         ..default()
-                    }),
-                );
+                    },
+                    MyButtonType::Undo,
+                ));
+
+                // redo button
+                parent.spawn((
+                    ButtonBundle {
+                        style: Style {
+                            size: Size::new(Val::Px(87.5), Val::Px(87.5)),
+                            position_type: PositionType::Absolute,
+                            position: UiRect {
+                                bottom: Val::Px(300.0),
+                                right: Val::Px(50.0),
+                                ..default()
+                            },
+                            ..default()
+                        },
+                        image: asset_server.load("images/button_redo.png").into(),
+                        ..default()
+                    },
+                    MyButtonType::Redo,
+                ));
             }
             GameMode::TimeAttack => {
                 parent.spawn(
