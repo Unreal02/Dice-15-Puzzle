@@ -1,9 +1,9 @@
 use bevy::prelude::*;
 
 use crate::{
-    game_mode_ui::GameMode,
-    game_ui::{GameUI, BUTTON_HOVER_COLOR, BUTTON_NORMAL_COLOR, BUTTON_PRESS_COLOR, TEXT_SIZE},
     player::PlayerState,
+    ui::game_mode_ui::GameMode,
+    ui::game_ui::{GameUI, BUTTON_HOVER_COLOR, BUTTON_NORMAL_COLOR, BUTTON_PRESS_COLOR, TEXT_SIZE},
 };
 
 const POPUP_BACKGROUND_COLOR: Color = Color::rgb(0.1, 0.1, 0.1);

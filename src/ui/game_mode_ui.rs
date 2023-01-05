@@ -2,7 +2,7 @@
 
 use bevy::{prelude::*, ui::FocusPolicy};
 
-use crate::game_ui::TEXT_SIZE;
+use crate::ui::game_ui::TEXT_SIZE;
 
 #[derive(Component, PartialEq, Eq, Debug, Hash, Clone, Copy)]
 pub enum GameMode {

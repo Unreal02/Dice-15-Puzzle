@@ -2,19 +2,15 @@ mod block;
 mod board_string;
 mod buffered_input;
 mod game;
-mod game_mode_ui;
-mod game_ui;
-mod mode_selection_popup;
 mod player;
+mod ui;
 
 use bevy::{prelude::*, DefaultPlugins};
 use bevy_mod_picking::DefaultPickingPlugins;
 use buffered_input::CustomInputPlugin;
 use game::{GamePlugin, MoveTimer};
-use game_mode_ui::GameModeUIPlugin;
-use game_ui::GameUIPlugin;
-use mode_selection_popup::ModeSelectionPopupPlugin;
 use player::PlayerPlugin;
+use ui::*;
 
 #[cfg(not(feature = "debug"))]
 fn main() {

@@ -4,8 +4,8 @@ use crate::{
     board_string::board_to_string,
     buffered_input::{InputInversionFlag, MoveImmediate},
     game::{GameState, MoveTimer},
-    game_mode_ui::GameMode,
     player::{PlayerInfo, PlayerState},
+    ui::game_mode_ui::GameMode,
 };
 
 pub const TEXT_SIZE: f32 = 40.0;
