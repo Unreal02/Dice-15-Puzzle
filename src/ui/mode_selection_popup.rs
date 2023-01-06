@@ -1,4 +1,7 @@
-use crate::{player::PlayerState, ui::*};
+use crate::{
+    player::{PlayerInfo, PlayerState},
+    ui::*,
+};
 
 const POPUP_BACKGROUND_COLOR: Color = Color::rgb(0.1, 0.1, 0.1);
 
@@ -149,6 +152,7 @@ fn mode_selection_popup_system(
         (Changed<Interaction>, With<Button>),
     >,
     mut player_state: ResMut<State<PlayerState>>,
+    mut player_info: Query<&mut PlayerInfo>,
     mut game_mode: ResMut<State<GameMode>>,
     keyboard_input: Res<Input<KeyCode>>,
 ) {
@@ -157,6 +161,9 @@ fn mode_selection_popup_system(
             Interaction::Clicked => {
                 if button_type != game_mode.current() {
                     let _ = game_mode.set(*button_type);
+                    let mut player_info = player_info.single_mut();
+                    player_info.reset();
+                    player_info.start_tracking();
                 }
                 *color = BUTTON_PRESS_COLOR.into();
                 let _ = player_state.pop();

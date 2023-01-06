@@ -37,7 +37,7 @@
   - [x] Undo/Redo Button
 
 - [ ] Game Logic
-  - [ ] Problem fix: timer reset after mode selection
+  - [x] Problem fix: timer reset after mode selection
   - [x] Undo / Redo
   - [x] Measure time after first move
   - [ ] Daily Puzzle
