@@ -1,5 +1,6 @@
 use crate::{
-    player::{PlayerInfo, PlayerState},
+    game::{GameState, MoveTimer},
+    player::{PlayLog, PlayerInfo, PlayerState},
     ui::*,
 };
 
@@ -155,15 +156,23 @@ fn mode_selection_popup_system(
     mut player_info: Query<&mut PlayerInfo>,
     mut game_mode: ResMut<State<GameMode>>,
     keyboard_input: Res<Input<KeyCode>>,
+    mut play_log: Query<&mut PlayLog>,
+    mut transforms: Query<&mut Transform>,
+    mut move_timer: ResMut<MoveTimer>,
+    mut game_query: Query<&mut GameState>,
 ) {
     for (interaction, mut color, button_type) in &mut interaction_query {
         match *interaction {
             Interaction::Clicked => {
                 if button_type != game_mode.current() {
                     let _ = game_mode.set(*button_type);
-                    let mut player_info = player_info.single_mut();
-                    player_info.reset();
-                    player_info.start_tracking();
+                    button_type.entry_handler(
+                        &mut player_info.single_mut(),
+                        &mut game_query.single_mut(),
+                        &mut play_log.single_mut(),
+                        &mut transforms,
+                        &mut move_timer,
+                    );
                 }
                 *color = BUTTON_PRESS_COLOR.into();
                 let _ = player_state.pop();

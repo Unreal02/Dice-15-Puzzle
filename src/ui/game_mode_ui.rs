@@ -2,6 +2,8 @@
 
 use bevy::{prelude::*, ui::FocusPolicy};
 
+use crate::game::{GameState, MoveTimer};
+use crate::player::{PlayLog, PlayerInfo};
 use crate::ui::TEXT_SIZE;
 use crate::MyButtonType;
 use crate::{spawn_button, MyTextType};
@@ -12,6 +14,65 @@ pub enum GameMode {
     TimeAttack,
     MinimalMovement,
     DailyPuzzle,
+}
+
+impl GameMode {
+    pub fn entry_handler(
+        &self,
+        player_info: &mut PlayerInfo,
+        game_state: &mut GameState,
+        play_log: &mut PlayLog,
+        mut transforms: &mut Query<&mut Transform>,
+        mut move_timer: &mut ResMut<MoveTimer>,
+    ) {
+        fn reset(
+            player_info: &mut PlayerInfo,
+            game_state: &mut GameState,
+            play_log: &mut PlayLog,
+            transforms: &mut Query<&mut Transform>,
+            move_timer: &mut ResMut<MoveTimer>,
+        ) {
+            player_info.reset();
+            game_state.reset(move_timer, transforms);
+            play_log.reset();
+        }
+
+        match self {
+            GameMode::Practice => reset(
+                player_info,
+                game_state,
+                play_log,
+                &mut transforms,
+                &mut move_timer,
+            ),
+            GameMode::TimeAttack => reset(
+                player_info,
+                game_state,
+                play_log,
+                &mut transforms,
+                &mut move_timer,
+            ),
+            GameMode::MinimalMovement => reset(
+                player_info,
+                game_state,
+                play_log,
+                &mut transforms,
+                &mut move_timer,
+            ),
+            GameMode::DailyPuzzle => {
+                reset(
+                    player_info,
+                    game_state,
+                    play_log,
+                    &mut transforms,
+                    &mut move_timer,
+                );
+                game_state.shuffle(&mut move_timer, &mut transforms);
+                game_state.is_shuffled = true;
+                player_info.start_tracking();
+            }
+        }
+    }
 }
 
 #[derive(Component)]
