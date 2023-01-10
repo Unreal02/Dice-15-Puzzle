@@ -149,6 +149,7 @@ impl GameState {
         }
         self.x = 3;
         self.z = 3;
+        self.is_shuffled = false;
     }
 
     pub fn shuffle(
