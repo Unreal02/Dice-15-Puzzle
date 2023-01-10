@@ -1,13 +1,17 @@
 mod game_mode_ui;
 mod game_ui;
 mod game_ui_system;
-mod mode_selection_popup;
+mod popup;
+mod popup_mode_selection;
+mod popup_statistics;
 
 pub use bevy::prelude::*;
 pub use game_mode_ui::*;
 pub use game_ui::*;
 pub use game_ui_system::*;
-pub use mode_selection_popup::*;
+pub use popup::*;
+pub use popup_mode_selection::*;
+pub use popup_statistics::*;
 
 pub const TEXT_SIZE: f32 = 40.0;
 

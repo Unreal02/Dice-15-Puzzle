@@ -26,7 +26,7 @@ fn main() {
         .add_plugin(GamePlugin)
         .add_plugin(GameUIPlugin)
         .add_plugin(CustomInputPlugin)
-        .add_plugin(ModeSelectionPopupPlugin)
+        .add_plugin(PopupPlugin)
         .add_plugin(GameModeUIPlugin)
         .add_plugin(StatisticsManagerPlugin)
         .run();

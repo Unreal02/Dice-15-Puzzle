@@ -87,7 +87,7 @@ pub fn game_ui_system(
                         &mut input_timer,
                     ),
                     MyButtonType::Statistics => {
-                        println!("statistics");
+                        let _ = player_state.push(PlayerState::StatisticsPopup);
                     }
                     MyButtonType::DateSelection => {
                         println!("date selection");

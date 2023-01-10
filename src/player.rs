@@ -10,6 +10,7 @@ pub enum PlayerState {
     Playing,
     GameClear,
     ModeSelectionPopup,
+    StatisticsPopup,
 }
 
 pub struct PlayerPlugin;

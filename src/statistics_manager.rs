@@ -1,7 +1,10 @@
 use bevy::prelude::*;
 use std::time::Duration;
 
-use crate::player::{PlayerInfo, PlayerState};
+use crate::{
+    player::{PlayerInfo, PlayerState},
+    ui::GameMode,
+};
 
 #[derive(Component, Default)]
 pub struct StatisticsManager {
@@ -24,7 +27,12 @@ fn spawn_statistics_manager(mut commands: Commands) {
 fn on_game_clear(
     mut statistics_manager_query: Query<&mut StatisticsManager>,
     player_info_query: Query<&PlayerInfo>,
+    game_mode: Res<State<GameMode>>,
 ) {
+    if *game_mode.current() != GameMode::TimeAttack {
+        return;
+    }
+
     let mut statistics_manager = statistics_manager_query.single_mut();
     let (time, _) = player_info_query.single().get_player_info();
     statistics_manager.records.push(time);
