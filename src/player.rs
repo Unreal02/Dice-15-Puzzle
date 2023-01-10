@@ -7,8 +7,10 @@ use crate::buffered_input::GameInput;
 /// So, PlayerPlugin would control such state transitions of player.
 #[derive(Clone, Eq, PartialEq, Debug, Hash)]
 pub enum PlayerState {
-    Playing,
-    GameClear,
+    Idle,
+    Shuffled,
+    Solving,
+    Clear,
     ModeSelectionPopup,
     StatisticsPopup,
 }
@@ -18,9 +20,12 @@ pub struct PlayerPlugin;
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
         app.add_startup_system(setup_playinfo)
-            .add_state(PlayerState::Playing)
-            .add_system_set(SystemSet::on_enter(PlayerState::Playing).with_system(init_playerinfo))
-            .add_system_set(SystemSet::on_update(PlayerState::Playing).with_system(tick_timer));
+            .add_state(PlayerState::Idle)
+            .add_system_set(SystemSet::on_enter(PlayerState::Idle).with_system(reset_timer))
+            .add_system_set(SystemSet::on_enter(PlayerState::Shuffled).with_system(reset_timer))
+            .add_system_set(SystemSet::on_enter(PlayerState::Solving).with_system(start_timer))
+            .add_system_set(SystemSet::on_update(PlayerState::Solving).with_system(tick_timer))
+            .add_system_set(SystemSet::on_enter(PlayerState::Clear).with_system(stop_timer));
     }
 }
 
@@ -63,7 +68,6 @@ impl PlayLog {
 pub struct PlayerInfo {
     play_timer: Stopwatch,
     move_count: usize,
-    time_measure_flag: bool,
 }
 
 impl PlayerInfo {
@@ -73,32 +77,25 @@ impl PlayerInfo {
         Self {
             play_timer: stopwatch,
             move_count: 0,
-            time_measure_flag: false,
         }
-    }
-
-    pub fn start_tracking(&mut self) {
-        self.play_timer.unpause();
-        self.move_count = 0;
     }
 
     pub fn add_move_count(&mut self) {
-        if !self.play_timer.paused() {
-            self.move_count += 1;
-        }
+        self.move_count += 1;
     }
 
-    pub fn try_start_timer(&mut self) {
-        if self.time_measure_flag == false && self.move_count > 0 {
-            self.time_measure_flag = true
-        }
+    pub fn start_timer(&mut self) {
+        self.play_timer.unpause();
+    }
+
+    pub fn stop_timer(&mut self) {
+        self.play_timer.pause();
     }
 
     pub fn reset(&mut self) {
         self.play_timer.pause();
         self.play_timer.reset();
         self.move_count = 0;
-        self.time_measure_flag = false;
     }
 
     pub fn get_player_info(&self) -> (Duration, usize) {
@@ -116,13 +113,18 @@ fn setup_playinfo(mut commands: Commands) {
         .insert(PlayLog::default());
 }
 
-fn init_playerinfo(mut player_info: Query<&mut PlayerInfo>) {
+fn reset_timer(mut player_info: Query<&mut PlayerInfo>) {
     player_info.single_mut().reset();
 }
 
+fn start_timer(mut player_info: Query<&mut PlayerInfo>) {
+    player_info.single_mut().start_timer();
+}
+
 fn tick_timer(time: Res<Time>, mut player_info: Query<&mut PlayerInfo>) {
-    let mut info = player_info.single_mut();
-    if info.time_measure_flag {
-        info.play_timer.tick(time.delta());
-    }
+    player_info.single_mut().play_timer.tick(time.delta());
+}
+
+fn stop_timer(mut player_info: Query<&mut PlayerInfo>) {
+    player_info.single_mut().stop_timer();
 }

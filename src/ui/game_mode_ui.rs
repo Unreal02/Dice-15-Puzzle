@@ -3,7 +3,7 @@
 use bevy::{prelude::*, ui::FocusPolicy};
 
 use crate::game::{GameState, MoveTimer};
-use crate::player::{PlayLog, PlayerInfo};
+use crate::player::{PlayLog, PlayerInfo, PlayerState};
 use crate::ui::TEXT_SIZE;
 use crate::MyButtonType;
 use crate::{spawn_button, MyTextType};
@@ -24,6 +24,7 @@ impl GameMode {
         play_log: &mut PlayLog,
         mut transforms: &mut Query<&mut Transform>,
         mut move_timer: &mut ResMut<MoveTimer>,
+        player_state: &mut ResMut<State<PlayerState>>,
     ) {
         fn reset(
             player_info: &mut PlayerInfo,
@@ -69,7 +70,7 @@ impl GameMode {
                 );
                 game_state.shuffle(&mut move_timer, &mut transforms);
                 game_state.is_shuffled = true;
-                player_info.start_tracking();
+                let _ = player_state.set(PlayerState::Shuffled);
             }
         }
     }

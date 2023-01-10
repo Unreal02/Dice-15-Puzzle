@@ -102,6 +102,7 @@ pub fn popup_system_mode_selection(
                         &mut play_log.single_mut(),
                         &mut transforms,
                         &mut move_timer,
+                        &mut player_state,
                     );
                 }
                 *color = BUTTON_PRESS_COLOR.into();

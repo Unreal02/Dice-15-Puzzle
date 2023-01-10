@@ -21,7 +21,7 @@ pub fn game_ui_system(
         &mut InputInversionFlag,
         &mut MoveImmediate,
     )>,
-    mut player_info: Query<&mut PlayerInfo>,
+    player_info: Query<&mut PlayerInfo>,
     mut play_log: Query<&mut PlayLog>,
     mut text_query: Query<(&mut Text, &MyTextType)>,
     mut player_state: ResMut<State<PlayerState>>,
@@ -40,20 +40,18 @@ pub fn game_ui_system(
                 match button_type {
                     MyButtonType::Reset => {
                         game.reset(&mut move_timer, &mut transforms);
-                        player_info.single_mut().reset();
                         play_log.single_mut().reset();
                         game.is_shuffled = false;
-                        if *player_state.current() == PlayerState::GameClear {
-                            let _ = player_state.set(PlayerState::Playing);
+                        if *player_state.current() != PlayerState::Idle {
+                            let _ = player_state.set(PlayerState::Idle);
                         }
                     }
                     MyButtonType::Shuffle => {
                         game.shuffle(&mut move_timer, &mut transforms);
-                        player_info.single_mut().start_tracking();
                         play_log.single_mut().reset();
                         game.is_shuffled = true;
-                        if *player_state.current() == PlayerState::GameClear {
-                            let _ = player_state.set(PlayerState::Playing);
+                        if *player_state.current() != PlayerState::Shuffled {
+                            let _ = player_state.set(PlayerState::Shuffled);
                         }
                     }
                     MyButtonType::AnimationToggle => match move_immediate.0 {

@@ -5,7 +5,7 @@ use bevy_mod_picking::PickingEvent;
 
 use crate::{
     game::{GameError, GameState},
-    player::{PlayLog, PlayerState},
+    player::PlayLog,
 };
 
 pub struct CustomInputPlugin;
@@ -13,7 +13,7 @@ pub struct CustomInputPlugin;
 impl Plugin for CustomInputPlugin {
     fn build(&self, app: &mut App) {
         app.add_startup_system(setup_input).add_system_set(
-            SystemSet::on_update(PlayerState::Playing)
+            SystemSet::new()
                 .with_system(input_keyboard)
                 .with_system(input_click),
         );

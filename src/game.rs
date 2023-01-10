@@ -51,15 +51,15 @@ pub enum GameStages {
 
 impl Plugin for GamePlugin {
     fn build(&self, app: &mut App) {
-        app.add_startup_system(setup).add_system_set(
-            SystemSet::on_update(PlayerState::Playing)
-                .with_system(update_block.label(GameStages::UpdateBlock))
-                .with_system(
+        app.add_startup_system(setup)
+            .add_system(update_block.label(GameStages::UpdateBlock))
+            .add_system_set(
+                SystemSet::on_update(PlayerState::Solving).with_system(
                     check_clear
                         .after(GameStages::UpdateBlock)
                         .label(GameStages::CheckClear),
                 ),
-        );
+            );
     }
 }
 
@@ -253,6 +253,7 @@ fn update_block(
     mut input_buffer: Query<&mut InputBuffer>,
     move_immediate: Query<&MoveImmediate>,
     mut player_info: Query<&mut PlayerInfo>,
+    mut player_state: ResMut<State<PlayerState>>,
 ) {
     let mut game = game_query.single_mut();
 
@@ -288,9 +289,18 @@ fn update_block(
 
     if new_move_flag {
         if let Some(input) = input_buffer.single_mut().pop() {
-            let mut player_info = player_info.single_mut();
-            player_info.add_move_count();
-            player_info.try_start_timer();
+            let state = player_state.current();
+            match state {
+                PlayerState::Shuffled => {
+                    player_info.single_mut().add_move_count();
+                    let _ = player_state.set(PlayerState::Solving);
+                }
+                PlayerState::Solving => player_info.single_mut().add_move_count(),
+                PlayerState::Clear => {
+                    let _ = player_state.set(PlayerState::Idle);
+                }
+                _ => {}
+            }
             game.move_block(
                 input.dx(),
                 input.dy(),
@@ -339,6 +349,6 @@ fn check_clear(
     }
 
     if is_clear {
-        let _ = app_state.set(PlayerState::GameClear);
+        let _ = app_state.set(PlayerState::Clear);
     }
 }

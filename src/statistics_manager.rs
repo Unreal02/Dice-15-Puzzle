@@ -34,7 +34,7 @@ pub struct StatisticsManagerPlugin;
 impl Plugin for StatisticsManagerPlugin {
     fn build(&self, app: &mut App) {
         app.add_startup_system(spawn_statistics_manager)
-            .add_system_set(SystemSet::on_enter(PlayerState::GameClear).with_system(on_game_clear));
+            .add_system_set(SystemSet::on_enter(PlayerState::Clear).with_system(on_game_clear));
     }
 }
 
@@ -54,5 +54,4 @@ fn on_game_clear(
     let mut statistics_manager = statistics_manager_query.single_mut();
     let (time, _) = player_info_query.single().get_player_info();
     statistics_manager.records.push(time);
-    println!("game clear");
 }
