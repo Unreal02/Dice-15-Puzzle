@@ -8,7 +8,25 @@ use crate::{
 
 #[derive(Component, Default)]
 pub struct StatisticsManager {
-    records: Vec<Duration>,
+    pub records: Vec<Duration>,
+}
+
+impl StatisticsManager {
+    pub fn solves(&self) -> usize {
+        self.records.len()
+    }
+
+    pub fn average(&self) -> Duration {
+        self.records.iter().sum::<Duration>() / self.records.len() as u32
+    }
+
+    pub fn best(&self) -> Duration {
+        *self.records.iter().min().unwrap()
+    }
+
+    pub fn worst(&self) -> Duration {
+        *self.records.iter().max().unwrap()
+    }
 }
 
 pub struct StatisticsManagerPlugin;
@@ -37,23 +55,4 @@ fn on_game_clear(
     let (time, _) = player_info_query.single().get_player_info();
     statistics_manager.records.push(time);
     println!("game clear");
-    println!("  number : {:?}", statistics_manager.records.len());
-    println!(
-        "  average: {:?}",
-        statistics_manager.records.iter().sum::<Duration>()
-            / statistics_manager.records.len() as u32
-    );
-    println!(
-        "  best   : {:?}",
-        statistics_manager.records.iter().min().unwrap()
-    );
-    println!(
-        "  worst  : {:?}",
-        statistics_manager.records.iter().max().unwrap()
-    );
-    println!("  details:");
-    for t in statistics_manager.records.iter() {
-        println!("    {:?}", t);
-    }
-    println!();
 }

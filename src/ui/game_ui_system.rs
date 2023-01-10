@@ -1,6 +1,7 @@
 use crate::{
     board_string::{board_to_string, string_to_board},
     buffered_input::{InputBuffer, InputHandler, InputInversionFlag, InputTimer, MoveImmediate},
+    duration_to_string::duration_to_string,
     game::{GameState, MoveTimer},
     player::{PlayLog, PlayerInfo, PlayerState},
     ui::*,
@@ -130,10 +131,8 @@ pub fn game_ui_system(
             MyTextType::PlayerInfo => {
                 let (play_time, move_count) = player_info.single().get_player_info();
                 text.sections[0].value = format!(
-                    "Time: {:02}:{:02}.{:02}\nMoves: {}",
-                    play_time.as_secs() / 60,
-                    play_time.as_secs() % 60,
-                    play_time.subsec_millis() / 10,
+                    "Time: {}\nMoves: {}",
+                    duration_to_string(play_time),
                     move_count
                 );
             }
