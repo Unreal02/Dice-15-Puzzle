@@ -5,7 +5,7 @@ use bevy_mod_picking::PickingEvent;
 
 use crate::{
     game::{GameError, GameState},
-    player::PlayLog,
+    player::{PlayLog, PlayerState},
 };
 
 pub struct CustomInputPlugin;
@@ -134,7 +134,13 @@ fn input_keyboard(
     mut input_timer: ResMut<InputTimer>,
     mut play_log: Query<&mut PlayLog>,
     time: Res<Time>,
+    player_state: Res<State<PlayerState>>,
 ) {
+    if *player_state.current() == PlayerState::ModeSelectionPopup
+        || *player_state.current() == PlayerState::StatisticsPopup
+    {
+        return;
+    }
     let (mut input_buffer, inversion_flag) = input_system.single_mut();
     let mut play_log = play_log.single_mut();
     if just_pressed(&keyboard_input) {
@@ -200,7 +206,13 @@ fn input_click(
     mut input_system: Query<(&mut InputBuffer, &InputInversionFlag)>,
     mut play_log: Query<&mut PlayLog>,
     mut events: EventReader<PickingEvent>,
+    player_state: Res<State<PlayerState>>,
 ) {
+    if *player_state.current() == PlayerState::ModeSelectionPopup
+        || *player_state.current() == PlayerState::StatisticsPopup
+    {
+        return;
+    }
     let game = game_query.single_mut();
     let mut play_log = play_log.single_mut();
     for event in events.iter() {
