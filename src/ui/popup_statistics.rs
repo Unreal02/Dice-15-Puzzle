@@ -1,9 +1,6 @@
 use bevy::input::mouse::{MouseScrollUnit, MouseWheel};
 
-use crate::{
-    duration_to_string::duration_to_string, player::PlayerState,
-    statistics_manager::StatisticsManager, ui::*,
-};
+use crate::{player::PlayerState, statistics_manager::StatisticsManager, ui::*, utils::*};
 
 const SCROLL_BAR_MAX_ITEMS: usize = 11;
 const SCROLL_SPEED: f32 = 1.0;

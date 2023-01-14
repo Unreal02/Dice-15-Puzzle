@@ -1,11 +1,10 @@
 mod block;
-mod board_string;
 mod buffered_input;
-mod duration_to_string;
 mod game;
 mod player;
 mod statistics_manager;
 mod ui;
+mod utils;
 
 use bevy::{prelude::*, DefaultPlugins};
 use bevy_mod_picking::DefaultPickingPlugins;
