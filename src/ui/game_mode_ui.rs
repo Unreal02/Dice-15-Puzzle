@@ -178,7 +178,7 @@ fn spawn_game_mode_ui(
                         left: Val::Px(50.0),
                         ..default()
                     },
-                    "Statistics\n(WIP)".to_string(),
+                    "Statistics".to_string(),
                     font.clone(),
                     MyButtonType::Statistics,
                     None,
