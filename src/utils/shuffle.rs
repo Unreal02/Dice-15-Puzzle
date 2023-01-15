@@ -4,7 +4,7 @@ use bevy::{ecs::system::SystemState, math::vec3, prelude::*, utils::HashMap};
 use rand::random;
 use std::time::Duration;
 
-const SHUFFLE_NUMBER: i32 = 8;
+const SHUFFLE_NUMBER: i32 = 1000;
 
 pub fn shuffle() -> BoardString {
     let mut world = World::new();
