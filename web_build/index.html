@@ -10,6 +10,10 @@
     <link rel="icon" href="data:,">
     <title>Dice 15 Puzzle</title>
 
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400&display=swap" rel="stylesheet">
+
     <style>
         body,
         html {
@@ -20,7 +24,20 @@
         }
 
         canvas {
+            position: absolute;
+            top: 0px;
+            left: 0px;
             display: block;
+        }
+
+        button {
+            position: absolute;
+            width: 100px;
+            height: 50px;
+            top: 730px;
+            left: 10px;
+            font-family: 'Quicksand', sans-serif;
+            font-size: 20px;
         }
     </style>
 </head>
@@ -125,6 +142,10 @@
             });
         })();
     </script>
+    
+    <button onclick="location.href='about'">
+        About
+    </button>
 </body>
 
 </html>
