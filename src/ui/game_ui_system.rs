@@ -46,7 +46,7 @@ pub fn game_ui_system(
                         }
                     }
                     MyButtonType::Shuffle => {
-                        game.shuffle(&mut move_timer, &mut transforms);
+                        game.shuffle(&mut transforms);
                         play_log.single_mut().reset();
                         game.is_shuffled = true;
                         if *player_state.current() != PlayerState::Shuffled {

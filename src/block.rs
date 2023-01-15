@@ -7,7 +7,7 @@ use bevy_mod_picking::{Highlighting, PickableBundle};
 #[derive(Component)]
 pub struct BlockMesh;
 
-#[derive(Component)]
+#[derive(Component, Clone, Copy)]
 #[cfg_attr(feature = "debug", derive(Inspectable))]
 pub struct Block {
     pub entity: Entity,

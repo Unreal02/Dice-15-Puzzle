@@ -4,23 +4,23 @@ use std::{
     mem::swap,
 };
 
-use bevy::{math::vec3, prelude::*};
+use bevy::{math::vec3, prelude::*, utils::HashMap};
 
 #[cfg(feature = "debug")]
 use bevy_inspector_egui::Inspectable;
 use bevy_mod_picking::PickingCameraBundle;
-use rand::random;
 
 use crate::{
     block::{spawn_meshes, Block, BlockMesh},
     buffered_input::{InputBuffer, MoveImmediate},
     player::{PlayerInfo, PlayerState},
+    utils::{shuffle, string_to_board},
 };
 
 const BLOCK_MOVE_TIME: f32 = 0.3;
 
 #[derive(Resource, Default)]
-pub struct MoveTimer(Timer);
+pub struct MoveTimer(pub Timer);
 
 pub enum GameError {
     BufFull,
@@ -64,8 +64,28 @@ impl Plugin for GamePlugin {
 }
 
 impl GameState {
+    /// init board
+    pub fn init(&mut self, mesh_entities: &HashMap<(usize, usize), Entity>) {
+        for x in 0..4 {
+            self.board.0.push(Vec::new());
+            for z in 0..4 {
+                self.board.0[x].push(if x != 3 || z != 3 {
+                    Some(Block {
+                        entity: mesh_entities.get(&(x, z)).unwrap().clone(),
+                        goal: (z * 4 + x + 1) as i32 % 16,
+                        moving: None,
+                    })
+                } else {
+                    None
+                });
+            }
+        }
+        self.x = 3;
+        self.z = 3;
+    }
+
     /// swap `self.board.0[x0][z0]` and `self.board.0[x1][z1]`
-    fn swap(&mut self, x0: usize, z0: usize, x1: usize, z1: usize) {
+    pub fn swap(&mut self, x0: usize, z0: usize, x1: usize, z1: usize) {
         if x0 == x1 {
             let arr = &mut self.board.0[x0];
             arr.swap(z0, z1);
@@ -81,7 +101,7 @@ impl GameState {
         dx: i32,
         dz: i32,
         immediate: bool,
-        move_timer: &mut ResMut<MoveTimer>,
+        move_timer: &mut MoveTimer,
         transforms: &mut Query<&mut Transform>,
     ) {
         if self.x + dx < 0
@@ -110,7 +130,7 @@ impl GameState {
             *transform = next_transform;
         } else {
             block.moving = Some((prev_transform, next_transform));
-            **move_timer = MoveTimer(Timer::from_seconds(BLOCK_MOVE_TIME, TimerMode::Once));
+            *move_timer = MoveTimer(Timer::from_seconds(BLOCK_MOVE_TIME, TimerMode::Once));
         }
 
         self.swap(x0, z0, x1, z1);
@@ -118,11 +138,7 @@ impl GameState {
         self.z += dz;
     }
 
-    pub fn reset(
-        &mut self,
-        move_timer: &mut ResMut<MoveTimer>,
-        transforms: &mut Query<&mut Transform>,
-    ) {
+    pub fn reset(&mut self, move_timer: &mut MoveTimer, transforms: &mut Query<&mut Transform>) {
         if !move_timer.0.finished() {
             return;
         }
@@ -152,20 +168,9 @@ impl GameState {
         self.is_shuffled = false;
     }
 
-    pub fn shuffle(
-        &mut self,
-        move_timer: &mut ResMut<MoveTimer>,
-        transforms: &mut Query<&mut Transform>,
-    ) {
-        for _ in 0..1000 {
-            match random::<u32>() % 4 {
-                0 => self.move_block(0, 1, true, move_timer, transforms),
-                1 => self.move_block(0, -1, true, move_timer, transforms),
-                2 => self.move_block(1, 0, true, move_timer, transforms),
-                3 => self.move_block(-1, 0, true, move_timer, transforms),
-                _ => unreachable!(),
-            }
-        }
+    pub fn shuffle(&mut self, transforms: &mut Query<&mut Transform>) {
+        let board_string = shuffle();
+        string_to_board(board_string, transforms, self);
     }
 }
 
@@ -176,27 +181,10 @@ fn setup(
     materials: ResMut<Assets<StandardMaterial>>,
     mut move_timer: ResMut<MoveTimer>,
 ) {
-    let mut new_game = GameState::default();
-
     let mesh_entities = spawn_meshes(&mut commands, meshes, materials, asset_server);
+    let mut new_game = GameState::default();
+    new_game.init(&mesh_entities);
 
-    // make board
-    for x in 0..4 {
-        new_game.board.0.push(Vec::new());
-        for z in 0..4 {
-            new_game.board.0[x].push(if x != 3 || z != 3 {
-                Some(Block {
-                    entity: mesh_entities.get(&(x, z)).unwrap().clone(),
-                    goal: (z * 4 + x + 1) as i32 % 16,
-                    moving: None,
-                })
-            } else {
-                None
-            });
-        }
-    }
-    new_game.x = 3;
-    new_game.z = 3;
     *move_timer = MoveTimer(Timer::from_seconds(0.1, TimerMode::Once));
 
     // Spawn Game

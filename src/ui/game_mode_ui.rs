@@ -68,7 +68,7 @@ impl GameMode {
                     &mut transforms,
                     &mut move_timer,
                 );
-                game_state.shuffle(&mut move_timer, &mut transforms);
+                game_state.shuffle(&mut transforms);
                 game_state.is_shuffled = true;
                 let _ = player_state.set(PlayerState::Shuffled);
             }
