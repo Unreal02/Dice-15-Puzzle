@@ -15,7 +15,7 @@ build:
   cache:
     key: build_cache
     paths:
-      - $CARGO_HOME
+      - $HOME/.cargo
       - target
   artifacts:
     name: web_build
