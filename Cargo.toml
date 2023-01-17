@@ -16,7 +16,7 @@ rand = "*"
 bevy-inspector-egui = "*"
 chrono = "*"
 copypasta = "*"
-tungstenite = {version = "0.18.0", features = ["native-tls"]}
+tungstenite = {version = "0.18.0", features = ["rustls-tls-webpki-roots"]}
 url = "*"
 
 [build-dependencies]

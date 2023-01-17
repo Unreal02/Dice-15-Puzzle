@@ -6,7 +6,6 @@ build:
   stage: build
   image: rust:latest
   script:
-    - apt-get install pkg-config libssl-dev
     - rustup target install wasm32-unknown-unknown
     - cargo install wasm-server-runner
     - cargo install wasm-bindgen-cli
