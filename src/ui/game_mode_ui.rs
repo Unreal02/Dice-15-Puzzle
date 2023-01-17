@@ -5,6 +5,7 @@ use bevy::{prelude::*, ui::FocusPolicy};
 use crate::game::{GameState, MoveTimer};
 use crate::player::{PlayLog, PlayerInfo, PlayerState};
 use crate::ui::TEXT_SIZE;
+use crate::utils::Network;
 use crate::MyButtonType;
 use crate::{spawn_button, MyTextType};
 
@@ -70,6 +71,7 @@ impl GameMode {
                 );
                 game_state.shuffle(&mut transforms);
                 game_state.is_shuffled = true;
+                Network::request();
                 let _ = player_state.set(PlayerState::Shuffled);
             }
         }
