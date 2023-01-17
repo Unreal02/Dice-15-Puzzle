@@ -2,6 +2,7 @@ use crate::{
     buffered_input::{InputBuffer, InputHandler, InputInversionFlag, InputTimer, MoveImmediate},
     game::{GameState, MoveTimer},
     player::{PlayLog, PlayerInfo, PlayerState},
+    statistics_manager::StatisticsManager,
     ui::*,
     utils::*,
 };
@@ -26,6 +27,7 @@ pub fn game_ui_system(
     mut player_state: ResMut<State<PlayerState>>,
     mut input_timer: ResMut<InputTimer>,
     game_mode: Res<State<GameMode>>,
+    statistics_manager_query: Query<&StatisticsManager>,
 ) {
     let mut game = game_query.single_mut();
 
@@ -92,6 +94,10 @@ pub fn game_ui_system(
                     }
                     MyButtonType::Rankings => {
                         println!("rankings");
+                    }
+                    MyButtonType::Export => {
+                        let statistics_manager = statistics_manager_query.single();
+                        statistics_manager.export();
                     }
                 }
                 *color = BUTTON_PRESS_COLOR.into();

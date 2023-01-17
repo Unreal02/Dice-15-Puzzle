@@ -54,6 +54,20 @@ pub fn spawn_popup_statistics(
                     font.clone(),
                 );
 
+                // export button
+                spawn_button(
+                    parent,
+                    UiRect {
+                        bottom: Val::Px(25.0),
+                        left: Val::Px(25.0),
+                        ..default()
+                    },
+                    "Export".to_string(),
+                    font.clone(),
+                    MyButtonType::Export,
+                    None,
+                );
+
                 if statistics_manager.solves() != 0 {
                     // average
                     spawn_text(

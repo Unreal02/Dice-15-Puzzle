@@ -32,6 +32,7 @@ pub enum MyButtonType {
     Statistics,
     DateSelection,
     Rankings,
+    Export,
 }
 
 #[derive(Debug, Component, PartialEq, Eq, Clone, Copy)]

@@ -1,9 +1,11 @@
 use bevy::prelude::*;
+use clipboard_win::{formats, set_clipboard};
 use std::time::Duration;
 
 use crate::{
     player::{PlayerInfo, PlayerState},
     ui::GameMode,
+    utils::duration_to_string,
 };
 
 #[derive(Component, Default)]
@@ -26,6 +28,26 @@ impl StatisticsManager {
 
     pub fn worst(&self) -> Duration {
         *self.records.iter().max().unwrap()
+    }
+
+    pub fn export(&self) {
+        let mut export_string = format!(
+            "Dice 15 Puzzle (dice15puzzle.haje.org)\nStatistics\n\nSolves: {}",
+            self.solves()
+        );
+        if self.solves() > 0 {
+            export_string.push_str(&format!(
+                "\nAverage: {}\nBest: {}\nWorst: {}\nDetails:\n",
+                duration_to_string(self.average()),
+                duration_to_string(self.best()),
+                duration_to_string(self.worst())
+            ));
+            for (i, &duration) in self.records.iter().enumerate() {
+                export_string.push_str(&format!("{}: {}\n", i + 1, duration_to_string(duration)));
+            }
+        }
+        println!("{}", export_string);
+        set_clipboard(formats::Unicode, export_string).expect("To set clipboard");
     }
 }
 
