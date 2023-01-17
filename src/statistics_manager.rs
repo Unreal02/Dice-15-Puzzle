@@ -43,7 +43,7 @@ impl StatisticsManager {
                 duration_to_string(self.worst())
             ));
             for (i, &duration) in self.records.iter().enumerate() {
-                export_string.push_str(&format!("{}: {}\n", i + 1, duration_to_string(duration)));
+                export_string.push_str(&format!("{}. {}\n", i + 1, duration_to_string(duration)));
             }
         }
         println!("{}", export_string);
