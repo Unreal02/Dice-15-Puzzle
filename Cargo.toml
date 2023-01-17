@@ -16,8 +16,9 @@ rand = "*"
 bevy-inspector-egui = "*"
 chrono = "*"
 copypasta = "*"
-tungstenite = {version = "0.18.0", features = ["rustls-tls-webpki-roots"]}
-url = "*"
+wasm-sockets = "1.0.0"
+wasm-bindgen = "0.2.83"
+log = "*"
 
 [build-dependencies]
 image = "0.24.0"

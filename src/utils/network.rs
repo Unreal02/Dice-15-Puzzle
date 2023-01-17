@@ -1,5 +1,5 @@
-use tungstenite::{self, connect, Message};
-use url::Url;
+use log::info;
+use wasm_sockets::{EventClient, Message};
 
 const SERVER_ADDR: &str = "wss://dice15puzzle-server.haje.org";
 
@@ -7,15 +7,27 @@ pub struct Network;
 
 impl Network {
     pub fn request() {
-        println!("{:?}", Url::parse(SERVER_ADDR).unwrap());
-        let (mut socket, _) = connect(Url::parse(SERVER_ADDR).unwrap()).expect("connect fail");
-
         let request = "get daily puzzle\n";
-        socket
-            .write_message(Message::Text(request.to_string()))
-            .unwrap();
 
-        let response = socket.read_message().unwrap();
-        println!("response: {}", response);
+        let mut client = EventClient::new(SERVER_ADDR).unwrap();
+
+        client.set_on_error(Some(Box::new(|error| {
+            info!("error {:#?}", error);
+        })));
+
+        client.set_on_connection(Some(Box::new(|client: &EventClient| {
+            info!("connected {:#?}", client.status);
+            info!("Sending message...");
+            client.send_string(request).unwrap();
+            client.send_binary(vec![20]).unwrap();
+        })));
+
+        client.set_on_close(Some(Box::new(|_evt| {
+            info!("Connection closed");
+        })));
+
+        client.set_on_message(Some(Box::new(|client: &EventClient, message: Message| {
+            info!("New Message: {:#?}", message);
+        })));
     }
 }

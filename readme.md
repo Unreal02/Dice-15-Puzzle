@@ -68,6 +68,15 @@ cargo install wasm-server-runner
 cargo install -f wasm-bindgen-cli
 ```
 
+#### Rust Analyzer Settings
+
+in `.vscode/settings.json`:
+
+```
+"rust-analyzer.cargo.target": "wasm32-unknown-unknown",
+"rust-analyzer.check.targets": "wasm32-unknown-unknown",
+```
+
 #### Build web version
 
 Already built in GitLab CI/CD.
