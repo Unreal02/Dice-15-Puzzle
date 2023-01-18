@@ -1,6 +1,5 @@
+use crate::{statistics_manager::StatisticsManager, ui::*, utils::*};
 use bevy::input::mouse::{MouseScrollUnit, MouseWheel};
-
-use crate::{player::PlayerState, statistics_manager::StatisticsManager, ui::*, utils::*};
 
 const SCROLL_BAR_MAX_ITEMS: usize = 11;
 const SCROLL_SPEED: f32 = 1.0;
@@ -161,19 +160,12 @@ pub fn spawn_popup_statistics(
 }
 
 pub fn popup_system_statistics(
-    mut player_state: ResMut<State<PlayerState>>,
-    keyboard_input: Res<Input<KeyCode>>,
     mut scroll_events: EventReader<MouseWheel>,
     mut scroll_bar_query: Query<(&mut ScrollBar, &Children)>,
     statistics_manager_query: Query<&StatisticsManager>,
     mut text_query: Query<&mut Text>,
 ) {
     let statistics_manager = statistics_manager_query.single();
-
-    // press Esc: popup close
-    if keyboard_input.just_pressed(KeyCode::Escape) {
-        let _ = player_state.pop();
-    }
 
     // scroll bar
     if let Ok((mut scroll_bar, children)) = scroll_bar_query.get_single_mut() {

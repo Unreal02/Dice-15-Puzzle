@@ -85,7 +85,6 @@ pub fn popup_system_mode_selection(
     mut player_state: ResMut<State<PlayerState>>,
     mut player_info: Query<&mut PlayerInfo>,
     mut game_mode: ResMut<State<GameMode>>,
-    keyboard_input: Res<Input<KeyCode>>,
     mut play_log: Query<&mut PlayLog>,
     mut transforms: Query<&mut Transform>,
     mut move_timer: ResMut<MoveTimer>,
@@ -111,11 +110,6 @@ pub fn popup_system_mode_selection(
             Interaction::Hovered => *color = BUTTON_HOVER_COLOR.into(),
             Interaction::None => *color = BUTTON_NORMAL_COLOR.into(),
         }
-    }
-
-    // press Esc: popup close
-    if keyboard_input.just_pressed(KeyCode::Escape) {
-        let _ = player_state.pop();
     }
 }
 

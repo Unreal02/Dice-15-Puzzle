@@ -44,6 +44,7 @@ fn popup_close_button_system(
         (Changed<Interaction>, With<Button>),
     >,
     mut player_state: ResMut<State<PlayerState>>,
+    keyboard_input: Res<Input<KeyCode>>,
 ) {
     for (interaction, mut color, _) in &mut interaction_query {
         match *interaction {
@@ -54,6 +55,11 @@ fn popup_close_button_system(
             Interaction::Hovered => *color = BUTTON_HOVER_COLOR.into(),
             Interaction::None => *color = BUTTON_NORMAL_COLOR.into(),
         }
+    }
+
+    // press Esc: popup close
+    if keyboard_input.just_pressed(KeyCode::Escape) {
+        let _ = player_state.pop();
     }
 }
 
