@@ -3,9 +3,9 @@
 use bevy::{prelude::*, ui::FocusPolicy};
 
 use crate::game::{GameState, MoveTimer};
+use crate::network::Network;
 use crate::player::{PlayLog, PlayerInfo, PlayerState};
 use crate::ui::TEXT_SIZE;
-use crate::utils::Network;
 use crate::MyButtonType;
 use crate::{spawn_button, MyTextType};
 

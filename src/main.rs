@@ -1,6 +1,7 @@
 mod block;
 mod buffered_input;
 mod game;
+mod network;
 mod player;
 mod statistics_manager;
 mod ui;
