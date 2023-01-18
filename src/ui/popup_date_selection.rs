@@ -63,7 +63,7 @@ pub fn spawn_popup_date_selection(
                     parent,
                     UiRect {
                         top: Val::Px(95.0),
-                        left: Val::Px(30.0),
+                        left: Val::Px(90.0),
                         ..default()
                     },
                     "<".to_string(),
@@ -76,7 +76,7 @@ pub fn spawn_popup_date_selection(
                     parent,
                     UiRect {
                         top: Val::Px(95.0),
-                        right: Val::Px(30.0),
+                        right: Val::Px(90.0),
                         ..default()
                     },
                     ">".to_string(),
