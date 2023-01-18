@@ -2,6 +2,7 @@ mod game_mode_ui;
 mod game_ui;
 mod game_ui_system;
 mod popup;
+mod popup_date_selection;
 mod popup_mode_selection;
 mod popup_statistics;
 
@@ -10,6 +11,7 @@ pub use game_mode_ui::*;
 pub use game_ui::*;
 pub use game_ui_system::*;
 pub use popup::*;
+pub use popup_date_selection::*;
 pub use popup_mode_selection::*;
 pub use popup_statistics::*;
 

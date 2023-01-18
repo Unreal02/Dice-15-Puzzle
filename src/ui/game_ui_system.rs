@@ -90,7 +90,7 @@ pub fn game_ui_system(
                         let _ = player_state.push(PlayerState::StatisticsPopup);
                     }
                     MyButtonType::DateSelection => {
-                        info!("date selection\n");
+                        let _ = player_state.push(PlayerState::DateSelectionPopup);
                     }
                     MyButtonType::Rankings => {
                         info!("rankings\n");
