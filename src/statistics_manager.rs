@@ -46,7 +46,7 @@ impl StatisticsManager {
                 export_string.push_str(&format!("{}. {}\n", i + 1, duration_to_string(duration)));
             }
         }
-        println!("{}", export_string);
+        info!("{}", export_string);
         let mut clipboard = ClipboardContext::new().unwrap();
         clipboard.set_contents(export_string).unwrap();
     }

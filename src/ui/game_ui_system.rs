@@ -71,7 +71,7 @@ pub fn game_ui_system(
                     }
                     MyButtonType::Share => {
                         let board_string = board_to_string(&transforms, &mut game);
-                        println!("{:?}", board_string);
+                        info!("board string: {:?}\n", board_string);
                         string_to_board(board_string, &mut transforms, &mut game);
                     }
                     MyButtonType::Undo => InputHandler::undo(
@@ -90,10 +90,10 @@ pub fn game_ui_system(
                         let _ = player_state.push(PlayerState::StatisticsPopup);
                     }
                     MyButtonType::DateSelection => {
-                        println!("date selection");
+                        info!("date selection\n");
                     }
                     MyButtonType::Rankings => {
-                        println!("rankings");
+                        info!("rankings\n");
                     }
                     MyButtonType::Export => {
                         let statistics_manager = statistics_manager_query.single();
