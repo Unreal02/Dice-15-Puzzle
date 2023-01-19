@@ -6,7 +6,6 @@ use crate::{
     ui::*,
     utils::*,
 };
-use chrono::{Datelike, Local};
 
 pub fn game_ui_system(
     mut interaction_query: Query<
@@ -140,12 +139,7 @@ pub fn game_ui_system(
                 );
             }
             MyTextType::GameClear => {}
-            MyTextType::Date => {
-                // currently just print today
-                let now = Local::now();
-                text.sections[0].value =
-                    format!("Date: {}. {}. {}.", now.year_ce().1, now.month(), now.day());
-            }
+            MyTextType::Date => {}
         }
     }
 }

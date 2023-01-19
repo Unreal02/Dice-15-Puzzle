@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use chrono::Utc;
+use chrono::NaiveDate;
 use wasm_sockets::{EventClient, Message};
 
 use crate::network::RequestType;
@@ -11,18 +11,17 @@ const SERVER_ADDR: &str = "wss://dice15puzzle-server.haje.org"; // actual server
 pub struct Network;
 
 impl Network {
-    pub fn request() {
+    fn request(req: RequestType) {
         let mut client = EventClient::new(SERVER_ADDR).unwrap();
 
         client.set_on_error(Some(Box::new(|error| {
-            info!("error {:#?}", error);
+            info!("Error\n{:#?}", error);
         })));
 
-        client.set_on_connection(Some(Box::new(|client: &EventClient| {
-            info!("connected {:#?}", client.status);
+        client.set_on_connection(Some(Box::new(move |client: &EventClient| {
+            info!("Connected\n{:#?}", client.status);
             info!("Sending message...");
-            let date = Utc::now().date_naive();
-            let message = serde_json::to_string(&RequestType::GetDailyPuzzle(date)).unwrap();
+            let message = serde_json::to_string(&req).unwrap();
             client.send_string(&message).unwrap();
         })));
 
@@ -33,5 +32,9 @@ impl Network {
         client.set_on_message(Some(Box::new(|client: &EventClient, message: Message| {
             info!("New Message: {:#?}", message);
         })));
+    }
+
+    pub fn get_daily_puzzle(date: NaiveDate) {
+        Self::request(RequestType::GetDailyPuzzle(date));
     }
 }

@@ -1,4 +1,4 @@
-use crate::*;
+use crate::{network::Network, player::PlayerState, *};
 use bevy::prelude::*;
 use chrono::{Datelike, Month, Months, NaiveDate};
 use num_traits::FromPrimitive;
@@ -126,8 +126,10 @@ pub fn popup_system_date_selection(
         (Changed<Interaction>, With<Button>),
     >,
     mut calendar_ui_query: Query<(&mut CalendarUI, Entity, &Children)>,
-    mut month_year_text_query: Query<&mut Text, With<MonthYearText>>,
+    mut month_year_text_query: Query<&mut Text, (With<MonthYearText>, Without<MyTextType>)>,
     asset_server: Res<AssetServer>,
+    mut player_state: ResMut<State<PlayerState>>,
+    mut date_text_query: Query<(&mut Text, &MyTextType)>,
 ) {
     let font = asset_server.load("fonts/Quicksand-Bold.ttf");
     let (mut calendar_ui, entity, children) = calendar_ui_query.single_mut();
@@ -169,7 +171,19 @@ pub fn popup_system_date_selection(
                         )
                     }
                     PopupDateSelectionButtonType::Date(date) => {
-                        info!("date button {}", date);
+                        let _ = player_state.pop();
+                        info!("{}", date);
+                        Network::get_daily_puzzle(*date);
+                        for (mut text, &text_type) in date_text_query.iter_mut() {
+                            if text_type == MyTextType::Date {
+                                text.sections[0].value = format!(
+                                    "Date: {}. {}. {}.",
+                                    date.year_ce().1,
+                                    date.month(),
+                                    date.day()
+                                );
+                            }
+                        }
                     }
                 }
                 *color = BUTTON_PRESS_COLOR.into();
