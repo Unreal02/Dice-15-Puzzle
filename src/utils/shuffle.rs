@@ -1,5 +1,8 @@
-use super::{board_to_string, BoardString};
-use crate::game::{GameState, MoveTimer};
+use super::board_to_string;
+use crate::{
+    game::{GameState, MoveTimer},
+    network::BoardString,
+};
 use bevy::{ecs::system::SystemState, math::vec3, prelude::*, utils::HashMap};
 use rand::random;
 use std::time::Duration;

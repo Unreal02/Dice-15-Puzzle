@@ -1,7 +1,7 @@
 use bevy::{prelude::*, tasks::AsyncComputeTaskPool};
 use chrono::NaiveDate;
 
-use crate::network::RequestType;
+use crate::network::*;
 
 const SERVER_ADDR: &str = "https://dice15puzzle-server.haje.org"; // actual server
 
@@ -23,13 +23,16 @@ impl Network {
                 .text()
                 .await
                 .unwrap();
-            info!("{}", res);
+            info!("raw text: {}", res);
+            if let Ok(response_type) = serde_json::from_str(&res) as Result<ResponseType, _> {
+                info!("{:?}", response_type);
+            }
         });
-        info!("asdf");
+        info!("send request");
     }
 
     pub fn get_daily_puzzle(date: NaiveDate) {
         Self::request(RequestType::GetDailyPuzzle(date));
-        info!("qwerqwer");
+        info!("get_daily_puzzle");
     }
 }

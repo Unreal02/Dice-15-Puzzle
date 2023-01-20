@@ -1,11 +1,6 @@
 use bevy::{math::vec3, prelude::*};
 
-use crate::{block::Block, game::GameState};
-
-#[derive(Default, Debug)]
-/// (position, rotation)
-/// index: number written on block (0 means empty)
-pub struct BoardString([(u8, u8); 16]);
+use crate::{block::Block, game::GameState, network::BoardString};
 
 pub fn board_to_string(transforms: &Query<&mut Transform>, game: &mut GameState) -> BoardString {
     let mut board_string = BoardString::default();
