@@ -13,7 +13,11 @@ impl Network {
     fn request(req: RequestType) {
         let thread_pool = AsyncComputeTaskPool::get();
         thread_pool.spawn(async move {
-            let res = reqwest::get(SERVER_ADDR)
+            let client = reqwest::Client::new();
+            let res = client
+                .post(SERVER_ADDR)
+                .body(serde_json::to_string(&req).unwrap())
+                .send()
                 .await
                 .unwrap()
                 .text()
