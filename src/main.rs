@@ -12,6 +12,7 @@ use bevy_mod_picking::DefaultPickingPlugins;
 use buffered_input::CustomInputPlugin;
 use buffered_input::InputTimer;
 use game::{GamePlugin, MoveTimer};
+use network::NetworkPlugin;
 use player::PlayerPlugin;
 use statistics_manager::StatisticsManagerPlugin;
 use ui::*;
@@ -23,6 +24,7 @@ fn main() {
         .init_resource::<InputTimer>()
         .add_plugins(DefaultPlugins)
         .add_plugins(DefaultPickingPlugins)
+        .add_plugin(NetworkPlugin)
         .add_plugin(PlayerPlugin)
         .add_plugin(GamePlugin)
         .add_plugin(GameUIPlugin)

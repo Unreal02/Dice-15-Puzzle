@@ -1,4 +1,8 @@
-use crate::{network::Network, player::PlayerState, *};
+use crate::{
+    network::{Network, NetworkChannel},
+    player::PlayerState,
+    *,
+};
 use bevy::prelude::*;
 use chrono::{Datelike, Month, Months, NaiveDate};
 use num_traits::FromPrimitive;
@@ -130,6 +134,7 @@ pub fn popup_system_date_selection(
     asset_server: Res<AssetServer>,
     mut player_state: ResMut<State<PlayerState>>,
     mut date_text_query: Query<(&mut Text, &MyTextType)>,
+    mut network_channel: Res<NetworkChannel>,
 ) {
     let font = asset_server.load("fonts/Quicksand-Bold.ttf");
     let (mut calendar_ui, entity, children) = calendar_ui_query.single_mut();
@@ -171,9 +176,8 @@ pub fn popup_system_date_selection(
                         )
                     }
                     PopupDateSelectionButtonType::Date(date) => {
-                        let _ = player_state.pop();
                         info!("{}", date);
-                        Network::get_daily_puzzle(*date);
+                        Network::get_daily_puzzle(*date, &mut player_state, &mut network_channel);
                         for (mut text, &text_type) in date_text_query.iter_mut() {
                             if text_type == MyTextType::Date {
                                 text.sections[0].value = format!(

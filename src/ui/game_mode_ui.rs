@@ -4,7 +4,7 @@ use bevy::{prelude::*, ui::FocusPolicy};
 use chrono::{Datelike, Utc};
 
 use crate::game::{GameState, MoveTimer};
-use crate::network::Network;
+use crate::network::{Network, NetworkChannel};
 use crate::player::{PlayLog, PlayerInfo, PlayerState};
 use crate::ui::TEXT_SIZE;
 use crate::MyButtonType;
@@ -27,6 +27,7 @@ impl GameMode {
         mut transforms: &mut Query<&mut Transform>,
         mut move_timer: &mut ResMut<MoveTimer>,
         player_state: &mut ResMut<State<PlayerState>>,
+        network_channel: &mut Res<NetworkChannel>,
     ) {
         fn reset(
             player_info: &mut PlayerInfo,
@@ -70,10 +71,7 @@ impl GameMode {
                     &mut transforms,
                     &mut move_timer,
                 );
-                game_state.shuffle(&mut transforms);
-                game_state.is_shuffled = true;
-                Network::get_daily_puzzle(Utc::now().date_naive());
-                let _ = player_state.set(PlayerState::Shuffled);
+                Network::get_daily_puzzle(Utc::now().date_naive(), player_state, network_channel);
             }
         }
     }

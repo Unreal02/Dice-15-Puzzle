@@ -1,5 +1,6 @@
 use crate::{
     game::{GameState, MoveTimer},
+    network::NetworkChannel,
     player::{PlayLog, PlayerInfo, PlayerState},
     ui::*,
 };
@@ -89,6 +90,7 @@ pub fn popup_system_mode_selection(
     mut transforms: Query<&mut Transform>,
     mut move_timer: ResMut<MoveTimer>,
     mut game_query: Query<&mut GameState>,
+    mut network_channel: Res<NetworkChannel>,
 ) {
     for (interaction, mut color, button_type) in &mut interaction_query {
         match *interaction {
@@ -102,6 +104,7 @@ pub fn popup_system_mode_selection(
                         &mut transforms,
                         &mut move_timer,
                         &mut player_state,
+                        &mut network_channel,
                     );
                 }
                 *color = BUTTON_PRESS_COLOR.into();

@@ -3,7 +3,7 @@
 use chrono::NaiveDate;
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Default, Debug)]
+#[derive(Serialize, Deserialize, Default, Debug, Clone, Copy)]
 /// (position, rotation)
 /// index: number written on block (0 means empty)
 pub struct BoardString(pub [(u8, u8); 16]);
@@ -13,7 +13,7 @@ pub enum RequestType {
     GetDailyPuzzle(NaiveDate),
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy)]
 pub enum ResponseType {
     GetDailyPuzzle(BoardString),
 }

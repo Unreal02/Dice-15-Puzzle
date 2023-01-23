@@ -14,6 +14,7 @@ pub enum PlayerState {
     ModeSelectionPopup,
     StatisticsPopup,
     DateSelectionPopup,
+    ResposeWating,
 }
 
 pub struct PlayerPlugin;
