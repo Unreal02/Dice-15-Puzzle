@@ -26,11 +26,12 @@ pub fn spawn_popup_date_selection(
     asset_server: Res<AssetServer>,
 ) {
     let font = asset_server.load("fonts/Quicksand-Bold.ttf");
+    let button_image = UiImage::from(asset_server.load("images/button.png"));
 
     commands
         .entity(game_ui_query.single_mut())
         .with_children(|parent| {
-            spawn_popup_panel(parent, font.clone(), |parent| {
+            spawn_popup_panel(parent, font.clone(), button_image.clone(), |parent| {
                 // date selection text
                 spawn_text(
                     parent,

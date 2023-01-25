@@ -105,6 +105,7 @@ fn spawn_game_mode_ui(
     game_mode: Res<State<GameMode>>,
 ) {
     let font = asset_server.load("fonts/Quicksand-Bold.ttf");
+    let button_image = UiImage::from(asset_server.load("images/button.png"));
 
     if !game_mode_ui_query.is_empty() {
         commands
@@ -183,6 +184,7 @@ fn spawn_game_mode_ui(
                     font.clone(),
                     MyButtonType::Statistics,
                     None,
+                    button_image.clone(),
                 );
             }
             GameMode::DailyPuzzle => {
@@ -226,6 +228,7 @@ fn spawn_game_mode_ui(
                     font.clone(),
                     MyButtonType::DateSelection,
                     None,
+                    button_image.clone(),
                 );
 
                 // rankings button
@@ -240,6 +243,7 @@ fn spawn_game_mode_ui(
                     font.clone(),
                     MyButtonType::Rankings,
                     None,
+                    button_image.clone(),
                 );
             }
         });

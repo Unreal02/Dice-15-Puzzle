@@ -11,11 +11,12 @@ pub fn spawn_popup_mode_selection(
     asset_server: Res<AssetServer>,
 ) {
     let font = asset_server.load("fonts/Quicksand-Bold.ttf");
+    let button_image = UiImage::from(asset_server.load("images/button.png"));
 
     commands
         .entity(game_ui_query.single_mut())
         .with_children(|parent| {
-            spawn_popup_panel(parent, font.clone(), |parent| {
+            spawn_popup_panel(parent, font.clone(), button_image.clone(), |parent| {
                 // mode selection text
                 parent.spawn(
                     TextBundle::from_section(
@@ -43,6 +44,7 @@ pub fn spawn_popup_mode_selection(
                     "Practice with\nundo and snapshots".to_string(),
                     font.clone(),
                     GameMode::Practice,
+                    button_image.clone(),
                 );
 
                 // time attack mode button
@@ -53,6 +55,7 @@ pub fn spawn_popup_mode_selection(
                     "Solve as fast\nas you can".to_string(),
                     font.clone(),
                     GameMode::TimeAttack,
+                    button_image.clone(),
                 );
 
                 // minimal movement mode button
@@ -63,6 +66,7 @@ pub fn spawn_popup_mode_selection(
                     "Solve with\nminimal movement".to_string(),
                     font.clone(),
                     GameMode::MinimalMovement,
+                    button_image.clone(),
                 );
 
                 // daily puzzle mode button
@@ -73,6 +77,7 @@ pub fn spawn_popup_mode_selection(
                     "Puzzle for\neveryday life".to_string(),
                     font.clone(),
                     GameMode::DailyPuzzle,
+                    button_image.clone(),
                 );
             });
         });
@@ -123,6 +128,7 @@ fn spawn_button_and_description(
     description_text: String,
     font: Handle<Font>,
     button_type: GameMode,
+    image: UiImage,
 ) {
     // button
     parent
@@ -140,6 +146,7 @@ fn spawn_button_and_description(
                     },
                     ..default()
                 },
+                image,
                 ..default()
             },
             button_type,

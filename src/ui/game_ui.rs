@@ -16,6 +16,7 @@ impl Plugin for GameUIPlugin {
 
 fn setup_game_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
     let font = asset_server.load("fonts/Quicksand-Bold.ttf");
+    let button_image = UiImage::from(asset_server.load("images/button.png"));
 
     commands
         .spawn((
@@ -44,6 +45,7 @@ fn setup_game_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
                 font.clone(),
                 MyButtonType::Reset,
                 None,
+                button_image.clone(),
             );
 
             // shuffle button
@@ -58,6 +60,7 @@ fn setup_game_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
                 font.clone(),
                 MyButtonType::Shuffle,
                 None,
+                button_image.clone(),
             );
 
             // animation toggle button
@@ -72,6 +75,7 @@ fn setup_game_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
                 font.clone(),
                 MyButtonType::AnimationToggle,
                 Some(MyTextType::AnimationToggle),
+                button_image.clone(),
             );
 
             // input inversion button
@@ -86,6 +90,7 @@ fn setup_game_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
                 font.clone(),
                 MyButtonType::InputInversion,
                 Some(MyTextType::InputInversion),
+                button_image.clone(),
             );
 
             // mode selection button
@@ -100,6 +105,7 @@ fn setup_game_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
                 font.clone(),
                 MyButtonType::ModeSelection,
                 Some(MyTextType::ModeSelection),
+                button_image.clone(),
             );
 
             // share button
@@ -114,6 +120,7 @@ fn setup_game_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
                 font.clone(),
                 MyButtonType::Share,
                 None,
+                button_image.clone(),
             );
 
             // player info
@@ -185,6 +192,7 @@ pub fn spawn_button(
     font: Handle<Font>,
     button_type: MyButtonType,
     text_type: Option<MyTextType>,
+    image: UiImage,
 ) {
     parent
         .spawn((
@@ -197,6 +205,7 @@ pub fn spawn_button(
                     position,
                     ..default()
                 },
+                image,
                 ..default()
             },
             button_type,

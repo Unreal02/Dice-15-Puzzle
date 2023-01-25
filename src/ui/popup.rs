@@ -85,6 +85,7 @@ fn despawn_popup(
 pub fn spawn_popup_panel(
     parent: &mut ChildBuilder,
     font: Handle<Font>,
+    image: UiImage,
     child_builder: impl FnOnce(&mut ChildBuilder),
 ) {
     parent
@@ -126,6 +127,7 @@ pub fn spawn_popup_panel(
                             },
                             ..default()
                         },
+                        image,
                         ..default()
                     },
                     PopupCloseButton,
