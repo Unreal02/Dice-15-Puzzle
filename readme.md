@@ -31,6 +31,7 @@
   - [ ] Load button
   - [x] Store button
   - [x] Undo/Redo Button
+  - [ ] More beautiful UI?
 
 - [ ] Game Logic
   - [x] Problem fix: timer reset after mode selection
@@ -43,6 +44,8 @@
 - [ ] Exernal site
   - [x] Credit
   - [ ] Tutorial?
+
+- [ ] Statistics export: clipboard
 
 # TBD
 - [ ] Minimal Movement mode
@@ -81,7 +84,7 @@ Already built in GitLab CI/CD.
 
 ```
 cargo build --release --target wasm32-unknown-unknown
-wasm-bindgen --out-dir ./out/ --no-typescript --target web ./target/wasm32-unknown-unknown/release/dice_15_puzzle.wasm
+wasm-bindgen --out-dir ./web_build/ --no-typescript --target web ./target/wasm32-unknown-unknown/release/dice_15_puzzle.wasm
 ```
 
 #### How to build with inspector
