@@ -17,6 +17,8 @@ impl Plugin for GameUIPlugin {
 fn setup_game_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
     let font = asset_server.load("fonts/Quicksand-Bold.ttf");
     let button_image = UiImage::from(asset_server.load("images/button.png"));
+    let button_toggle_off_image = UiImage::from(asset_server.load("images/button_toggle_off.png"));
+    let button_toggle_on_image = UiImage::from(asset_server.load("images/button_toggle_on.png"));
 
     commands
         .spawn((
@@ -64,33 +66,31 @@ fn setup_game_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
             );
 
             // animation toggle button
-            spawn_button(
+            spawn_toggle_button(
                 parent,
                 UiRect {
                     right: Val::Px(50.0),
                     top: Val::Px(50.0),
                     ..default()
                 },
-                "Animation\nOn".to_string(),
+                "Animation".to_string(),
                 font.clone(),
                 MyButtonType::AnimationToggle,
-                Some(MyTextType::AnimationToggle),
-                button_image.clone(),
+                button_toggle_on_image.clone(), // default: on
             );
 
             // input inversion button
-            spawn_button(
+            spawn_toggle_button(
                 parent,
                 UiRect {
                     right: Val::Px(50.0),
-                    top: Val::Px(175.0),
+                    top: Val::Px(115.0),
                     ..default()
                 },
-                "Input\nNormal".to_string(),
+                "Input Inversion".to_string(),
                 font.clone(),
                 MyButtonType::InputInversion,
-                Some(MyTextType::InputInversion),
-                button_image.clone(),
+                button_toggle_off_image.clone(), // default: off
             );
 
             // mode selection button
@@ -224,5 +224,52 @@ pub fn spawn_button(
                 Some(text_type) => parent.spawn((bundle, text_type)),
                 None => parent.spawn(bundle),
             };
+        });
+}
+
+fn spawn_toggle_button(
+    parent: &mut ChildBuilder,
+    position: UiRect,
+    text: String,
+    font: Handle<Font>,
+    button_type: MyButtonType,
+    image: UiImage,
+) {
+    parent
+        .spawn((
+            ButtonBundle {
+                style: Style {
+                    align_items: AlignItems::Center,
+                    justify_content: JustifyContent::Center,
+                    size: Size::new(Val::Px(40.0), Val::Px(40.0)),
+                    position_type: PositionType::Absolute,
+                    position,
+                    ..default()
+                },
+                image,
+                ..default()
+            },
+            button_type,
+        ))
+        .with_children(|parent| {
+            parent.spawn(
+                TextBundle::from_section(
+                    text,
+                    TextStyle {
+                        font: font.clone(),
+                        font_size: TEXT_SIZE,
+                        color: Color::BLACK,
+                    },
+                )
+                .with_style(Style {
+                    position_type: PositionType::Absolute,
+                    position: UiRect {
+                        right: Val::Px(50.0),
+                        bottom: Val::Px(0.0),
+                        ..default()
+                    },
+                    ..default()
+                }),
+            );
         });
 }

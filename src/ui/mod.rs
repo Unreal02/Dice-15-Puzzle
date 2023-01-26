@@ -39,8 +39,6 @@ pub enum MyButtonType {
 
 #[derive(Debug, Component, PartialEq, Eq, Clone, Copy)]
 pub enum MyTextType {
-    AnimationToggle,
-    InputInversion,
     ModeSelection,
     PlayerInfo,
     GameClear,

@@ -9,7 +9,12 @@ use crate::{
 
 pub fn game_ui_system(
     mut interaction_query: Query<
-        (&Interaction, &mut BackgroundColor, &MyButtonType),
+        (
+            &Interaction,
+            &mut BackgroundColor,
+            Option<&mut UiImage>,
+            &MyButtonType,
+        ),
         (Changed<Interaction>, With<Button>),
     >,
     mut transforms: Query<&mut Transform>,
@@ -27,14 +32,17 @@ pub fn game_ui_system(
     mut input_timer: ResMut<InputTimer>,
     game_mode: Res<State<GameMode>>,
     statistics_manager_query: Query<&StatisticsManager>,
+    asset_server: Res<AssetServer>,
 ) {
     let mut game = game_query.single_mut();
+    let button_toggle_on_image = asset_server.load("images/button_toggle_on.png");
+    let button_toggle_off_image = asset_server.load("images/button_toggle_off.png");
 
     let (mut input_buffer, mut input_reveresion_flag, mut move_immediate) =
         input_system.single_mut();
 
     // button interactions
-    for (interaction, mut color, button_type) in &mut interaction_query {
+    for (interaction, mut color, ui_image, button_type) in &mut interaction_query {
         match *interaction {
             Interaction::Clicked => {
                 match button_type {
@@ -55,14 +63,26 @@ pub fn game_ui_system(
                         }
                     }
                     MyButtonType::AnimationToggle => match move_immediate.0 {
-                        true => move_immediate.0 = false,
-                        false => move_immediate.0 = true,
+                        true => {
+                            move_immediate.0 = false;
+                            ui_image.unwrap().0 = button_toggle_on_image.clone();
+                        }
+                        false => {
+                            move_immediate.0 = true;
+                            ui_image.unwrap().0 = button_toggle_off_image.clone();
+                        }
                     },
                     MyButtonType::InputInversion => {
                         play_log.single_mut().reset();
                         match input_reveresion_flag.0 {
-                            true => input_reveresion_flag.0 = false,
-                            false => input_reveresion_flag.0 = true,
+                            true => {
+                                input_reveresion_flag.0 = false;
+                                ui_image.unwrap().0 = button_toggle_off_image.clone();
+                            }
+                            false => {
+                                input_reveresion_flag.0 = true;
+                                ui_image.unwrap().0 = button_toggle_on_image.clone();
+                            }
                         }
                     }
                     MyButtonType::ModeSelection => {
@@ -109,18 +129,6 @@ pub fn game_ui_system(
     // text
     for (mut text, &ui_type) in &mut text_query {
         match ui_type {
-            MyTextType::AnimationToggle => {
-                text.sections[0].value = match move_immediate.0 {
-                    true => "Animation\nOff".to_string(),
-                    false => "Animation\nOn".to_string(),
-                };
-            }
-            MyTextType::InputInversion => {
-                text.sections[0].value = match input_reveresion_flag.0 {
-                    true => "Input\nInverse".to_string(),
-                    false => "Input\nNormal".to_string(),
-                };
-            }
             MyTextType::ModeSelection => {
                 text.sections[0].value = "Mode (WIP)\n".to_string()
                     + match game_mode.current() {
