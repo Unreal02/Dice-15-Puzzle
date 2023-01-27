@@ -4,6 +4,7 @@ use crate::{
     buffered_input::{InputBuffer, InputHandler, InputInversionFlag, InputTimer, MoveImmediate},
     daily_puzzle_info::DailyPuzzleInfo,
     game::{GameState, MoveTimer},
+    network::NetworkChannel,
     player::{PlayLog, PlayerInfo, PlayerState},
     statistics_manager::StatisticsManager,
     ui::*,
@@ -37,8 +38,10 @@ pub fn game_ui_system(
     statistics_manager_query: Query<&StatisticsManager>,
     asset_server: Res<AssetServer>,
     daily_puzzle_info_query: Query<&DailyPuzzleInfo>,
+    network_channel: Res<NetworkChannel>,
 ) {
     let mut game = game_query.single_mut();
+    let daily_puzzle_info = daily_puzzle_info_query.single();
     let button_toggle_on_image = asset_server.load("images/button_toggle_on.png");
     let button_toggle_off_image = asset_server.load("images/button_toggle_off.png");
 
@@ -119,7 +122,13 @@ pub fn game_ui_system(
                         info!("rankings\n");
                     }
                     MyButtonType::Restart => {
-                        info!("restart\n");
+                        let _ = daily_puzzle_info.load_daily_puzzle(
+                            daily_puzzle_info.current_date,
+                            &mut transforms,
+                            &mut game,
+                            &mut player_state,
+                            &network_channel,
+                        );
                     }
                     MyButtonType::Export => {
                         let statistics_manager = statistics_manager_query.single();
@@ -155,7 +164,6 @@ pub fn game_ui_system(
             }
             MyTextType::GameClear => {}
             MyTextType::Date => {
-                let daily_puzzle_info = daily_puzzle_info_query.single();
                 let current_date = daily_puzzle_info.current_date;
                 text.sections[0].value = format!(
                     "Date: {}. {}. {}.",

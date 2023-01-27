@@ -2,10 +2,7 @@ use bevy::{prelude::*, tasks::AsyncComputeTaskPool};
 use chrono::NaiveDate;
 use tokio::sync::mpsc::{unbounded_channel, UnboundedReceiver, UnboundedSender};
 
-use crate::{
-    daily_puzzle_info::DailyPuzzleInfo, game::GameState, network::*, player::PlayerState,
-    utils::string_to_board,
-};
+use crate::{daily_puzzle_info::DailyPuzzleInfo, game::GameState, network::*, player::PlayerState};
 
 #[cfg(not(feature = "local_server"))]
 const SERVER_ADDR: &str = "https://dice15puzzle-server.haje.org"; // actual server
@@ -38,7 +35,7 @@ impl Network {
     pub fn get_daily_puzzle(
         date: NaiveDate,
         player_state: &mut ResMut<State<PlayerState>>,
-        network_channel: &mut Res<NetworkChannel>,
+        network_channel: &Res<NetworkChannel>,
     ) {
         network_channel
             .input
@@ -101,22 +98,34 @@ fn response_waiting_system(
     mut network_channel: ResMut<NetworkChannel>,
     mut daily_puzzle_info_query: Query<&mut DailyPuzzleInfo>,
 ) {
+    let mut game = game_query.single_mut();
+    let mut daily_puzzle_info = daily_puzzle_info_query.single_mut();
+
     if let Ok(response_type) = network_channel.output.try_recv() {
         info!("get response {:?}", response_type);
         match response_type {
-            ResponseType::GetDailyPuzzle(board_string) => {
-                let mut game = game_query.single_mut();
-                string_to_board(board_string, &mut transforms, &mut game);
-                // inactive stack 밑에 있는 것이 무엇이든 Shuffled로 바꾸기 위해 replace 사용
-                assert_eq!(player_state.inactives().len(), 1);
-                player_state.replace(PlayerState::Shuffled).unwrap();
+            ResponseType::GetDailyPuzzle(date, board_string) => {
+                daily_puzzle_info.insert_daily_puzzle(date, board_string);
+                let load_result = daily_puzzle_info.load_daily_puzzle(
+                    date,
+                    &mut transforms,
+                    &mut game,
+                    &mut player_state,
+                    &mut Res::from(network_channel),
+                );
+                assert_eq!(load_result, true);
             }
             ResponseType::GetDailyPuzzleDate { first, last } => {
-                let mut daily_puzzle_info = daily_puzzle_info_query.single_mut();
                 daily_puzzle_info.first_date = first;
                 daily_puzzle_info.last_date = last;
                 daily_puzzle_info.current_date = last;
-                Network::get_daily_puzzle(last, &mut player_state, &mut Res::from(network_channel));
+                let _ = daily_puzzle_info.load_daily_puzzle(
+                    last,
+                    &mut transforms,
+                    &mut game,
+                    &mut player_state,
+                    &mut Res::from(network_channel),
+                );
             }
         }
     }

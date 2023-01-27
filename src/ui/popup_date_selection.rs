@@ -1,8 +1,6 @@
 use crate::{
-    daily_puzzle_info::DailyPuzzleInfo,
-    network::{Network, NetworkChannel},
-    player::PlayerState,
-    *,
+    daily_puzzle_info::DailyPuzzleInfo, game::GameState, network::NetworkChannel,
+    player::PlayerState, *,
 };
 use bevy::prelude::*;
 use chrono::{Datelike, Month, Months, NaiveDate};
@@ -147,8 +145,10 @@ pub fn popup_system_date_selection(
     asset_server: Res<AssetServer>,
     mut player_state: ResMut<State<PlayerState>>,
     mut date_text_query: Query<(&mut Text, &MyTextType)>,
-    mut network_channel: Res<NetworkChannel>,
+    network_channel: Res<NetworkChannel>,
     mut daily_puzzle_info_query: Query<&mut DailyPuzzleInfo>,
+    mut transforms: Query<&mut Transform>,
+    mut game_query: Query<&mut GameState>,
 ) {
     let font = asset_server.load("fonts/Quicksand-Bold.ttf");
     let (mut calendar_ui, entity, children) = calendar_ui_query.single_mut();
@@ -156,6 +156,7 @@ pub fn popup_system_date_selection(
     let mut daily_puzzle_info = daily_puzzle_info_query.single_mut();
     let first_date = daily_puzzle_info.first_date;
     let last_date = daily_puzzle_info.last_date;
+    let mut game = game_query.single_mut();
 
     // button interactions
     for (interaction, mut color, button_type) in &mut interaction_query {
@@ -201,7 +202,13 @@ pub fn popup_system_date_selection(
                     PopupDateSelectionButtonType::Date(date) => {
                         info!("{}", date);
                         daily_puzzle_info.current_date = *date;
-                        Network::get_daily_puzzle(*date, &mut player_state, &mut network_channel);
+                        daily_puzzle_info.load_daily_puzzle(
+                            *date,
+                            &mut transforms,
+                            &mut game,
+                            &mut player_state,
+                            &network_channel,
+                        );
                         for (mut text, &text_type) in date_text_query.iter_mut() {
                             if text_type == MyTextType::Date {
                                 text.sections[0].value = format!(

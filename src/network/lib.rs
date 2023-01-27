@@ -16,6 +16,6 @@ pub enum RequestType {
 
 #[derive(Serialize, Deserialize, Debug, Clone, Copy)]
 pub enum ResponseType {
-    GetDailyPuzzle(BoardString),
+    GetDailyPuzzle(NaiveDate, BoardString),
     GetDailyPuzzleDate { first: NaiveDate, last: NaiveDate },
 }
