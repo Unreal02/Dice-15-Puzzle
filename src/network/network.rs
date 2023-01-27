@@ -16,7 +16,7 @@ pub struct NetworkPlugin;
 impl Plugin for NetworkPlugin {
     fn build(&self, app: &mut App) {
         app.add_startup_system(init_network_channel).add_system_set(
-            SystemSet::on_update(PlayerState::ResposeWating).with_system(response_waiting_system),
+            SystemSet::on_update(PlayerState::ResponseWaiting).with_system(response_waiting_system),
         );
     }
 }
@@ -39,7 +39,7 @@ impl Network {
             .input
             .send(RequestType::GetDailyPuzzle(date))
             .unwrap();
-        player_state.push(PlayerState::ResposeWating).unwrap();
+        player_state.push(PlayerState::ResponseWaiting).unwrap();
         info!("get_daily_puzzle");
     }
 }
