@@ -7,9 +7,11 @@ use crate::{
     utils::string_to_board,
 };
 
+#[cfg(not(feature = "local_server"))]
 const SERVER_ADDR: &str = "https://dice15puzzle-server.haje.org"; // actual server
 
-// const SERVER_ADDR: &str = "http://localhost:1515"; // local server
+#[cfg(feature = "local_server")]
+const SERVER_ADDR: &str = "http://localhost:1515"; // local server
 
 #[derive(Component)]
 pub struct NetworkResponse(ResponseType);
