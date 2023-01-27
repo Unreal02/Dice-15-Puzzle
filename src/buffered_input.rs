@@ -208,8 +208,10 @@ fn input_click(
     mut events: EventReader<PickingEvent>,
     player_state: Res<State<PlayerState>>,
 ) {
-    if *player_state.current() == PlayerState::ModeSelectionPopup
-        || *player_state.current() == PlayerState::StatisticsPopup
+    if *player_state.current() != PlayerState::Idle
+        && *player_state.current() != PlayerState::Shuffled
+        && *player_state.current() != PlayerState::Solving
+        && *player_state.current() != PlayerState::Clear
     {
         return;
     }
