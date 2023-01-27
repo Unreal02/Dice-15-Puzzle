@@ -118,6 +118,9 @@ pub fn game_ui_system(
                     MyButtonType::Rankings => {
                         info!("rankings\n");
                     }
+                    MyButtonType::Restart => {
+                        info!("restart\n");
+                    }
                     MyButtonType::Export => {
                         let statistics_manager = statistics_manager_query.single();
                         statistics_manager.export();

@@ -34,6 +34,7 @@ pub enum MyButtonType {
     Statistics,
     DateSelection,
     Rankings,
+    Restart,
     Export,
 }
 

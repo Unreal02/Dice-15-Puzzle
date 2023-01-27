@@ -92,7 +92,12 @@ impl Plugin for GameModeUIPlugin {
                 SystemSet::on_enter(GameMode::MinimalMovement).with_system(spawn_game_mode_ui),
             )
             .add_system_set(
-                SystemSet::on_enter(GameMode::DailyPuzzle).with_system(spawn_game_mode_ui),
+                SystemSet::on_enter(GameMode::DailyPuzzle)
+                    .with_system(spawn_game_mode_ui)
+                    .with_system(hide_shuffle_reset_button),
+            )
+            .add_system_set(
+                SystemSet::on_exit(GameMode::DailyPuzzle).with_system(show_shuffle_reset_button),
             );
     }
 }
@@ -238,6 +243,43 @@ fn spawn_game_mode_ui(
                     None,
                     button_image.clone(),
                 );
+
+                // restart button
+                spawn_button(
+                    parent,
+                    UiRect {
+                        right: Val::Px(50.0),
+                        bottom: Val::Px(50.0),
+                        ..default()
+                    },
+                    "Restart".to_string(),
+                    font.clone(),
+                    MyButtonType::Restart,
+                    None,
+                    button_image.clone(),
+                );
             }
         });
+}
+
+fn hide_shuffle_reset_button(mut buttons_query: Query<(&mut Visibility, &MyButtonType)>) {
+    for (mut visibility, button_type) in buttons_query.iter_mut() {
+        match button_type {
+            MyButtonType::Shuffle | MyButtonType::Reset => {
+                visibility.is_visible = false;
+            }
+            _ => {}
+        }
+    }
+}
+
+fn show_shuffle_reset_button(mut buttons_query: Query<(&mut Visibility, &MyButtonType)>) {
+    for (mut visibility, button_type) in buttons_query.iter_mut() {
+        match button_type {
+            MyButtonType::Shuffle | MyButtonType::Reset => {
+                visibility.is_visible = true;
+            }
+            _ => {}
+        }
+    }
 }
