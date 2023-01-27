@@ -11,9 +11,11 @@ pub struct BoardString(pub [(u8, u8); 16]);
 #[derive(Serialize, Deserialize, Debug)]
 pub enum RequestType {
     GetDailyPuzzle(NaiveDate),
+    GetDailyPuzzleDate,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Copy)]
 pub enum ResponseType {
     GetDailyPuzzle(BoardString),
+    GetDailyPuzzleDate { first: NaiveDate, last: NaiveDate },
 }

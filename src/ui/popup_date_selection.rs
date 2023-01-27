@@ -1,4 +1,5 @@
 use crate::{
+    daily_puzzle_info::DailyPuzzleInfo,
     network::{Network, NetworkChannel},
     player::PlayerState,
     *,
@@ -24,9 +25,14 @@ pub fn spawn_popup_date_selection(
     mut commands: Commands,
     mut game_ui_query: Query<Entity, With<GameUI>>,
     asset_server: Res<AssetServer>,
+    daily_puzzle_info_query: Query<&DailyPuzzleInfo>,
 ) {
     let font = asset_server.load("fonts/Quicksand-Bold.ttf");
     let button_image = UiImage::from(asset_server.load("images/button.png"));
+    let daily_puzzle_info = daily_puzzle_info_query.single();
+    let first_date = daily_puzzle_info.first_date;
+    let last_date = daily_puzzle_info.last_date;
+    let current_date = daily_puzzle_info.current_date;
 
     commands
         .entity(game_ui_query.single_mut())
@@ -57,7 +63,11 @@ pub fn spawn_popup_date_selection(
                         ..default()
                     },
                     Size::new(Val::Percent(100.0), Val::Auto),
-                    "January 2023".to_string(),
+                    format!(
+                        "{:?} {:?}",
+                        Month::from_u32(current_date.month()).unwrap(),
+                        current_date.year_ce().1
+                    ),
                     font.clone(),
                     Color::WHITE,
                     Some(MonthYearText),
@@ -106,14 +116,16 @@ pub fn spawn_popup_date_selection(
                             },
                             ..default()
                         },
-                        CalendarUI(NaiveDate::from_ymd_opt(2023, 1, 1).unwrap()),
+                        CalendarUI(current_date.with_day(1).unwrap()),
                     ))
                     .with_children(|parent| {
                         // date (1 ~ 28,29,30,31)
                         spawn_calendar_ui(
                             parent,
                             font.clone(),
-                            NaiveDate::from_ymd_opt(2023, 1, 1).unwrap(),
+                            current_date.with_day(1).unwrap(),
+                            first_date,
+                            last_date,
                         );
                     });
             });
@@ -136,10 +148,14 @@ pub fn popup_system_date_selection(
     mut player_state: ResMut<State<PlayerState>>,
     mut date_text_query: Query<(&mut Text, &MyTextType)>,
     mut network_channel: Res<NetworkChannel>,
+    mut daily_puzzle_info_query: Query<&mut DailyPuzzleInfo>,
 ) {
     let font = asset_server.load("fonts/Quicksand-Bold.ttf");
     let (mut calendar_ui, entity, children) = calendar_ui_query.single_mut();
     let mut month_year_text = month_year_text_query.single_mut();
+    let mut daily_puzzle_info = daily_puzzle_info_query.single_mut();
+    let first_date = daily_puzzle_info.first_date;
+    let last_date = daily_puzzle_info.last_date;
 
     // button interactions
     for (interaction, mut color, button_type) in &mut interaction_query {
@@ -147,13 +163,16 @@ pub fn popup_system_date_selection(
             Interaction::Clicked => {
                 match button_type {
                     PopupDateSelectionButtonType::MonthPrev => {
-                        calendar_ui.0 = calendar_ui.0.checked_sub_months(Months::new(1)).unwrap();
+                        if first_date < calendar_ui.0 {
+                            calendar_ui.0 =
+                                calendar_ui.0.checked_sub_months(Months::new(1)).unwrap();
+                        }
                         let date = calendar_ui.0;
                         for &child in children {
                             commands.entity(child).despawn_recursive();
                         }
                         commands.entity(entity).with_children(|parent| {
-                            spawn_calendar_ui(parent, font.clone(), date);
+                            spawn_calendar_ui(parent, font.clone(), date, first_date, last_date);
                         });
                         month_year_text.sections[0].value = format!(
                             "{} {}",
@@ -162,13 +181,16 @@ pub fn popup_system_date_selection(
                         )
                     }
                     PopupDateSelectionButtonType::MonthNext => {
-                        calendar_ui.0 = calendar_ui.0.checked_add_months(Months::new(1)).unwrap();
+                        if last_date >= calendar_ui.0.checked_add_months(Months::new(1)).unwrap() {
+                            calendar_ui.0 =
+                                calendar_ui.0.checked_add_months(Months::new(1)).unwrap();
+                        }
                         let date = calendar_ui.0;
                         for &child in children {
                             commands.entity(child).despawn_recursive();
                         }
                         commands.entity(entity).with_children(|parent| {
-                            spawn_calendar_ui(parent, font.clone(), date);
+                            spawn_calendar_ui(parent, font.clone(), date, first_date, last_date);
                         });
                         month_year_text.sections[0].value = format!(
                             "{} {}",
@@ -178,6 +200,7 @@ pub fn popup_system_date_selection(
                     }
                     PopupDateSelectionButtonType::Date(date) => {
                         info!("{}", date);
+                        daily_puzzle_info.current_date = *date;
                         Network::get_daily_puzzle(*date, &mut player_state, &mut network_channel);
                         for (mut text, &text_type) in date_text_query.iter_mut() {
                             if text_type == MyTextType::Date {
@@ -275,7 +298,13 @@ fn spawn_popup_date_selection_button(
         });
 }
 
-fn spawn_calendar_ui(parent: &mut ChildBuilder, font: Handle<Font>, first_date: NaiveDate) {
+fn spawn_calendar_ui(
+    parent: &mut ChildBuilder,
+    font: Handle<Font>,
+    calendar_first_date: NaiveDate,
+    first_date: NaiveDate,
+    last_date: NaiveDate,
+) {
     // day (sun ~ sat)
     let day_char_arr = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
     for (i, day_char) in day_char_arr.iter().enumerate() {
@@ -309,15 +338,21 @@ fn spawn_calendar_ui(parent: &mut ChildBuilder, font: Handle<Font>, first_date: 
         };
         year_border_corrected + sunday_addition
     };
-    for date in first_date.iter_days() {
-        if date.month() != first_date.month() {
+    for date in calendar_first_date.iter_days() {
+        if date.month() != calendar_first_date.month() {
+            break;
+        }
+        if date < first_date {
+            continue;
+        }
+        if date > last_date {
             break;
         }
         spawn_popup_date_selection_button(
             parent,
             UiRect {
                 left: Val::Px(60.0 * date.weekday().num_days_from_sunday() as f32),
-                top: Val::Px(60.0 * (1 + get_week(date) - get_week(first_date)) as f32),
+                top: Val::Px(60.0 * (1 + get_week(date) - get_week(calendar_first_date)) as f32),
                 ..default()
             },
             date.day().to_string(),

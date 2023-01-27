@@ -1,5 +1,8 @@
+use chrono::Datelike;
+
 use crate::{
     buffered_input::{InputBuffer, InputHandler, InputInversionFlag, InputTimer, MoveImmediate},
+    daily_puzzle_info::DailyPuzzleInfo,
     game::{GameState, MoveTimer},
     player::{PlayLog, PlayerInfo, PlayerState},
     statistics_manager::StatisticsManager,
@@ -33,6 +36,7 @@ pub fn game_ui_system(
     game_mode: Res<State<GameMode>>,
     statistics_manager_query: Query<&StatisticsManager>,
     asset_server: Res<AssetServer>,
+    daily_puzzle_info_query: Query<&DailyPuzzleInfo>,
 ) {
     let mut game = game_query.single_mut();
     let button_toggle_on_image = asset_server.load("images/button_toggle_on.png");
@@ -147,7 +151,16 @@ pub fn game_ui_system(
                 );
             }
             MyTextType::GameClear => {}
-            MyTextType::Date => {}
+            MyTextType::Date => {
+                let daily_puzzle_info = daily_puzzle_info_query.single();
+                let current_date = daily_puzzle_info.current_date;
+                text.sections[0].value = format!(
+                    "Date: {}. {}. {}.",
+                    current_date.year(),
+                    current_date.month(),
+                    current_date.day()
+                );
+            }
         }
     }
 }

@@ -1,7 +1,6 @@
 // UIs depends on game mode
 
 use bevy::{prelude::*, ui::FocusPolicy};
-use chrono::{Datelike, Utc};
 
 use crate::game::{GameState, MoveTimer};
 use crate::network::{Network, NetworkChannel};
@@ -71,7 +70,7 @@ impl GameMode {
                     &mut transforms,
                     &mut move_timer,
                 );
-                Network::get_daily_puzzle(Utc::now().date_naive(), player_state, network_channel);
+                Network::get_daily_puzzle_date(player_state, network_channel);
             }
         }
     }
@@ -189,15 +188,9 @@ fn spawn_game_mode_ui(
             }
             GameMode::DailyPuzzle => {
                 // date text
-                let date = Utc::now().date_naive();
                 parent.spawn((
                     TextBundle::from_section(
-                        format!(
-                            "Date: {}. {}. {}.",
-                            date.year_ce().1,
-                            date.month(),
-                            date.day()
-                        ),
+                        "Date:",
                         TextStyle {
                             font: font.clone(),
                             font_size: TEXT_SIZE,

@@ -1,5 +1,6 @@
 mod block;
 mod buffered_input;
+mod daily_puzzle_info;
 mod game;
 mod network;
 mod player;
@@ -11,6 +12,7 @@ use bevy::{prelude::*, DefaultPlugins};
 use bevy_mod_picking::DefaultPickingPlugins;
 use buffered_input::CustomInputPlugin;
 use buffered_input::InputTimer;
+use daily_puzzle_info::DailyPuzzleInfoPlugin;
 use game::{GamePlugin, MoveTimer};
 use network::NetworkPlugin;
 use player::PlayerPlugin;
@@ -32,6 +34,7 @@ fn main() {
         .add_plugin(PopupPlugin)
         .add_plugin(GameModeUIPlugin)
         .add_plugin(StatisticsManagerPlugin)
+        .add_plugin(DailyPuzzleInfoPlugin)
         .run();
 }
 
