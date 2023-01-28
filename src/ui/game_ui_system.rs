@@ -42,8 +42,6 @@ pub fn game_ui_system(
 ) {
     let mut game = game_query.single_mut();
     let daily_puzzle_info = daily_puzzle_info_query.single();
-    let button_toggle_on_image = asset_server.load("images/button_toggle_on.png");
-    let button_toggle_off_image = asset_server.load("images/button_toggle_off.png");
 
     let (mut input_buffer, mut input_reveresion_flag, mut move_immediate) =
         input_system.single_mut();
@@ -72,11 +70,11 @@ pub fn game_ui_system(
                     MyButtonType::AnimationToggle => match move_immediate.0 {
                         true => {
                             move_immediate.0 = false;
-                            ui_image.unwrap().0 = button_toggle_on_image.clone();
+                            ui_image.unwrap().0 = asset_server.load("images/button_toggle_on.png");
                         }
                         false => {
                             move_immediate.0 = true;
-                            ui_image.unwrap().0 = button_toggle_off_image.clone();
+                            ui_image.unwrap().0 = asset_server.load("images/button_toggle_off.png");
                         }
                     },
                     MyButtonType::InputInversion => {
@@ -84,11 +82,13 @@ pub fn game_ui_system(
                         match input_reveresion_flag.0 {
                             true => {
                                 input_reveresion_flag.0 = false;
-                                ui_image.unwrap().0 = button_toggle_off_image.clone();
+                                ui_image.unwrap().0 =
+                                    asset_server.load("images/button_toggle_off.png");
                             }
                             false => {
                                 input_reveresion_flag.0 = true;
-                                ui_image.unwrap().0 = button_toggle_on_image.clone();
+                                ui_image.unwrap().0 =
+                                    asset_server.load("images/button_toggle_on.png");
                             }
                         }
                     }
