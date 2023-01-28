@@ -16,9 +16,6 @@ impl Plugin for GameUIPlugin {
 
 fn setup_game_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
     let font = asset_server.load("fonts/Quicksand-Bold.ttf");
-    let button_image = UiImage::from(asset_server.load("images/button.png"));
-    let button_toggle_off_image = UiImage::from(asset_server.load("images/button_toggle_off.png"));
-    let button_toggle_on_image = UiImage::from(asset_server.load("images/button_toggle_on.png"));
 
     commands
         .spawn((
@@ -36,33 +33,27 @@ fn setup_game_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
         ))
         .with_children(|parent| {
             // reset button
-            spawn_button(
+            spawn_image_button(
                 parent,
                 UiRect {
                     right: Val::Px(50.0),
                     bottom: Val::Px(50.0),
                     ..default()
                 },
-                "Reset".to_string(),
-                font.clone(),
                 MyButtonType::Reset,
-                None,
-                button_image.clone(),
+                asset_server.load("images/button_reset.png").into(),
             );
 
             // shuffle button
-            spawn_button(
+            spawn_image_button(
                 parent,
                 UiRect {
-                    right: Val::Px(50.0),
-                    bottom: Val::Px(175.0),
+                    right: Val::Px(170.0),
+                    bottom: Val::Px(50.0),
                     ..default()
                 },
-                "Shuffle".to_string(),
-                font.clone(),
                 MyButtonType::Shuffle,
-                None,
-                button_image.clone(),
+                asset_server.load("images/button_shuffle.png").into(),
             );
 
             // animation toggle button
@@ -76,7 +67,7 @@ fn setup_game_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
                 "Animation".to_string(),
                 font.clone(),
                 MyButtonType::AnimationToggle,
-                button_toggle_on_image.clone(), // default: on
+                asset_server.load("images/button_toggle_on.png").into(), // default: on
             );
 
             // input inversion button
@@ -90,7 +81,7 @@ fn setup_game_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
                 "Input Inversion".to_string(),
                 font.clone(),
                 MyButtonType::InputInversion,
-                button_toggle_off_image.clone(), // default: off
+                asset_server.load("images/button_toggle_off.png").into(), // default: off
             );
 
             // mode selection button
@@ -105,22 +96,19 @@ fn setup_game_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
                 font.clone(),
                 MyButtonType::ModeSelection,
                 Some(MyTextType::ModeSelection),
-                button_image.clone(),
+                asset_server.load("images/button.png").into(),
             );
 
             // share button
-            spawn_button(
+            spawn_image_button(
                 parent,
                 UiRect {
                     left: Val::Px(50.0),
                     bottom: Val::Px(50.0),
                     ..default()
                 },
-                "Share\n(WIP)".to_string(),
-                font.clone(),
                 MyButtonType::Share,
-                None,
-                button_image.clone(),
+                asset_server.load("images/button_share.png").into(),
             );
 
             // player info
@@ -225,6 +213,29 @@ pub fn spawn_button(
                 None => parent.spawn(bundle),
             };
         });
+}
+
+pub fn spawn_image_button(
+    parent: &mut ChildBuilder,
+    position: UiRect,
+    button_type: MyButtonType,
+    image: UiImage,
+) {
+    parent.spawn((
+        ButtonBundle {
+            style: Style {
+                align_items: AlignItems::Center,
+                justify_content: JustifyContent::Center,
+                size: Size::new(Val::Px(100.0), Val::Px(100.0)),
+                position_type: PositionType::Absolute,
+                position,
+                ..default()
+            },
+            image,
+            ..default()
+        },
+        button_type,
+    ));
 }
 
 fn spawn_toggle_button(

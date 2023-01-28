@@ -7,7 +7,9 @@ use crate::network::{Network, NetworkChannel};
 use crate::player::{PlayLog, PlayerInfo, PlayerState};
 use crate::ui::TEXT_SIZE;
 use crate::MyButtonType;
-use crate::{spawn_button, MyTextType};
+use crate::MyTextType;
+
+use super::spawn_image_button;
 
 #[derive(Component, PartialEq, Eq, Debug, Hash, Clone, Copy)]
 pub enum GameMode {
@@ -109,7 +111,6 @@ fn spawn_game_mode_ui(
     game_mode: Res<State<GameMode>>,
 ) {
     let font = asset_server.load("fonts/Quicksand-Bold.ttf");
-    let button_image = UiImage::from(asset_server.load("images/button.png"));
 
     if !game_mode_ui_query.is_empty() {
         commands
@@ -138,57 +139,40 @@ fn spawn_game_mode_ui(
         .with_children(|parent| match game_mode.current() {
             GameMode::Practice => {
                 // undo button
-                parent.spawn((
-                    ButtonBundle {
-                        style: Style {
-                            size: Size::new(Val::Px(87.5), Val::Px(87.5)),
-                            position_type: PositionType::Absolute,
-                            position: UiRect {
-                                bottom: Val::Px(300.0),
-                                right: Val::Px(162.5),
-                                ..default()
-                            },
-                            ..default()
-                        },
-                        image: asset_server.load("images/button_undo.png").into(),
+                spawn_image_button(
+                    parent,
+                    UiRect {
+                        bottom: Val::Px(170.0),
+                        right: Val::Px(170.0),
                         ..default()
                     },
                     MyButtonType::Undo,
-                ));
+                    asset_server.load("images/button_undo.png").into(),
+                );
 
                 // redo button
-                parent.spawn((
-                    ButtonBundle {
-                        style: Style {
-                            size: Size::new(Val::Px(87.5), Val::Px(87.5)),
-                            position_type: PositionType::Absolute,
-                            position: UiRect {
-                                bottom: Val::Px(300.0),
-                                right: Val::Px(50.0),
-                                ..default()
-                            },
-                            ..default()
-                        },
-                        image: asset_server.load("images/button_redo.png").into(),
+                spawn_image_button(
+                    parent,
+                    UiRect {
+                        bottom: Val::Px(170.0),
+                        right: Val::Px(50.0),
                         ..default()
                     },
                     MyButtonType::Redo,
-                ));
+                    asset_server.load("images/button_redo.png").into(),
+                );
             }
             GameMode::TimeAttack | GameMode::MinimalMovement => {
                 // statistics button
-                spawn_button(
+                spawn_image_button(
                     parent,
                     UiRect {
                         top: Val::Px(275.0),
                         left: Val::Px(50.0),
                         ..default()
                     },
-                    "Statistics".to_string(),
-                    font.clone(),
                     MyButtonType::Statistics,
-                    None,
-                    button_image.clone(),
+                    asset_server.load("images/button_statistics.png").into(),
                 );
             }
             GameMode::DailyPuzzle => {
@@ -215,48 +199,39 @@ fn spawn_game_mode_ui(
                 ));
 
                 // date selection button
-                spawn_button(
+                spawn_image_button(
                     parent,
                     UiRect {
-                        bottom: Val::Px(300.0),
+                        bottom: Val::Px(290.0),
                         left: Val::Px(50.0),
                         ..default()
                     },
-                    "Date\nSelection".to_string(),
-                    font.clone(),
                     MyButtonType::DateSelection,
-                    None,
-                    button_image.clone(),
+                    asset_server.load("images/button_date_selection.png").into(),
                 );
 
                 // rankings button
-                spawn_button(
+                spawn_image_button(
                     parent,
                     UiRect {
-                        bottom: Val::Px(175.0),
+                        bottom: Val::Px(170.0),
                         left: Val::Px(50.0),
                         ..default()
                     },
-                    "Rankings".to_string(),
-                    font.clone(),
                     MyButtonType::Rankings,
-                    None,
-                    button_image.clone(),
+                    asset_server.load("images/button_rankings.png").into(),
                 );
 
                 // restart button
-                spawn_button(
+                spawn_image_button(
                     parent,
                     UiRect {
                         right: Val::Px(50.0),
                         bottom: Val::Px(50.0),
                         ..default()
                     },
-                    "Restart".to_string(),
-                    font.clone(),
                     MyButtonType::Restart,
-                    None,
-                    button_image.clone(),
+                    asset_server.load("images/button_restart.png").into(),
                 );
             }
         });
