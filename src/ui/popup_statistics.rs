@@ -1,4 +1,4 @@
-use crate::{statistics_manager::StatisticsManager, ui::*, utils::*};
+use crate::{statistics_manager::StatisticsManager, ui::*};
 use bevy::input::mouse::{MouseScrollUnit, MouseWheel};
 
 const SCROLL_BAR_MAX_ITEMS: usize = 11;
@@ -78,10 +78,7 @@ pub fn spawn_popup_statistics(
                             left: Val::Px(25.0),
                             ..default()
                         },
-                        format!(
-                            "Average\n{}",
-                            duration_to_string(statistics_manager.average())
-                        ),
+                        format!("Average\n{}", statistics_manager.average()),
                         font.clone(),
                     );
 
@@ -93,7 +90,7 @@ pub fn spawn_popup_statistics(
                             left: Val::Px(25.0),
                             ..default()
                         },
-                        format!("Best\n{}", duration_to_string(statistics_manager.best())),
+                        format!("Best\n{}", statistics_manager.best()),
                         font.clone(),
                     );
 
@@ -105,7 +102,7 @@ pub fn spawn_popup_statistics(
                             left: Val::Px(25.0),
                             ..default()
                         },
-                        format!("Worst\n{}", duration_to_string(statistics_manager.worst())),
+                        format!("Worst\n{}", statistics_manager.worst()),
                         font.clone(),
                     );
 
@@ -188,11 +185,7 @@ pub fn popup_system_statistics(
             let index = start_position + i;
             text_query.get_mut(children[i]).unwrap().sections[0].value =
                 if index < statistics_manager.solves() {
-                    format!(
-                        "{}. {}",
-                        index + 1,
-                        duration_to_string(statistics_manager.records[index])
-                    )
+                    format!("{}. {}", index + 1, statistics_manager.get_record(i))
                 } else {
                     "".to_string()
                 };

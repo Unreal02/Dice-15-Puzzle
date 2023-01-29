@@ -8,26 +8,82 @@ use crate::{
     utils::duration_to_string,
 };
 
-#[derive(Component, Default)]
+#[derive(Component)]
 pub struct StatisticsManager {
-    pub records: Vec<Duration>,
+    mode: GameMode,
+    time_records: Vec<Duration>,
+    move_records: Vec<usize>,
+}
+
+impl Default for StatisticsManager {
+    fn default() -> Self {
+        Self {
+            mode: GameMode::Practice,
+            time_records: vec![],
+            move_records: vec![],
+        }
+    }
 }
 
 impl StatisticsManager {
+    pub fn set_mode(&mut self, mode: GameMode) {
+        self.mode = mode;
+    }
+
+    pub fn push(&mut self, info: &PlayerInfo) {
+        let (time, move_count) = info.get_player_info();
+        match self.mode {
+            GameMode::TimeAttack => self.time_records.push(time),
+            GameMode::MinimalMovement => self.move_records.push(move_count),
+            _ => unreachable!(),
+        }
+    }
+
+    pub fn get_record(&self, i: usize) -> String {
+        match self.mode {
+            GameMode::TimeAttack => duration_to_string(self.time_records[i]),
+            GameMode::MinimalMovement => format!("{}", self.move_records[i]),
+            _ => unreachable!(),
+        }
+    }
+
     pub fn solves(&self) -> usize {
-        self.records.len()
+        match self.mode {
+            GameMode::TimeAttack => self.time_records.len(),
+            GameMode::MinimalMovement => self.move_records.len(),
+            _ => unreachable!(),
+        }
     }
 
-    pub fn average(&self) -> Duration {
-        self.records.iter().sum::<Duration>() / self.records.len() as u32
+    pub fn average(&self) -> String {
+        match self.mode {
+            GameMode::TimeAttack => duration_to_string(
+                self.time_records.iter().sum::<Duration>() / self.solves() as u32,
+            ),
+            GameMode::MinimalMovement => {
+                format!(
+                    "{:.2}",
+                    self.move_records.iter().sum::<usize>() as f32 / self.solves() as f32
+                )
+            }
+            _ => unreachable!(),
+        }
     }
 
-    pub fn best(&self) -> Duration {
-        *self.records.iter().min().unwrap()
+    pub fn best(&self) -> String {
+        match self.mode {
+            GameMode::TimeAttack => duration_to_string(*self.time_records.iter().min().unwrap()),
+            GameMode::MinimalMovement => format!("{}", self.move_records.iter().min().unwrap()),
+            _ => unreachable!(),
+        }
     }
 
-    pub fn worst(&self) -> Duration {
-        *self.records.iter().max().unwrap()
+    pub fn worst(&self) -> String {
+        match self.mode {
+            GameMode::TimeAttack => duration_to_string(*self.time_records.iter().max().unwrap()),
+            GameMode::MinimalMovement => format!("{}", self.move_records.iter().max().unwrap()),
+            _ => unreachable!(),
+        }
     }
 
     pub fn export(&self) {
@@ -38,12 +94,12 @@ impl StatisticsManager {
         if self.solves() > 0 {
             export_string.push_str(&format!(
                 "\nAverage: {}\nBest: {}\nWorst: {}\nDetails:\n",
-                duration_to_string(self.average()),
-                duration_to_string(self.best()),
-                duration_to_string(self.worst())
+                self.average(),
+                self.best(),
+                self.worst()
             ));
-            for (i, &duration) in self.records.iter().enumerate() {
-                export_string.push_str(&format!("{}. {}\n", i + 1, duration_to_string(duration)));
+            for i in 0..self.solves() {
+                export_string.push_str(&format!("{}. {}\n", i + 1, self.get_record(i)));
             }
         }
         info!("{}", export_string);
@@ -57,7 +113,8 @@ pub struct StatisticsManagerPlugin;
 impl Plugin for StatisticsManagerPlugin {
     fn build(&self, app: &mut App) {
         app.add_startup_system(spawn_statistics_manager)
-            .add_system_set(SystemSet::on_enter(PlayerState::Clear).with_system(on_game_clear));
+            .add_system_set(SystemSet::on_enter(PlayerState::Clear).with_system(on_game_clear))
+            .add_system(set_game_mode);
     }
 }
 
@@ -70,11 +127,24 @@ fn on_game_clear(
     player_info_query: Query<&PlayerInfo>,
     game_mode: Res<State<GameMode>>,
 ) {
-    if *game_mode.current() != GameMode::TimeAttack {
+    let mut statistics_manager = statistics_manager_query.single_mut();
+
+    if *game_mode.current() != GameMode::TimeAttack
+        && *game_mode.current() != GameMode::MinimalMovement
+    {
         return;
     }
 
-    let mut statistics_manager = statistics_manager_query.single_mut();
-    let (time, _) = player_info_query.single().get_player_info();
-    statistics_manager.records.push(time);
+    statistics_manager.push(player_info_query.single());
+}
+
+fn set_game_mode(
+    mut statistics_manager_query: Query<&mut StatisticsManager>,
+    game_mode: Res<State<GameMode>>,
+) {
+    if game_mode.is_changed() {
+        statistics_manager_query
+            .single_mut()
+            .set_mode(*game_mode.current());
+    }
 }
