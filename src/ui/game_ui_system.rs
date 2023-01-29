@@ -146,7 +146,7 @@ pub fn game_ui_system(
     for (mut text, &ui_type) in &mut text_query {
         match ui_type {
             MyTextType::ModeSelection => {
-                text.sections[0].value = "Mode (WIP)\n".to_string()
+                text.sections[0].value = "Mode\n".to_string()
                     + match game_mode.current() {
                         GameMode::Practice => "Practice",
                         GameMode::TimeAttack => "Time Attack",

@@ -92,7 +92,7 @@ fn setup_game_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
                     top: Val::Px(50.0),
                     ..default()
                 },
-                "Mode (WIP)\nPractice".to_string(),
+                "Mode\nPractice".to_string(),
                 font.clone(),
                 MyButtonType::ModeSelection,
                 Some(MyTextType::ModeSelection),
