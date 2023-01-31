@@ -111,6 +111,8 @@ pub fn popup_system_mode_selection(
                         &mut player_state,
                         &mut network_channel,
                     );
+                } else {
+                    player_state.pop().unwrap();
                 }
                 *color = BUTTON_PRESS_COLOR.into();
             }
