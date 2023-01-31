@@ -127,6 +127,7 @@ fn response_waiting_system(
                     &mut Res::from(network_channel),
                 );
             }
+            ResponseType::GenerateDailyPuzzle(_) => unreachable!(),
         }
     }
 }
