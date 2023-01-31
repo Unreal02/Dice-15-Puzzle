@@ -12,10 +12,12 @@ pub struct BoardString(pub [(u8, u8); 16]);
 pub enum RequestType {
     GetDailyPuzzle(NaiveDate),
     GetDailyPuzzleDate,
+    GenerateDailyPuzzle(NaiveDate), // used by daily trigger only
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Copy)]
 pub enum ResponseType {
     GetDailyPuzzle(NaiveDate, BoardString),
     GetDailyPuzzleDate { first: NaiveDate, last: NaiveDate },
+    GenerateDailyPuzzle(bool), // used by daily trigger only
 }
