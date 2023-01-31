@@ -43,27 +43,36 @@ impl GameMode {
         }
 
         match self {
-            GameMode::Practice => reset(
-                player_info,
-                game_state,
-                play_log,
-                &mut transforms,
-                &mut move_timer,
-            ),
-            GameMode::TimeAttack => reset(
-                player_info,
-                game_state,
-                play_log,
-                &mut transforms,
-                &mut move_timer,
-            ),
-            GameMode::MinimalMovement => reset(
-                player_info,
-                game_state,
-                play_log,
-                &mut transforms,
-                &mut move_timer,
-            ),
+            GameMode::Practice => {
+                reset(
+                    player_info,
+                    game_state,
+                    play_log,
+                    &mut transforms,
+                    &mut move_timer,
+                );
+                player_state.replace(PlayerState::Idle).unwrap();
+            }
+            GameMode::TimeAttack => {
+                reset(
+                    player_info,
+                    game_state,
+                    play_log,
+                    &mut transforms,
+                    &mut move_timer,
+                );
+                player_state.replace(PlayerState::Idle).unwrap();
+            }
+            GameMode::MinimalMovement => {
+                reset(
+                    player_info,
+                    game_state,
+                    play_log,
+                    &mut transforms,
+                    &mut move_timer,
+                );
+                player_state.replace(PlayerState::Idle).unwrap();
+            }
             GameMode::DailyPuzzle => {
                 reset(
                     player_info,

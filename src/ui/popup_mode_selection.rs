@@ -113,7 +113,6 @@ pub fn popup_system_mode_selection(
                     );
                 }
                 *color = BUTTON_PRESS_COLOR.into();
-                let _ = player_state.pop();
             }
             Interaction::Hovered => *color = BUTTON_HOVER_COLOR.into(),
             Interaction::None => *color = BUTTON_NORMAL_COLOR.into(),
