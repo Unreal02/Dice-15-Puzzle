@@ -1,5 +1,4 @@
 use bevy::prelude::*;
-use copypasta::{ClipboardContext, ClipboardProvider};
 use std::time::Duration;
 
 use crate::{
@@ -103,8 +102,8 @@ impl StatisticsManager {
             }
         }
         info!("{}", export_string);
-        let mut clipboard = ClipboardContext::new().unwrap();
-        clipboard.set_contents(export_string).unwrap();
+        let clipboard = web_sys::window().unwrap().navigator().clipboard().unwrap();
+        let _ = clipboard.write_text(&export_string);
     }
 }
 
