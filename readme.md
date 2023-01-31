@@ -83,8 +83,20 @@ in `.vscode/settings.json`:
 Already built in GitLab CI/CD.
 
 ```
-cargo build --release --target wasm32-unknown-unknown
-wasm-bindgen --out-dir ./web_build/ --no-typescript --target web ./target/wasm32-unknown-unknown/release/dice_15_puzzle.wasm
+cargo build --target wasm32-unknown-unknown
+wasm-bindgen --out-dir ./web_build/ --no-typescript --target web ./target/wasm32-unknown-unknown/debug/dice_15_puzzle.wasm
+```
+
+#### Run web version
+
+```
+cargo run --target wasm32-unknown-unknown
+```
+
+Expected output:
+```
+INFO wasm_server_runner: compressed wasm output is 5.27mb large
+INFO wasm_server_runner::server: starting webserver at http://127.0.0.1:1334
 ```
 
 #### How to build with inspector
