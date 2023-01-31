@@ -4,7 +4,7 @@ use std::f32::consts::PI;
 
 use crate::network::BoardString;
 
-const SHUFFLE_NUMBER: i32 = 8;
+const SHUFFLE_NUMBER: i32 = 1000;
 
 pub fn shuffle() -> BoardString {
     #[derive(Clone, Copy, Debug)]
