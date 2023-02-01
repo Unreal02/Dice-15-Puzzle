@@ -59,11 +59,11 @@ fn popup_close_button_system(
     for (interaction, mut color, _) in &mut interaction_query {
         match *interaction {
             Interaction::Clicked => {
-                *color = BUTTON_PRESS_COLOR.into();
+                *color = (BUTTON_WHITE * BUTTON_PRESS_MUL).into();
                 let _ = player_state.pop();
             }
-            Interaction::Hovered => *color = BUTTON_HOVER_COLOR.into(),
-            Interaction::None => *color = BUTTON_NORMAL_COLOR.into(),
+            Interaction::Hovered => *color = (BUTTON_WHITE * BUTTON_HOVER_MUL).into(),
+            Interaction::None => *color = BUTTON_WHITE.into(),
         }
     }
 

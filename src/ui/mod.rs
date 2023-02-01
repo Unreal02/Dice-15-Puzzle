@@ -17,9 +17,11 @@ pub use popup_statistics::*;
 
 pub const TEXT_SIZE: f32 = 40.0;
 
-pub const BUTTON_NORMAL_COLOR: Color = Color::rgb(1.0, 1.0, 1.0);
-pub const BUTTON_HOVER_COLOR: Color = Color::rgb(0.8, 0.8, 0.8);
-pub const BUTTON_PRESS_COLOR: Color = Color::rgb(0.5, 0.5, 0.5);
+pub const BUTTON_WHITE: Color = Color::rgb(1.0, 1.0, 1.0);
+pub const BUTTON_GREEN: Color = Color::rgb(0.0, 1.0, 0.0);
+
+pub const BUTTON_HOVER_MUL: f32 = 0.8;
+pub const BUTTON_PRESS_MUL: f32 = 0.5;
 
 #[derive(Component, PartialEq, Eq)]
 pub enum MyButtonType {

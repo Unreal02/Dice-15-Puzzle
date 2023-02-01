@@ -140,10 +140,10 @@ pub fn game_ui_button_system(
                         }
                     }
                 }
-                *color = BUTTON_PRESS_COLOR.into();
+                *color = (BUTTON_WHITE * BUTTON_PRESS_MUL).into();
             }
-            Interaction::Hovered => *color = BUTTON_HOVER_COLOR.into(),
-            Interaction::None => *color = BUTTON_NORMAL_COLOR.into(),
+            Interaction::Hovered => *color = (BUTTON_WHITE * BUTTON_HOVER_MUL).into(),
+            Interaction::None => *color = BUTTON_WHITE.into(),
         }
     }
 }

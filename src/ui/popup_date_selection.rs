@@ -16,7 +16,7 @@ pub struct MonthYearText;
 pub enum PopupDateSelectionButtonType {
     MonthPrev,
     MonthNext,
-    Date(NaiveDate),
+    Date(NaiveDate, bool),
 }
 
 pub fn spawn_popup_date_selection(
@@ -82,6 +82,7 @@ pub fn spawn_popup_date_selection(
                     "<".to_string(),
                     font.clone(),
                     PopupDateSelectionButtonType::MonthPrev,
+                    BUTTON_WHITE,
                 );
 
                 // month next button
@@ -95,6 +96,7 @@ pub fn spawn_popup_date_selection(
                     ">".to_string(),
                     font.clone(),
                     PopupDateSelectionButtonType::MonthNext,
+                    BUTTON_WHITE,
                 );
 
                 // calendar
@@ -124,6 +126,7 @@ pub fn spawn_popup_date_selection(
                             current_date.with_day(1).unwrap(),
                             first_date,
                             last_date,
+                            daily_puzzle_info,
                         );
                     });
             });
@@ -161,70 +164,105 @@ pub fn popup_system_date_selection(
     // button interactions
     for (interaction, mut color, button_type) in &mut interaction_query {
         match interaction {
-            Interaction::Clicked => {
-                match button_type {
-                    PopupDateSelectionButtonType::MonthPrev => {
-                        if first_date < calendar_ui.0 {
-                            calendar_ui.0 =
-                                calendar_ui.0.checked_sub_months(Months::new(1)).unwrap();
-                        }
-                        let date = calendar_ui.0;
-                        for &child in children {
-                            commands.entity(child).despawn_recursive();
-                        }
-                        commands.entity(entity).with_children(|parent| {
-                            spawn_calendar_ui(parent, font.clone(), date, first_date, last_date);
-                        });
-                        month_year_text.sections[0].value = format!(
-                            "{} {}",
-                            Month::from_u32(date.month()).unwrap().name(),
-                            date.year_ce().1
-                        )
+            Interaction::Clicked => match button_type {
+                PopupDateSelectionButtonType::MonthPrev => {
+                    if first_date < calendar_ui.0 {
+                        calendar_ui.0 = calendar_ui.0.checked_sub_months(Months::new(1)).unwrap();
                     }
-                    PopupDateSelectionButtonType::MonthNext => {
-                        if last_date >= calendar_ui.0.checked_add_months(Months::new(1)).unwrap() {
-                            calendar_ui.0 =
-                                calendar_ui.0.checked_add_months(Months::new(1)).unwrap();
-                        }
-                        let date = calendar_ui.0;
-                        for &child in children {
-                            commands.entity(child).despawn_recursive();
-                        }
-                        commands.entity(entity).with_children(|parent| {
-                            spawn_calendar_ui(parent, font.clone(), date, first_date, last_date);
-                        });
-                        month_year_text.sections[0].value = format!(
-                            "{} {}",
-                            Month::from_u32(date.month()).unwrap().name(),
-                            date.year_ce().1
-                        )
+                    let date = calendar_ui.0;
+                    for &child in children {
+                        commands.entity(child).despawn_recursive();
                     }
-                    PopupDateSelectionButtonType::Date(date) => {
-                        info!("{}", date);
-                        daily_puzzle_info.current_date = *date;
-                        daily_puzzle_info.load_daily_puzzle(
-                            *date,
-                            &mut transforms,
-                            &mut game,
-                            &mut player_state,
-                            &network_channel,
+                    commands.entity(entity).with_children(|parent| {
+                        spawn_calendar_ui(
+                            parent,
+                            font.clone(),
+                            date,
+                            first_date,
+                            last_date,
+                            &daily_puzzle_info,
                         );
-                        for (mut text, &text_type) in date_text_query.iter_mut() {
-                            if text_type == MyTextType::Date {
-                                text.sections[0].value = format!(
-                                    "Date: {}. {}. {}.",
-                                    date.year_ce().1,
-                                    date.month(),
-                                    date.day()
-                                );
-                            }
+                    });
+                    month_year_text.sections[0].value = format!(
+                        "{} {}",
+                        Month::from_u32(date.month()).unwrap().name(),
+                        date.year_ce().1
+                    );
+                    *color = (BUTTON_WHITE * BUTTON_PRESS_MUL).into();
+                }
+                PopupDateSelectionButtonType::MonthNext => {
+                    if last_date >= calendar_ui.0.checked_add_months(Months::new(1)).unwrap() {
+                        calendar_ui.0 = calendar_ui.0.checked_add_months(Months::new(1)).unwrap();
+                    }
+                    let date = calendar_ui.0;
+                    for &child in children {
+                        commands.entity(child).despawn_recursive();
+                    }
+                    commands.entity(entity).with_children(|parent| {
+                        spawn_calendar_ui(
+                            parent,
+                            font.clone(),
+                            date,
+                            first_date,
+                            last_date,
+                            &daily_puzzle_info,
+                        );
+                    });
+                    month_year_text.sections[0].value = format!(
+                        "{} {}",
+                        Month::from_u32(date.month()).unwrap().name(),
+                        date.year_ce().1
+                    );
+                    *color = (BUTTON_WHITE * BUTTON_PRESS_MUL).into();
+                }
+                PopupDateSelectionButtonType::Date(date, clear) => {
+                    info!("{}", date);
+                    daily_puzzle_info.current_date = *date;
+                    daily_puzzle_info.load_daily_puzzle(
+                        *date,
+                        &mut transforms,
+                        &mut game,
+                        &mut player_state,
+                        &network_channel,
+                    );
+                    for (mut text, &text_type) in date_text_query.iter_mut() {
+                        if text_type == MyTextType::Date {
+                            text.sections[0].value = format!(
+                                "Date: {}. {}. {}.",
+                                date.year_ce().1,
+                                date.month(),
+                                date.day()
+                            );
                         }
                     }
+                    *color = (if *clear { BUTTON_GREEN } else { BUTTON_WHITE } * BUTTON_PRESS_MUL)
+                        .into();
                 }
-                *color = BUTTON_PRESS_COLOR.into();
+            },
+            Interaction::Hovered => {
+                *color = (if let PopupDateSelectionButtonType::Date(_, clear) = button_type {
+                    if *clear {
+                        BUTTON_GREEN
+                    } else {
+                        BUTTON_WHITE
+                    }
+                } else {
+                    BUTTON_WHITE
+                } * BUTTON_HOVER_MUL)
+                    .into()
             }
-            Interaction::Hovered => *color = BUTTON_HOVER_COLOR.into(),
-            Interaction::None => *color = BUTTON_NORMAL_COLOR.into(),
+            Interaction::None => {
+                *color = if let PopupDateSelectionButtonType::Date(_, clear) = button_type {
+                    if *clear {
+                        BUTTON_GREEN
+                    } else {
+                        BUTTON_WHITE
+                    }
+                } else {
+                    BUTTON_WHITE
+                }
+                .into()
+            }
         }
     }
 }
@@ -274,6 +312,7 @@ fn spawn_popup_date_selection_button(
     text: String,
     font: Handle<Font>,
     button_type: PopupDateSelectionButtonType,
+    color: Color,
 ) {
     parent
         .spawn((
@@ -286,6 +325,7 @@ fn spawn_popup_date_selection_button(
                     position,
                     ..default()
                 },
+                background_color: color.into(),
                 ..default()
             },
             button_type,
@@ -311,6 +351,7 @@ fn spawn_calendar_ui(
     calendar_first_date: NaiveDate,
     first_date: NaiveDate,
     last_date: NaiveDate,
+    daily_puzzle_info: &DailyPuzzleInfo,
 ) {
     // day (sun ~ sat)
     let day_char_arr = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
@@ -355,6 +396,7 @@ fn spawn_calendar_ui(
         if date > last_date {
             break;
         }
+        let clear = daily_puzzle_info.clear_history.get(date);
         spawn_popup_date_selection_button(
             parent,
             UiRect {
@@ -364,7 +406,8 @@ fn spawn_calendar_ui(
             },
             date.day().to_string(),
             font.clone(),
-            PopupDateSelectionButtonType::Date(date),
+            PopupDateSelectionButtonType::Date(date, clear),
+            if clear { BUTTON_GREEN } else { BUTTON_WHITE },
         );
     }
 }
