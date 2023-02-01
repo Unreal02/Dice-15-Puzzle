@@ -170,6 +170,59 @@ fn spawn_game_mode_ui(
                     MyButtonType::Redo,
                     asset_server.load("images/button_redo.png").into(),
                 );
+
+                // load URL button
+                spawn_image_button(
+                    parent,
+                    UiRect {
+                        bottom: Val::Px(170.0),
+                        left: Val::Px(50.0),
+                        ..default()
+                    },
+                    MyButtonType::LoadURL,
+                    asset_server.load("images/button_load.png").into(),
+                );
+
+                // load URL text
+                parent
+                    .spawn(NodeBundle {
+                        style: Style {
+                            position_type: PositionType::Absolute,
+                            position: UiRect {
+                                bottom: Val::Px(290.0),
+                                left: Val::Px(50.0),
+                                ..default()
+                            },
+                            size: Size::new(Val::Px(200.0), Val::Px(40.0)),
+                            ..default()
+                        },
+                        background_color: Color::GRAY.into(),
+                        ..default()
+                    })
+                    .with_children(|parent| {
+                        parent.spawn((
+                            TextBundle::from_section(
+                                "",
+                                TextStyle {
+                                    font: font.clone(),
+                                    font_size: TEXT_SIZE,
+                                    color: Color::BLACK,
+                                },
+                            )
+                            .with_text_alignment(TextAlignment::CENTER_LEFT)
+                            .with_style(Style {
+                                position_type: PositionType::Absolute,
+                                position: UiRect {
+                                    left: Val::Px(5.0),
+                                    right: Val::Px(5.0),
+                                    top: Val::Px(0.0),
+                                    bottom: Val::Px(0.0),
+                                },
+                                ..default()
+                            }),
+                            MyTextType::LoadURL,
+                        ));
+                    });
             }
             GameMode::TimeAttack | GameMode::MinimalMovement => {
                 // statistics button

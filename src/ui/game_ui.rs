@@ -8,7 +8,8 @@ pub struct GameUIPlugin;
 impl Plugin for GameUIPlugin {
     fn build(&self, app: &mut App) {
         app.add_startup_system(setup_game_ui)
-            .add_system(game_ui_system)
+            .add_system(game_ui_button_system)
+            .add_system(game_ui_text_system)
             .add_system_set(SystemSet::on_enter(PlayerState::Clear).with_system(spawn_clear_ui))
             .add_system_set(SystemSet::on_exit(PlayerState::Clear).with_system(despawn_clear_ui));
     }

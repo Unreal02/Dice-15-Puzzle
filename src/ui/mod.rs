@@ -36,6 +36,7 @@ pub enum MyButtonType {
     Rankings,
     Restart,
     Export,
+    LoadURL,
 }
 
 #[derive(Debug, Component, PartialEq, Eq, Clone, Copy)]
@@ -44,4 +45,5 @@ pub enum MyTextType {
     PlayerInfo,
     GameClear,
     Date,
+    LoadURL,
 }

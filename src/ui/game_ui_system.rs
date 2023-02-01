@@ -11,7 +11,7 @@ use crate::{
     utils::*,
 };
 
-pub fn game_ui_system(
+pub fn game_ui_button_system(
     mut interaction_query: Query<
         (
             &Interaction,
@@ -21,6 +21,7 @@ pub fn game_ui_system(
         ),
         (Changed<Interaction>, With<Button>),
     >,
+    text_query: Query<(&Text, &MyTextType)>,
     mut transforms: Query<&mut Transform>,
     mut move_timer: ResMut<MoveTimer>,
     mut game_query: Query<&mut GameState>,
@@ -29,12 +30,9 @@ pub fn game_ui_system(
         &mut InputInversionFlag,
         &mut MoveImmediate,
     )>,
-    player_info: Query<&mut PlayerInfo>,
     mut play_log: Query<&mut PlayLog>,
-    mut text_query: Query<(&mut Text, &MyTextType)>,
     mut player_state: ResMut<State<PlayerState>>,
     mut input_timer: ResMut<InputTimer>,
-    game_mode: Res<State<GameMode>>,
     statistics_manager_query: Query<&StatisticsManager>,
     asset_server: Res<AssetServer>,
     daily_puzzle_info_query: Query<&DailyPuzzleInfo>,
@@ -134,6 +132,13 @@ pub fn game_ui_system(
                         let statistics_manager = statistics_manager_query.single();
                         statistics_manager.export();
                     }
+                    MyButtonType::LoadURL => {
+                        for (text, &text_type) in text_query.iter() {
+                            if text_type == MyTextType::LoadURL {
+                                info!("Load URL: {}", text.sections[0].value);
+                            }
+                        }
+                    }
                 }
                 *color = BUTTON_PRESS_COLOR.into();
             }
@@ -141,6 +146,17 @@ pub fn game_ui_system(
             Interaction::None => *color = BUTTON_NORMAL_COLOR.into(),
         }
     }
+}
+
+pub fn game_ui_text_system(
+    player_info: Query<&mut PlayerInfo>,
+    mut text_query: Query<(&mut Text, &MyTextType)>,
+    game_mode: Res<State<GameMode>>,
+    daily_puzzle_info_query: Query<&DailyPuzzleInfo>,
+    mut char_evr: EventReader<ReceivedCharacter>,
+    keyboard_input: Res<Input<KeyCode>>,
+) {
+    let daily_puzzle_info = daily_puzzle_info_query.single();
 
     // text
     for (mut text, &ui_type) in &mut text_query {
@@ -171,6 +187,16 @@ pub fn game_ui_system(
                     current_date.month(),
                     current_date.day()
                 );
+            }
+            MyTextType::LoadURL => {
+                if keyboard_input.just_pressed(KeyCode::Back) {
+                    text.sections[0].value.pop();
+                }
+                for ev in char_evr.iter() {
+                    if text.sections[0].value.len() < 6 {
+                        text.sections[0].value.push(ev.char);
+                    }
+                }
             }
         }
     }
