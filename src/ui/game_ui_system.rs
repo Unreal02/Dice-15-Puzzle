@@ -95,7 +95,12 @@ pub fn game_ui_button_system(
                     }
                     MyButtonType::Share => {
                         let board_string = board_to_string(&transforms, &mut game);
-                        info!("board string: {:?}\n", board_string);
+                        let puzzle_key = board_string.into_key();
+                        info!("Puzzle Key: {}\n", puzzle_key);
+                        info!(
+                            "Puzzle Key if collision: {}\n",
+                            crate::network::BoardString::retry_into_key(puzzle_key)
+                        );
                         string_to_board(board_string, &mut transforms, &mut game);
                     }
                     MyButtonType::Undo => InputHandler::undo(
