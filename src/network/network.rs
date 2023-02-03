@@ -128,6 +128,8 @@ fn response_waiting_system(
                 );
             }
             ResponseType::GenerateDailyPuzzle(_) => unreachable!(),
+            ResponseType::EnrollPuzzleState(_) => todo!(),
+            ResponseType::GetPuzzleState(_) => todo!(),
         }
     }
 }

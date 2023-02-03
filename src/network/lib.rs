@@ -13,6 +13,13 @@ use serde::{Deserialize, Serialize};
 /// index: number written on block (0 means empty)
 pub struct BoardString(pub [(u8, u8); 16]);
 
+#[derive(Copy, Serialize, Deserialize, Clone, Debug)]
+pub enum NetworkError {
+    KeyAlreadyExist,
+    NoEntry,
+}
+
+#[allow(dead_code)]
 impl BoardString {
     const CORPUS: &[u8] =
         "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!#".as_bytes();
@@ -54,6 +61,8 @@ pub enum RequestType {
     GetDailyPuzzle(NaiveDate),
     GetDailyPuzzleDate,
     GenerateDailyPuzzle(NaiveDate), // used by daily trigger only
+    EnrollPuzzleState(String, BoardString),
+    GetPuzzleState(String),
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Copy)]
@@ -61,4 +70,6 @@ pub enum ResponseType {
     GetDailyPuzzle(NaiveDate, BoardString),
     GetDailyPuzzleDate { first: NaiveDate, last: NaiveDate },
     GenerateDailyPuzzle(bool), // used by daily trigger only
+    EnrollPuzzleState(Result<(), NetworkError>),
+    GetPuzzleState(Result<BoardString, NetworkError>),
 }
