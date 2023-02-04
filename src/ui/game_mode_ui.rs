@@ -1,6 +1,7 @@
 // UIs depends on game mode
 
 use bevy::{prelude::*, ui::FocusPolicy};
+use serde::{Deserialize, Serialize};
 
 use crate::game::{GameState, MoveTimer};
 use crate::network::{Network, NetworkChannel};
@@ -11,7 +12,7 @@ use crate::MyTextType;
 
 use super::spawn_image_button;
 
-#[derive(Component, PartialEq, Eq, Debug, Hash, Clone, Copy)]
+#[derive(Component, PartialEq, Eq, Debug, Hash, Clone, Copy, Serialize, Deserialize)]
 pub enum GameMode {
     Practice,
     TimeAttack,

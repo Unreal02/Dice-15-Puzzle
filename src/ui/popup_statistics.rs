@@ -4,9 +4,21 @@ use bevy::input::mouse::{MouseScrollUnit, MouseWheel};
 const SCROLL_BAR_MAX_ITEMS: usize = 11;
 const SCROLL_SPEED: f32 = 1.0;
 
+#[derive(Default)]
+pub struct DeleteStatisticsEvent;
+
 #[derive(Component, Default)]
 pub struct ScrollBar {
     position: f32,
+}
+
+#[derive(Component, Debug)]
+pub enum PopupStatisticsTextType {
+    Solves,
+    Average,
+    Best,
+    Worst,
+    Details,
 }
 
 pub fn spawn_popup_statistics(
@@ -52,21 +64,31 @@ pub fn spawn_popup_statistics(
                     },
                     format!("Solves\n{}", statistics_manager.solves()),
                     font.clone(),
+                    Some(PopupStatisticsTextType::Solves),
                 );
 
                 // export button
-                spawn_button(
+                spawn_image_button(
                     parent,
                     UiRect {
                         bottom: Val::Px(25.0),
                         left: Val::Px(25.0),
                         ..default()
                     },
-                    "Export".to_string(),
-                    font.clone(),
                     MyButtonType::Export,
-                    None,
-                    button_image,
+                    asset_server.load("images/button_share.png").into(),
+                );
+
+                // delete statistics button
+                spawn_image_button(
+                    parent,
+                    UiRect {
+                        bottom: Val::Px(25.0),
+                        left: Val::Px(145.0),
+                        ..default()
+                    },
+                    MyButtonType::DeleteStatistics,
+                    asset_server.load("images/button_delete.png").into(),
                 );
 
                 if statistics_manager.solves() != 0 {
@@ -80,6 +102,7 @@ pub fn spawn_popup_statistics(
                         },
                         format!("Average\n{}", statistics_manager.average()),
                         font.clone(),
+                        Some(PopupStatisticsTextType::Average),
                     );
 
                     // best
@@ -92,6 +115,7 @@ pub fn spawn_popup_statistics(
                         },
                         format!("Best\n{}", statistics_manager.best()),
                         font.clone(),
+                        Some(PopupStatisticsTextType::Best),
                     );
 
                     // worst
@@ -104,6 +128,7 @@ pub fn spawn_popup_statistics(
                         },
                         format!("Worst\n{}", statistics_manager.worst()),
                         font.clone(),
+                        Some(PopupStatisticsTextType::Worst),
                     );
 
                     // details (text)
@@ -116,6 +141,7 @@ pub fn spawn_popup_statistics(
                         },
                         "Details".to_string(),
                         font.clone(),
+                        Some(PopupStatisticsTextType::Details),
                     );
 
                     // scroll bar background
@@ -150,6 +176,7 @@ pub fn spawn_popup_statistics(
                                     },
                                     "".to_string(),
                                     font.clone(),
+                                    None,
                                 );
                             }
                         });
@@ -159,15 +186,18 @@ pub fn spawn_popup_statistics(
 }
 
 pub fn popup_system_statistics(
+    mut commands: Commands,
     mut scroll_events: EventReader<MouseWheel>,
-    mut scroll_bar_query: Query<(&mut ScrollBar, &Children)>,
+    mut scroll_bar_query: Query<(&mut ScrollBar, &Children, Entity)>,
     statistics_manager_query: Query<&StatisticsManager>,
-    mut text_query: Query<&mut Text>,
+    mut text_query: Query<&mut Text, Without<PopupStatisticsTextType>>,
+    mut statistics_text_query: Query<(&mut Text, &PopupStatisticsTextType, Entity)>,
+    delete_statistics_event: EventReader<DeleteStatisticsEvent>,
 ) {
     let statistics_manager = statistics_manager_query.single();
 
     // scroll bar
-    if let Ok((mut scroll_bar, children)) = scroll_bar_query.get_single_mut() {
+    if let Ok((mut scroll_bar, children, _)) = scroll_bar_query.get_single_mut() {
         for scroll_event in scroll_events.iter() {
             let dy = match scroll_event.unit {
                 MouseScrollUnit::Line => scroll_event.y,
@@ -191,22 +221,48 @@ pub fn popup_system_statistics(
                 };
         }
     }
+
+    if !delete_statistics_event.is_empty() {
+        for (mut text, text_type, entity) in statistics_text_query.iter_mut() {
+            match text_type {
+                PopupStatisticsTextType::Solves => text.sections[0].value = "Solves\n0".to_string(),
+                PopupStatisticsTextType::Average
+                | PopupStatisticsTextType::Best
+                | PopupStatisticsTextType::Worst
+                | PopupStatisticsTextType::Details => {
+                    commands.entity(entity).despawn_recursive();
+                }
+            }
+        }
+        if let Ok((_, _, entity)) = scroll_bar_query.get_single() {
+            commands.entity(entity).despawn_recursive();
+        }
+    }
 }
 
-fn spawn_text(parent: &mut ChildBuilder, position: UiRect, text: String, font: Handle<Font>) {
-    parent.spawn(
-        TextBundle::from_section(
-            text,
-            TextStyle {
-                font,
-                font_size: TEXT_SIZE,
-                color: Color::WHITE,
-            },
-        )
-        .with_style(Style {
-            position_type: PositionType::Absolute,
-            position,
-            ..default()
-        }),
-    );
+fn spawn_text(
+    parent: &mut ChildBuilder,
+    position: UiRect,
+    text: String,
+    font: Handle<Font>,
+    text_type: Option<PopupStatisticsTextType>,
+) {
+    let text_bundle = TextBundle::from_section(
+        text,
+        TextStyle {
+            font,
+            font_size: TEXT_SIZE,
+            color: Color::WHITE,
+        },
+    )
+    .with_style(Style {
+        position_type: PositionType::Absolute,
+        position,
+        ..default()
+    });
+    if let Some(text_type) = text_type {
+        parent.spawn((text_bundle, text_type));
+    } else {
+        parent.spawn(text_bundle);
+    };
 }

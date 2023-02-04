@@ -39,6 +39,7 @@ pub enum MyButtonType {
     Restart,
     Export,
     LoadURL,
+    DeleteStatistics,
 }
 
 #[derive(Debug, Component, PartialEq, Eq, Clone, Copy)]

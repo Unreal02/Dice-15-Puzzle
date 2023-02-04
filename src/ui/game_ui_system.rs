@@ -33,10 +33,11 @@ pub fn game_ui_button_system(
     mut play_log: Query<&mut PlayLog>,
     mut player_state: ResMut<State<PlayerState>>,
     mut input_timer: ResMut<InputTimer>,
-    statistics_manager_query: Query<&StatisticsManager>,
+    mut statistics_manager_query: Query<&mut StatisticsManager>,
     asset_server: Res<AssetServer>,
     daily_puzzle_info_query: Query<&DailyPuzzleInfo>,
     network_channel: Res<NetworkChannel>,
+    mut delete_statistics_event: EventWriter<DeleteStatisticsEvent>,
 ) {
     let mut game = game_query.single_mut();
     let daily_puzzle_info = daily_puzzle_info_query.single();
@@ -143,6 +144,11 @@ pub fn game_ui_button_system(
                                 info!("Load URL: {}", text.sections[0].value);
                             }
                         }
+                    }
+                    MyButtonType::DeleteStatistics => {
+                        let mut statistics_manager = statistics_manager_query.single_mut();
+                        statistics_manager.delete_statistics();
+                        delete_statistics_event.send_default();
                     }
                 }
                 *color = (BUTTON_WHITE * BUTTON_PRESS_MUL).into();

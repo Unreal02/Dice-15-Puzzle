@@ -12,39 +12,43 @@ pub struct PopupPlugin;
 
 impl Plugin for PopupPlugin {
     fn build(&self, app: &mut App) {
-        app.add_system_set(
-            SystemSet::on_enter(PlayerState::ModeSelectionPopup)
-                .with_system(spawn_popup_mode_selection),
-        )
-        .add_system_set(
-            SystemSet::on_enter(PlayerState::StatisticsPopup).with_system(spawn_popup_statistics),
-        )
-        .add_system_set(
-            SystemSet::on_enter(PlayerState::DateSelectionPopup)
-                .with_system(spawn_popup_date_selection),
-        )
-        .add_system_set(
-            SystemSet::on_update(PlayerState::ModeSelectionPopup)
-                .with_system(popup_system_mode_selection)
-                .with_system(popup_close_button_system),
-        )
-        .add_system_set(
-            SystemSet::on_update(PlayerState::StatisticsPopup)
-                .with_system(popup_system_statistics)
-                .with_system(popup_close_button_system),
-        )
-        .add_system_set(
-            SystemSet::on_update(PlayerState::DateSelectionPopup)
-                .with_system(popup_system_date_selection)
-                .with_system(popup_close_button_system),
-        )
-        .add_system_set(
-            SystemSet::on_exit(PlayerState::ModeSelectionPopup).with_system(despawn_popup),
-        )
-        .add_system_set(SystemSet::on_exit(PlayerState::StatisticsPopup).with_system(despawn_popup))
-        .add_system_set(
-            SystemSet::on_exit(PlayerState::DateSelectionPopup).with_system(despawn_popup),
-        );
+        app.add_event::<DeleteStatisticsEvent>()
+            .add_system_set(
+                SystemSet::on_enter(PlayerState::ModeSelectionPopup)
+                    .with_system(spawn_popup_mode_selection),
+            )
+            .add_system_set(
+                SystemSet::on_enter(PlayerState::StatisticsPopup)
+                    .with_system(spawn_popup_statistics),
+            )
+            .add_system_set(
+                SystemSet::on_enter(PlayerState::DateSelectionPopup)
+                    .with_system(spawn_popup_date_selection),
+            )
+            .add_system_set(
+                SystemSet::on_update(PlayerState::ModeSelectionPopup)
+                    .with_system(popup_system_mode_selection)
+                    .with_system(popup_close_button_system),
+            )
+            .add_system_set(
+                SystemSet::on_update(PlayerState::StatisticsPopup)
+                    .with_system(popup_system_statistics)
+                    .with_system(popup_close_button_system),
+            )
+            .add_system_set(
+                SystemSet::on_update(PlayerState::DateSelectionPopup)
+                    .with_system(popup_system_date_selection)
+                    .with_system(popup_close_button_system),
+            )
+            .add_system_set(
+                SystemSet::on_exit(PlayerState::ModeSelectionPopup).with_system(despawn_popup),
+            )
+            .add_system_set(
+                SystemSet::on_exit(PlayerState::StatisticsPopup).with_system(despawn_popup),
+            )
+            .add_system_set(
+                SystemSet::on_exit(PlayerState::DateSelectionPopup).with_system(despawn_popup),
+            );
     }
 }
 
