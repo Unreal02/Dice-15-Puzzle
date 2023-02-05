@@ -54,20 +54,22 @@ impl Plugin for PopupPlugin {
 
 fn popup_close_button_system(
     mut interaction_query: Query<
-        (&Interaction, &mut BackgroundColor, &PopupCloseButton),
-        (Changed<Interaction>, With<Button>),
+        (&Interaction, &mut BackgroundColor, Option<&Popup>),
+        (Changed<Interaction>, With<Button>, With<PopupCloseButton>),
     >,
     mut player_state: ResMut<State<PlayerState>>,
     keyboard_input: Res<Input<KeyCode>>,
 ) {
-    for (interaction, mut color, _) in &mut interaction_query {
-        match *interaction {
-            Interaction::Clicked => {
-                *color = (BUTTON_WHITE * BUTTON_PRESS_MUL).into();
-                let _ = player_state.pop();
-            }
-            Interaction::Hovered => *color = (BUTTON_WHITE * BUTTON_HOVER_MUL).into(),
-            Interaction::None => *color = BUTTON_WHITE.into(),
+    for (interaction, mut color, popup) in &mut interaction_query {
+        if *interaction == Interaction::Clicked {
+            let _ = player_state.pop();
+        }
+        if popup.is_none() {
+            *color = match *interaction {
+                Interaction::Clicked => (BUTTON_WHITE * BUTTON_PRESS_MUL).into(),
+                Interaction::Hovered => (BUTTON_WHITE * BUTTON_HOVER_MUL).into(),
+                Interaction::None => BUTTON_WHITE.into(),
+            };
         }
     }
 
@@ -88,14 +90,13 @@ fn despawn_popup(
 
 pub fn spawn_popup_panel(
     parent: &mut ChildBuilder,
-    font: Handle<Font>,
-    image: UiImage,
+    close_button_image: UiImage,
     child_builder: impl FnOnce(&mut ChildBuilder),
 ) {
     parent
         .spawn((
             // dark background
-            NodeBundle {
+            ButtonBundle {
                 style: Style {
                     position_type: PositionType::Absolute,
                     align_items: AlignItems::Center,
@@ -113,48 +114,9 @@ pub fn spawn_popup_panel(
                 ..default()
             },
             Popup,
+            PopupCloseButton,
         ))
         .with_children(|parent| {
-            // close button
-            parent
-                .spawn((
-                    ButtonBundle {
-                        style: Style {
-                            align_items: AlignItems::Center,
-                            justify_content: JustifyContent::Center,
-                            size: Size::new(Val::Px(200.0), Val::Px(100.0)),
-                            position_type: PositionType::Absolute,
-                            position: UiRect {
-                                left: Val::Px(50.0),
-                                top: Val::Px(50.0),
-                                ..default()
-                            },
-                            ..default()
-                        },
-                        image,
-                        ..default()
-                    },
-                    PopupCloseButton,
-                ))
-                .with_children(|parent| {
-                    // button text
-                    parent.spawn(
-                        TextBundle::from_section(
-                            "Close",
-                            TextStyle {
-                                font: font.clone(),
-                                font_size: TEXT_SIZE,
-                                color: Color::BLACK,
-                            },
-                        )
-                        .with_text_alignment(TextAlignment::CENTER)
-                        .with_style(Style {
-                            max_size: Size::new(Val::Px(200.0), Val::Px(100.0)),
-                            ..default()
-                        }),
-                    );
-                });
-
             // UI panel
             parent
                 .spawn(NodeBundle {
@@ -167,6 +129,28 @@ pub fn spawn_popup_panel(
                     },
                     background_color: POPUP_BACKGROUND_COLOR.into(),
                     ..default()
+                })
+                .with_children(|parent| {
+                    // close button
+                    parent.spawn((
+                        ButtonBundle {
+                            style: Style {
+                                align_items: AlignItems::Center,
+                                justify_content: JustifyContent::Center,
+                                size: Size::new(Val::Px(60.0), Val::Px(60.0)),
+                                position_type: PositionType::Absolute,
+                                position: UiRect {
+                                    right: Val::Px(20.0),
+                                    top: Val::Px(20.0),
+                                    ..default()
+                                },
+                                ..default()
+                            },
+                            image: close_button_image,
+                            ..default()
+                        },
+                        PopupCloseButton,
+                    ));
                 })
                 .with_children(child_builder);
         });

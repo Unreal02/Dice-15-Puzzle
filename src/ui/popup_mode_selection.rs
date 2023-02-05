@@ -12,11 +12,12 @@ pub fn spawn_popup_mode_selection(
 ) {
     let font = asset_server.load("fonts/Quicksand-Bold.ttf");
     let button_image = UiImage::from(asset_server.load("images/button.png"));
+    let button_close_image = UiImage::from(asset_server.load("images/button_close.png"));
 
     commands
         .entity(game_ui_query.single_mut())
         .with_children(|parent| {
-            spawn_popup_panel(parent, font.clone(), button_image.clone(), |parent| {
+            spawn_popup_panel(parent, button_close_image.clone(), |parent| {
                 // mode selection text
                 parent.spawn(
                     TextBundle::from_section(

@@ -26,7 +26,7 @@ pub fn spawn_popup_date_selection(
     daily_puzzle_info_query: Query<&DailyPuzzleInfo>,
 ) {
     let font = asset_server.load("fonts/Quicksand-Bold.ttf");
-    let button_image = UiImage::from(asset_server.load("images/button.png"));
+    let button_close_image = UiImage::from(asset_server.load("images/button_close.png"));
     let daily_puzzle_info = daily_puzzle_info_query.single();
     let first_date = daily_puzzle_info.first_date;
     let last_date = daily_puzzle_info.last_date;
@@ -35,16 +35,17 @@ pub fn spawn_popup_date_selection(
     commands
         .entity(game_ui_query.single_mut())
         .with_children(|parent| {
-            spawn_popup_panel(parent, font.clone(), button_image.clone(), |parent| {
+            spawn_popup_panel(parent, button_close_image.clone(), |parent| {
                 // date selection text
                 spawn_text(
                     parent,
                     UiRect {
                         top: Val::Px(25.0),
-                        right: Val::Px(0.0),
+                        left: Val::Px(100.0),
+                        right: Val::Px(100.0),
                         ..default()
                     },
-                    Size::new(Val::Percent(100.0), Val::Auto),
+                    Size::new(Val::Auto, Val::Auto),
                     "Date Selection".to_string(),
                     font.clone(),
                     Color::WHITE,
