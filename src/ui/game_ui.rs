@@ -24,7 +24,6 @@ fn setup_game_ui(
     asset_server: Res<AssetServer>,
     input_system: Query<(&InputInversionFlag, &MoveImmediate)>,
 ) {
-    info!("setup game ui");
     let font = asset_server.load("fonts/Quicksand-Bold.ttf");
     let (input_inversion, move_immediate) = input_system.single();
     let button_toggle_on_image = UiImage::from(asset_server.load("images/button_toggle_on.png"));

@@ -111,7 +111,6 @@ impl InputBuffer {
 }
 
 pub fn setup_input(mut commands: Commands, mut input_timer: ResMut<InputTimer>) {
-    info!("setup input");
     let local_storage = window().unwrap().local_storage().unwrap().unwrap();
     commands.spawn((
         Name::new("InputSystem"),
