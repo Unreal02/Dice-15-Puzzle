@@ -1,4 +1,8 @@
-use crate::{player::PlayerState, ui::*};
+use crate::{
+    buffered_input::{InputInversionFlag, MoveImmediate},
+    player::PlayerState,
+    ui::*,
+};
 
 #[derive(Component)]
 pub struct GameUI;
@@ -7,7 +11,7 @@ pub struct GameUIPlugin;
 
 impl Plugin for GameUIPlugin {
     fn build(&self, app: &mut App) {
-        app.add_startup_system(setup_game_ui)
+        app.add_startup_system_to_stage(StartupStage::PostStartup, setup_game_ui)
             .add_system(game_ui_button_system)
             .add_system(game_ui_text_system)
             .add_system_set(SystemSet::on_enter(PlayerState::Clear).with_system(spawn_clear_ui))
@@ -15,8 +19,16 @@ impl Plugin for GameUIPlugin {
     }
 }
 
-fn setup_game_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
+fn setup_game_ui(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    input_system: Query<(&InputInversionFlag, &MoveImmediate)>,
+) {
+    info!("setup game ui");
     let font = asset_server.load("fonts/Quicksand-Bold.ttf");
+    let (input_inversion, move_immediate) = input_system.single();
+    let button_toggle_on_image = UiImage::from(asset_server.load("images/button_toggle_on.png"));
+    let button_toggle_off_image = UiImage::from(asset_server.load("images/button_toggle_off.png"));
 
     commands
         .spawn((
@@ -68,7 +80,10 @@ fn setup_game_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
                 "Animation".to_string(),
                 font.clone(),
                 MyButtonType::AnimationToggle,
-                asset_server.load("images/button_toggle_on.png").into(), // default: on
+                match move_immediate.0 {
+                    true => button_toggle_off_image.clone(),
+                    false => button_toggle_on_image.clone(),
+                },
             );
 
             // input inversion button
@@ -82,7 +97,10 @@ fn setup_game_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
                 "Input Inversion".to_string(),
                 font.clone(),
                 MyButtonType::InputInversion,
-                asset_server.load("images/button_toggle_off.png").into(), // default: off
+                match input_inversion.0 {
+                    true => button_toggle_on_image.clone(),
+                    false => button_toggle_off_image.clone(),
+                },
             );
 
             // mode selection button
