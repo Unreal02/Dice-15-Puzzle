@@ -14,6 +14,9 @@ impl Plugin for PopupPlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<DeleteStatisticsEvent>()
             .add_system_set(
+                SystemSet::on_enter(PlayerState::SettingsPopup).with_system(spawn_popup_settings),
+            )
+            .add_system_set(
                 SystemSet::on_enter(PlayerState::ModeSelectionPopup)
                     .with_system(spawn_popup_mode_selection),
             )
@@ -24,6 +27,10 @@ impl Plugin for PopupPlugin {
             .add_system_set(
                 SystemSet::on_enter(PlayerState::DateSelectionPopup)
                     .with_system(spawn_popup_date_selection),
+            )
+            .add_system_set(
+                SystemSet::on_update(PlayerState::SettingsPopup)
+                    .with_system(popup_close_button_system),
             )
             .add_system_set(
                 SystemSet::on_update(PlayerState::ModeSelectionPopup)
@@ -39,6 +46,9 @@ impl Plugin for PopupPlugin {
                 SystemSet::on_update(PlayerState::DateSelectionPopup)
                     .with_system(popup_system_date_selection)
                     .with_system(popup_close_button_system),
+            )
+            .add_system_set(
+                SystemSet::on_exit(PlayerState::SettingsPopup).with_system(despawn_popup),
             )
             .add_system_set(
                 SystemSet::on_exit(PlayerState::ModeSelectionPopup).with_system(despawn_popup),

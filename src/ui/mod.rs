@@ -4,6 +4,7 @@ mod game_ui_system;
 mod popup;
 mod popup_date_selection;
 mod popup_mode_selection;
+mod popup_settings;
 mod popup_statistics;
 
 pub use bevy::prelude::*;
@@ -13,6 +14,7 @@ pub use game_ui_system::*;
 pub use popup::*;
 pub use popup_date_selection::*;
 pub use popup_mode_selection::*;
+pub use popup_settings::*;
 pub use popup_statistics::*;
 
 pub const TEXT_SIZE: f32 = 40.0;
@@ -30,6 +32,7 @@ pub enum MyButtonType {
     AnimationToggle,
     InputInversion,
     ModeSelection,
+    Settings,
     Share,
     Undo,
     Redo,
@@ -48,5 +51,6 @@ pub enum MyTextType {
     PlayerInfo,
     GameClear,
     Date,
+    ShareURL,
     LoadURL,
 }

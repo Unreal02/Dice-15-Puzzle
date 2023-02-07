@@ -12,6 +12,7 @@ pub enum PlayerState {
     Shuffled,
     Solving,
     Clear,
+    SettingsPopup,
     ModeSelectionPopup,
     StatisticsPopup,
     DateSelectionPopup,

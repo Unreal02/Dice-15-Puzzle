@@ -107,6 +107,9 @@ pub fn game_ui_button_system(
                     MyButtonType::ModeSelection => {
                         let _ = player_state.push(PlayerState::ModeSelectionPopup);
                     }
+                    MyButtonType::Settings => {
+                        let _ = player_state.push(PlayerState::SettingsPopup);
+                    }
                     MyButtonType::Share => {
                         let board_string = board_to_string(&transforms, &mut game);
                         let puzzle_key = board_string.into_key();
@@ -218,12 +221,13 @@ pub fn game_ui_text_system(
                     current_date.day()
                 );
             }
+            MyTextType::ShareURL => {}
             MyTextType::LoadURL => {
                 if keyboard_input.just_pressed(KeyCode::Back) {
                     text.sections[0].value.pop();
                 }
                 for ev in char_evr.iter() {
-                    if text.sections[0].value.len() < 6 {
+                    if text.sections[0].value.len() < 12 {
                         text.sections[0].value.push(ev.char);
                     }
                 }

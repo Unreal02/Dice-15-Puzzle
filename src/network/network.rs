@@ -4,7 +4,7 @@ use tokio::sync::mpsc::{unbounded_channel, UnboundedReceiver, UnboundedSender};
 
 use crate::{
     daily_puzzle_info::DailyPuzzleInfo, game::GameState, network::*, player::PlayerState,
-    utils::string_to_board,
+    ui::MyTextType, utils::string_to_board,
 };
 
 #[cfg(not(feature = "local_server"))]
@@ -74,9 +74,8 @@ impl Network {
             .input
             .send(RequestType::EnrollPuzzleState(url_key, board_string))
             .unwrap();
-        //FIXME: Check state context of share button
-        assert_eq!(player_state.inactives().len(), 0);
-        let _ = player_state.set(PlayerState::ResponseWaiting);
+        assert_eq!(player_state.inactives().len(), 1);
+        player_state.push(PlayerState::ResponseWaiting).unwrap();
     }
 
     pub fn get_puzzle_state(
@@ -88,9 +87,7 @@ impl Network {
             .input
             .send(RequestType::GetPuzzleState(url_key))
             .unwrap();
-        //FIXME: Check state context of share button
-        assert_eq!(player_state.inactives().len(), 0);
-        let _ = player_state.set(PlayerState::ResponseWaiting);
+        player_state.push(PlayerState::ResponseWaiting).unwrap();
     }
 }
 
@@ -129,6 +126,7 @@ fn response_waiting_system(
     mut game_query: Query<&mut GameState>,
     mut network_channel: ResMut<NetworkChannel>,
     mut daily_puzzle_info_query: Query<&mut DailyPuzzleInfo>,
+    mut text_query: Query<(&mut Text, &MyTextType)>,
 ) {
     let mut game = game_query.single_mut();
     let mut daily_puzzle_info = daily_puzzle_info_query.single_mut();
@@ -163,26 +161,33 @@ fn response_waiting_system(
             ResponseType::EnrollPuzzleState(result) => {
                 match result {
                     Ok(final_key) => {
-                        //TODO: Show on screen
-                        info!("Enroll Success {:?}", final_key);
+                        let share_url = format!("dice15puzzle.haje.org/?{}", final_key);
+                        let clipboard = web_sys::window().unwrap().navigator().clipboard().unwrap();
+                        let _ = clipboard.write_text(&share_url.clone());
+                        for (mut text, _) in text_query
+                            .iter_mut()
+                            .filter(|(_, text_type)| **text_type == MyTextType::ShareURL)
+                        {
+                            text.sections[0].value = "Link copied!\n".into();
+                            text.sections[1].value = share_url.clone();
+                        }
                     }
                     Err(_) => todo!(),
                 }
+                assert_eq!(*player_state.current(), PlayerState::ResponseWaiting);
+                assert_eq!(player_state.inactives().len(), 2);
+                player_state.pop().unwrap();
             }
             ResponseType::GetPuzzleState(result) => match result {
                 Ok(board_string) => {
                     string_to_board(board_string, &mut transforms, &mut game);
-                    if *player_state.current() != PlayerState::Shuffled {
-                        // inactive stack에 있는 것이 무엇이든 Shuffled로 바꾸기 위해 replace 사용
-                        player_state.replace(PlayerState::Shuffled).unwrap();
-                    }
+                    // inactive stack에 있는 것이 무엇이든 Shuffled로 바꾸기 위해 replace 사용
+                    player_state.replace(PlayerState::Shuffled).unwrap();
                     info!("Load Success {:?}", board_string);
                 }
                 Err(e) => {
                     info!("Load Failed {:?}", e);
-                    if *player_state.current() == PlayerState::Init {
-                        player_state.replace(PlayerState::Idle).unwrap();
-                    }
+                    player_state.pop().unwrap();
                 }
             },
         }

@@ -1,8 +1,4 @@
-use crate::{
-    buffered_input::{InputInversionFlag, MoveImmediate},
-    player::PlayerState,
-    ui::*,
-};
+use crate::{player::PlayerState, ui::*};
 
 #[derive(Component)]
 pub struct GameUI;
@@ -19,15 +15,8 @@ impl Plugin for GameUIPlugin {
     }
 }
 
-fn setup_game_ui(
-    mut commands: Commands,
-    asset_server: Res<AssetServer>,
-    input_system: Query<(&InputInversionFlag, &MoveImmediate)>,
-) {
+fn setup_game_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
     let font = asset_server.load("fonts/Quicksand-Bold.ttf");
-    let (input_inversion, move_immediate) = input_system.single();
-    let button_toggle_on_image = UiImage::from(asset_server.load("images/button_toggle_on.png"));
-    let button_toggle_off_image = UiImage::from(asset_server.load("images/button_toggle_off.png"));
 
     commands
         .spawn((
@@ -68,40 +57,6 @@ fn setup_game_ui(
                 asset_server.load("images/button_shuffle.png").into(),
             );
 
-            // animation toggle button
-            spawn_toggle_button(
-                parent,
-                UiRect {
-                    right: Val::Px(50.0),
-                    top: Val::Px(50.0),
-                    ..default()
-                },
-                "Animation".to_string(),
-                font.clone(),
-                MyButtonType::AnimationToggle,
-                match move_immediate.0 {
-                    true => button_toggle_off_image.clone(),
-                    false => button_toggle_on_image.clone(),
-                },
-            );
-
-            // input inversion button
-            spawn_toggle_button(
-                parent,
-                UiRect {
-                    right: Val::Px(50.0),
-                    top: Val::Px(115.0),
-                    ..default()
-                },
-                "Input Inversion".to_string(),
-                font.clone(),
-                MyButtonType::InputInversion,
-                match input_inversion.0 {
-                    true => button_toggle_on_image.clone(),
-                    false => button_toggle_off_image.clone(),
-                },
-            );
-
             // mode selection button
             spawn_button(
                 parent,
@@ -117,16 +72,16 @@ fn setup_game_ui(
                 asset_server.load("images/button.png").into(),
             );
 
-            // share button
+            // settings button
             spawn_image_button(
                 parent,
                 UiRect {
-                    left: Val::Px(50.0),
-                    bottom: Val::Px(50.0),
+                    right: Val::Px(50.0),
+                    top: Val::Px(50.0),
                     ..default()
                 },
-                MyButtonType::Share,
-                asset_server.load("images/button_share.png").into(),
+                MyButtonType::Settings,
+                asset_server.load("images/button_settings.png").into(),
             );
 
             // player info
@@ -254,51 +209,4 @@ pub fn spawn_image_button(
         },
         button_type,
     ));
-}
-
-fn spawn_toggle_button(
-    parent: &mut ChildBuilder,
-    position: UiRect,
-    text: String,
-    font: Handle<Font>,
-    button_type: MyButtonType,
-    image: UiImage,
-) {
-    parent
-        .spawn((
-            ButtonBundle {
-                style: Style {
-                    align_items: AlignItems::Center,
-                    justify_content: JustifyContent::Center,
-                    size: Size::new(Val::Px(40.0), Val::Px(40.0)),
-                    position_type: PositionType::Absolute,
-                    position,
-                    ..default()
-                },
-                image,
-                ..default()
-            },
-            button_type,
-        ))
-        .with_children(|parent| {
-            parent.spawn(
-                TextBundle::from_section(
-                    text,
-                    TextStyle {
-                        font: font.clone(),
-                        font_size: TEXT_SIZE,
-                        color: Color::BLACK,
-                    },
-                )
-                .with_style(Style {
-                    position_type: PositionType::Absolute,
-                    position: UiRect {
-                        right: Val::Px(50.0),
-                        bottom: Val::Px(0.0),
-                        ..default()
-                    },
-                    ..default()
-                }),
-            );
-        });
 }
