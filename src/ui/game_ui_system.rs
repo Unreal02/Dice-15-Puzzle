@@ -96,12 +96,12 @@ pub fn game_ui_button_system(
                     MyButtonType::Share => {
                         let board_string = board_to_string(&transforms, &mut game);
                         let puzzle_key = board_string.into_key();
-                        info!("Puzzle Key: {}\n", puzzle_key);
-                        info!(
-                            "Puzzle Key if collision: {}\n",
-                            crate::network::BoardString::retry_into_key(puzzle_key)
+                        let _ = crate::network::Network::enroll_puzzle_state(
+                            puzzle_key,
+                            board_string,
+                            &mut player_state,
+                            &network_channel,
                         );
-                        string_to_board(board_string, &mut transforms, &mut game);
                     }
                     MyButtonType::Undo => InputHandler::undo(
                         input_reveresion_flag.0,
@@ -140,7 +140,13 @@ pub fn game_ui_button_system(
                     MyButtonType::LoadURL => {
                         for (text, &text_type) in text_query.iter() {
                             if text_type == MyTextType::LoadURL {
-                                info!("Load URL: {}", text.sections[0].value);
+                                let url_key = &text.sections[0].value;
+                                info!("Load URL: {}", url_key);
+                                let _ = crate::network::Network::get_puzzle_state(
+                                    url_key.to_string(),
+                                    &mut player_state,
+                                    &network_channel,
+                                );
                             }
                         }
                     }
