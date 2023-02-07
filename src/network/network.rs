@@ -178,7 +178,12 @@ fn response_waiting_system(
                     }
                     info!("Load Success {:?}", board_string);
                 }
-                Err(_) => todo!(),
+                Err(e) => {
+                    info!("Load Failed {:?}", e);
+                    if *player_state.current() == PlayerState::Init {
+                        player_state.replace(PlayerState::Idle).unwrap();
+                    }
+                }
             },
         }
     }
