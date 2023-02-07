@@ -2,6 +2,7 @@ use std::collections::VecDeque;
 
 use bevy::prelude::*;
 use bevy_mod_picking::PickingEvent;
+use web_sys::window;
 
 use crate::{
     game::{GameError, GameState},
@@ -109,12 +110,25 @@ impl InputBuffer {
     }
 }
 
-fn setup_input(mut commands: Commands, mut input_timer: ResMut<InputTimer>) {
+pub fn setup_input(mut commands: Commands, mut input_timer: ResMut<InputTimer>) {
+    let local_storage = window().unwrap().local_storage().unwrap().unwrap();
     commands.spawn((
         Name::new("InputSystem"),
         InputBuffer::new(),
-        InputInversionFlag(false),
-        MoveImmediate(false),
+        InputInversionFlag(
+            if let Some(str) = local_storage.get_item("input_inversion").unwrap() {
+                serde_json::from_str(&str).unwrap()
+            } else {
+                false
+            },
+        ),
+        MoveImmediate(
+            if let Some(str) = local_storage.get_item("move_immediate").unwrap() {
+                serde_json::from_str(&str).unwrap()
+            } else {
+                false
+            },
+        ),
     ));
     *input_timer = InputTimer(Timer::from_seconds(0.03, TimerMode::Once));
 }

@@ -1,4 +1,5 @@
 use chrono::Datelike;
+use web_sys::window;
 
 use crate::{
     buffered_input::{InputBuffer, InputHandler, InputInversionFlag, InputTimer, MoveImmediate},
@@ -33,10 +34,11 @@ pub fn game_ui_button_system(
     mut play_log: Query<&mut PlayLog>,
     mut player_state: ResMut<State<PlayerState>>,
     mut input_timer: ResMut<InputTimer>,
-    statistics_manager_query: Query<&StatisticsManager>,
+    mut statistics_manager_query: Query<&mut StatisticsManager>,
     asset_server: Res<AssetServer>,
     daily_puzzle_info_query: Query<&DailyPuzzleInfo>,
     network_channel: Res<NetworkChannel>,
+    mut delete_statistics_event: EventWriter<DeleteStatisticsEvent>,
 ) {
     let mut game = game_query.single_mut();
     let daily_puzzle_info = daily_puzzle_info_query.single();
@@ -65,16 +67,24 @@ pub fn game_ui_button_system(
                             let _ = player_state.set(PlayerState::Shuffled);
                         }
                     }
-                    MyButtonType::AnimationToggle => match move_immediate.0 {
-                        true => {
-                            move_immediate.0 = false;
-                            ui_image.unwrap().0 = asset_server.load("images/button_toggle_on.png");
+                    MyButtonType::AnimationToggle => {
+                        match move_immediate.0 {
+                            true => {
+                                move_immediate.0 = false;
+                                ui_image.unwrap().0 =
+                                    asset_server.load("images/button_toggle_on.png");
+                            }
+                            false => {
+                                move_immediate.0 = true;
+                                ui_image.unwrap().0 =
+                                    asset_server.load("images/button_toggle_off.png");
+                            }
                         }
-                        false => {
-                            move_immediate.0 = true;
-                            ui_image.unwrap().0 = asset_server.load("images/button_toggle_off.png");
-                        }
-                    },
+                        let local_storage = window().unwrap().local_storage().unwrap().unwrap();
+                        local_storage
+                            .set_item("move_immediate", &move_immediate.0.to_string())
+                            .unwrap();
+                    }
                     MyButtonType::InputInversion => {
                         play_log.single_mut().reset();
                         match input_reveresion_flag.0 {
@@ -89,6 +99,10 @@ pub fn game_ui_button_system(
                                     asset_server.load("images/button_toggle_on.png");
                             }
                         }
+                        let local_storage = window().unwrap().local_storage().unwrap().unwrap();
+                        local_storage
+                            .set_item("input_inversion", &input_reveresion_flag.0.to_string())
+                            .unwrap();
                     }
                     MyButtonType::ModeSelection => {
                         let _ = player_state.push(PlayerState::ModeSelectionPopup);
@@ -149,6 +163,11 @@ pub fn game_ui_button_system(
                                 );
                             }
                         }
+                    }
+                    MyButtonType::DeleteStatistics => {
+                        let mut statistics_manager = statistics_manager_query.single_mut();
+                        statistics_manager.delete_statistics();
+                        delete_statistics_event.send_default();
                     }
                 }
                 *color = (BUTTON_WHITE * BUTTON_PRESS_MUL).into();

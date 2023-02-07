@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use serde::{Deserialize, Serialize};
 use std::time::Duration;
 
 use crate::{
@@ -7,7 +8,7 @@ use crate::{
     utils::duration_to_string,
 };
 
-#[derive(Component)]
+#[derive(Serialize, Deserialize, Component)]
 pub struct StatisticsManager {
     mode: GameMode,
     time_records: Vec<Duration>,
@@ -29,6 +30,13 @@ impl StatisticsManager {
         self.mode = mode;
     }
 
+    fn save_storage(&self) {
+        let local_storage = web_sys::window().unwrap().local_storage().unwrap().unwrap();
+        local_storage
+            .set_item("statistics", &serde_json::to_string(self).unwrap())
+            .unwrap();
+    }
+
     pub fn push(&mut self, info: &PlayerInfo) {
         let (time, move_count) = info.get_player_info();
         match self.mode {
@@ -36,6 +44,16 @@ impl StatisticsManager {
             GameMode::MinimalMovement => self.move_records.push(move_count),
             _ => unreachable!(),
         }
+        self.save_storage();
+    }
+
+    pub fn delete_statistics(&mut self) {
+        match self.mode {
+            GameMode::TimeAttack => self.time_records.clear(),
+            GameMode::MinimalMovement => self.move_records.clear(),
+            _ => unreachable!(),
+        }
+        self.save_storage();
     }
 
     pub fn get_record(&self, i: usize) -> String {
@@ -118,7 +136,16 @@ impl Plugin for StatisticsManagerPlugin {
 }
 
 fn spawn_statistics_manager(mut commands: Commands) {
-    commands.spawn(StatisticsManager::default());
+    // saved statistics
+    let local_storage = web_sys::window().unwrap().local_storage().unwrap().unwrap();
+    let statistics_manager =
+        if let Some(clear_history) = local_storage.get_item("statistics").unwrap() {
+            serde_json::from_str(&clear_history).unwrap()
+        } else {
+            StatisticsManager::default()
+        };
+
+    commands.spawn(statistics_manager);
 }
 
 fn on_game_clear(
