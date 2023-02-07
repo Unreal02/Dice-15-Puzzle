@@ -13,6 +13,7 @@ use bevy_mod_picking::PickingCameraBundle;
 use crate::{
     block::{spawn_meshes, Block, BlockMesh},
     buffered_input::{InputBuffer, MoveImmediate},
+    network::NetworkChannel,
     player::{PlayerInfo, PlayerState},
     utils::{shuffle, string_to_board},
 };
@@ -48,6 +49,9 @@ pub enum GameStages {
     UpdateBlock,
     CheckClear,
 }
+
+#[derive(Default, Resource)]
+pub struct UrlReqestInfo(Option<String>);
 
 impl Plugin for GamePlugin {
     fn build(&self, app: &mut App) {
@@ -231,6 +235,34 @@ fn setup(
         },
         PickingCameraBundle::default(),
     ));
+}
+
+pub fn try_url_load(
+    mut player_state: ResMut<State<PlayerState>>,
+    network_channel: Res<NetworkChannel>,
+) {
+    let window = web_sys::window().unwrap();
+    let query = window.location().search().map(|raw_url| {
+        let url_key = raw_url.trim_start_matches('?').to_owned();
+        info!("Try getting url reqeust {}", &url_key);
+        url_key
+    });
+    match query {
+        Ok(url_key) => {
+            if url_key.len() > 0 {
+                let _ = crate::network::Network::get_puzzle_state(
+                    url_key,
+                    &mut player_state,
+                    &network_channel,
+                );
+                return;
+            }
+        }
+        Err(_) => (),
+    }
+
+    assert_eq!(player_state.inactives().len(), 0);
+    let _ = player_state.set(PlayerState::Idle);
 }
 
 fn update_block(

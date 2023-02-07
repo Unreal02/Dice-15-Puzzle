@@ -7,6 +7,7 @@ use crate::buffered_input::GameInput;
 /// So, PlayerPlugin would control such state transitions of player.
 #[derive(Clone, Eq, PartialEq, Debug, Hash)]
 pub enum PlayerState {
+    Init,
     Idle,
     Shuffled,
     Solving,
@@ -22,7 +23,10 @@ pub struct PlayerPlugin;
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
         app.add_startup_system(setup_playinfo)
-            .add_state(PlayerState::Idle)
+            .add_state(PlayerState::Init)
+            .add_system_set(
+                SystemSet::on_update(PlayerState::Init).with_system(crate::game::try_url_load),
+            )
             .add_system_set(SystemSet::on_enter(PlayerState::Idle).with_system(reset_timer))
             .add_system_set(SystemSet::on_enter(PlayerState::Shuffled).with_system(reset_timer))
             .add_system_set(SystemSet::on_enter(PlayerState::Solving).with_system(start_timer))
