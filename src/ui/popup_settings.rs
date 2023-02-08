@@ -23,7 +23,7 @@ pub fn spawn_popup_settings(
     commands
         .entity(game_ui_query.single())
         .with_children(|parent| {
-            spawn_popup_panel(parent, button_close_image.clone(), |parent| {
+            spawn_popup_panel(parent, button_close_image.clone(), font.clone(), |parent| {
                 // settings text
                 parent.spawn(
                     TextBundle::from_section(
@@ -87,6 +87,8 @@ pub fn spawn_popup_settings(
                     },
                     MyButtonType::Share,
                     asset_server.load("images/button_share.png").into(),
+                    "Share URL".to_string(),
+                    font.clone(),
                 );
 
                 // share result UI
@@ -134,6 +136,8 @@ pub fn spawn_popup_settings(
                         },
                         MyButtonType::LoadURL,
                         asset_server.load("images/button_load.png").into(),
+                        "Load URL".to_string(),
+                        font.clone(),
                     );
 
                     // load URL guide text

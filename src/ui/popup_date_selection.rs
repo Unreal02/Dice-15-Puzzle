@@ -35,7 +35,7 @@ pub fn spawn_popup_date_selection(
     commands
         .entity(game_ui_query.single_mut())
         .with_children(|parent| {
-            spawn_popup_panel(parent, button_close_image.clone(), |parent| {
+            spawn_popup_panel(parent, button_close_image.clone(), font.clone(), |parent| {
                 // date selection text
                 spawn_text(
                     parent,

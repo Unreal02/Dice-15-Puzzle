@@ -101,6 +101,7 @@ fn despawn_popup(
 pub fn spawn_popup_panel(
     parent: &mut ChildBuilder,
     close_button_image: UiImage,
+    font: Handle<Font>,
     child_builder: impl FnOnce(&mut ChildBuilder),
 ) {
     parent
@@ -142,25 +143,30 @@ pub fn spawn_popup_panel(
                 })
                 .with_children(|parent| {
                     // close button
-                    parent.spawn((
-                        ButtonBundle {
-                            style: Style {
-                                align_items: AlignItems::Center,
-                                justify_content: JustifyContent::Center,
-                                size: Size::new(Val::Px(60.0), Val::Px(60.0)),
-                                position_type: PositionType::Absolute,
-                                position: UiRect {
-                                    right: Val::Px(20.0),
-                                    top: Val::Px(20.0),
+                    parent
+                        .spawn((
+                            ButtonBundle {
+                                style: Style {
+                                    align_items: AlignItems::Center,
+                                    justify_content: JustifyContent::Center,
+                                    size: Size::new(Val::Px(60.0), Val::Px(60.0)),
+                                    position_type: PositionType::Absolute,
+                                    position: UiRect {
+                                        right: Val::Px(20.0),
+                                        top: Val::Px(20.0),
+                                        ..default()
+                                    },
                                     ..default()
                                 },
+                                image: close_button_image,
                                 ..default()
                             },
-                            image: close_button_image,
-                            ..default()
-                        },
-                        PopupCloseButton,
-                    ));
+                            PopupCloseButton,
+                            ButtonInfoBundle::default(),
+                        ))
+                        .with_children(|parent| {
+                            spawn_button_info(parent, "Close".to_string(), None, font);
+                        });
                 })
                 .with_children(child_builder);
         });

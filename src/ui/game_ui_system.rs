@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use chrono::Datelike;
 use web_sys::window;
 
@@ -231,6 +233,46 @@ pub fn game_ui_text_system(
                         text.sections[0].value.push(ev.char);
                     }
                 }
+            }
+        }
+    }
+}
+
+pub fn button_hover_system(
+    mut interaction_query: Query<
+        (
+            &Interaction,
+            ChangeTrackers<Interaction>,
+            &mut InteractionHistory,
+            &mut HoverTimer,
+            &mut Children,
+        ),
+        With<Button>,
+    >,
+    time: Res<Time>,
+    mut visibility_query: Query<&mut Visibility>,
+) {
+    for (interaction, tracker, mut interaction_history, mut hover_timer, children) in
+        interaction_query.iter_mut()
+    {
+        assert_eq!(children.len(), 1);
+        let mut info_visibility = visibility_query.get_mut(children[0]).unwrap();
+
+        if tracker.is_changed() {
+            interaction_history.prev = interaction_history.curr;
+            interaction_history.curr = *interaction;
+            info_visibility.is_visible = false;
+        }
+
+        if interaction_history.prev == Interaction::None && *interaction == Interaction::Hovered {
+            if tracker.is_changed() {
+                hover_timer.0.reset();
+                hover_timer.0.set_duration(Duration::from_secs_f32(0.7));
+            }
+
+            hover_timer.0.tick(time.delta());
+            if hover_timer.0.just_finished() {
+                info_visibility.is_visible = true;
             }
         }
     }

@@ -34,7 +34,7 @@ pub fn spawn_popup_statistics(
     commands
         .entity(game_ui_query.single_mut())
         .with_children(|parent| {
-            spawn_popup_panel(parent, button_close_image.clone(), |parent| {
+            spawn_popup_panel(parent, button_close_image.clone(), font.clone(), |parent| {
                 // statistics text
                 parent.spawn(
                     TextBundle::from_section(
@@ -77,6 +77,8 @@ pub fn spawn_popup_statistics(
                     },
                     MyButtonType::Export,
                     asset_server.load("images/button_share.png").into(),
+                    "Copy to clipboard".to_string(),
+                    font.clone(),
                 );
 
                 // delete statistics button
@@ -89,6 +91,8 @@ pub fn spawn_popup_statistics(
                     },
                     MyButtonType::DeleteStatistics,
                     asset_server.load("images/button_delete.png").into(),
+                    "Delete all".to_string(),
+                    font.clone(),
                 );
 
                 if statistics_manager.solves() != 0 {

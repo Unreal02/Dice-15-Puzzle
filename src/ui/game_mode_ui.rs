@@ -158,6 +158,8 @@ fn spawn_game_mode_ui(
                     },
                     MyButtonType::Undo,
                     asset_server.load("images/button_undo.png").into(),
+                    "Undo".to_string(),
+                    font.clone(),
                 );
 
                 // redo button
@@ -170,6 +172,8 @@ fn spawn_game_mode_ui(
                     },
                     MyButtonType::Redo,
                     asset_server.load("images/button_redo.png").into(),
+                    "Redo".to_string(),
+                    font.clone(),
                 );
             }
             GameMode::TimeAttack | GameMode::MinimalMovement => {
@@ -183,6 +187,8 @@ fn spawn_game_mode_ui(
                     },
                     MyButtonType::Statistics,
                     asset_server.load("images/button_statistics.png").into(),
+                    "Statistics".to_string(),
+                    font.clone(),
                 );
             }
             GameMode::DailyPuzzle => {
@@ -212,24 +218,28 @@ fn spawn_game_mode_ui(
                 spawn_image_button(
                     parent,
                     UiRect {
-                        bottom: Val::Px(290.0),
+                        top: Val::Px(320.0),
                         left: Val::Px(50.0),
                         ..default()
                     },
                     MyButtonType::DateSelection,
                     asset_server.load("images/button_date_selection.png").into(),
+                    "Date Selection".to_string(),
+                    font.clone(),
                 );
 
                 // rankings button
                 spawn_image_button(
                     parent,
                     UiRect {
-                        bottom: Val::Px(170.0),
+                        top: Val::Px(440.0),
                         left: Val::Px(50.0),
                         ..default()
                     },
                     MyButtonType::Rankings,
                     asset_server.load("images/button_rankings.png").into(),
+                    "Rankings".to_string(),
+                    font.clone(),
                 );
 
                 // restart button
@@ -242,6 +252,8 @@ fn spawn_game_mode_ui(
                     },
                     MyButtonType::Restart,
                     asset_server.load("images/button_restart.png").into(),
+                    "Restart".to_string(),
+                    font.clone(),
                 );
             }
         });
