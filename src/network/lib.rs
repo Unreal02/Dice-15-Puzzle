@@ -3,6 +3,7 @@
 use std::{
     collections::hash_map::DefaultHasher,
     hash::{Hash, Hasher},
+    time::Duration,
 };
 
 use chrono::NaiveDate;
@@ -13,10 +14,18 @@ use serde::{Deserialize, Serialize};
 /// index: number written on block (0 means empty)
 pub struct BoardString(pub [(u8, u8); 16]);
 
+#[derive(Serialize, Deserialize, Default, Debug, Clone, Hash)]
+pub struct DailyRanking {
+    pub date: NaiveDate,
+    pub time_ranking: Vec<(String, u128)>, //u128 == Duration.to_micros()
+    pub move_ranking: Vec<(String, usize)>,
+}
+
 #[derive(Copy, Serialize, Deserialize, Clone, Debug)]
 pub enum NetworkError {
     KeyAlreadyExist,
     NoEntry,
+    NameAlreadyExist,
 }
 
 #[allow(dead_code)]
@@ -81,6 +90,8 @@ pub enum RequestType {
     GenerateDailyPuzzle(NaiveDate), // used by daily trigger only
     EnrollPuzzleState(String, BoardString),
     GetPuzzleState(String),
+    EnrollDailyScore(NaiveDate, String, Duration, usize), // zadd 사용해서 처리하면 될듯함
+    GetDailyRanking(NaiveDate),
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -90,4 +101,6 @@ pub enum ResponseType {
     GenerateDailyPuzzle(bool), // used by daily trigger only
     EnrollPuzzleState(Result<String, NetworkError>),
     GetPuzzleState(Result<BoardString, NetworkError>),
+    EnrollDailyScore(Result<(), NetworkError>),
+    GetDailyRanking(Result<DailyRanking, NetworkError>),
 }
