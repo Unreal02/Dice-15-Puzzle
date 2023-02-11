@@ -1,15 +1,15 @@
 use crate::{statistics_manager::StatisticsManager, ui::*};
-use bevy::input::mouse::{MouseScrollUnit, MouseWheel};
 
 const SCROLL_BAR_MAX_ITEMS: usize = 11;
-const SCROLL_SPEED: f32 = 1.0;
 
 #[derive(Default)]
 pub struct DeleteStatisticsEvent;
 
 #[derive(Component, Default)]
 pub struct ScrollBar {
-    position: f32,
+    pub content: Vec<String>,
+    pub max_items: usize,
+    pub position: f32,
 }
 
 #[derive(Component, Debug)]
@@ -148,6 +148,11 @@ pub fn spawn_popup_statistics(
                         Some(PopupStatisticsTextType::Details),
                     );
 
+                    let mut content = vec![];
+                    for i in 0..statistics_manager.solves() {
+                        content.push(format!("{}. {}", i + 1, statistics_manager.get_record(i)));
+                    }
+
                     // scroll bar background
                     parent
                         .spawn((
@@ -167,7 +172,11 @@ pub fn spawn_popup_statistics(
                                 background_color: Color::rgb(0.2, 0.2, 0.2).into(),
                                 ..default()
                             },
-                            ScrollBar::default(),
+                            ScrollBar {
+                                content,
+                                max_items: SCROLL_BAR_MAX_ITEMS,
+                                position: 0.0,
+                            },
                         ))
                         .with_children(|parent| {
                             for i in 0..SCROLL_BAR_MAX_ITEMS {
@@ -191,41 +200,10 @@ pub fn spawn_popup_statistics(
 
 pub fn popup_system_statistics(
     mut commands: Commands,
-    mut scroll_events: EventReader<MouseWheel>,
-    mut scroll_bar_query: Query<(&mut ScrollBar, &Children, Entity)>,
-    statistics_manager_query: Query<&StatisticsManager>,
-    mut text_query: Query<&mut Text, Without<PopupStatisticsTextType>>,
+    scroll_bar_query: Query<(&mut ScrollBar, &Children, Entity)>,
     mut statistics_text_query: Query<(&mut Text, &PopupStatisticsTextType, Entity)>,
     delete_statistics_event: EventReader<DeleteStatisticsEvent>,
 ) {
-    let statistics_manager = statistics_manager_query.single();
-
-    // scroll bar
-    if let Ok((mut scroll_bar, children, _)) = scroll_bar_query.get_single_mut() {
-        for scroll_event in scroll_events.iter() {
-            let dy = match scroll_event.unit {
-                MouseScrollUnit::Line => scroll_event.y,
-                MouseScrollUnit::Pixel => scroll_event.y / 20.0,
-            };
-            scroll_bar.position -= dy * SCROLL_SPEED;
-        }
-
-        scroll_bar.position = scroll_bar
-            .position
-            .clamp(0.0, (statistics_manager.solves() as f32 - 11.0).max(0.0));
-
-        let start_position = scroll_bar.position as usize;
-        for i in 0..children.len() {
-            let index = start_position + i;
-            text_query.get_mut(children[i]).unwrap().sections[0].value =
-                if index < statistics_manager.solves() {
-                    format!("{}. {}", index + 1, statistics_manager.get_record(i))
-                } else {
-                    "".to_string()
-                };
-        }
-    }
-
     if !delete_statistics_event.is_empty() {
         for (mut text, text_type, entity) in statistics_text_query.iter_mut() {
             match text_type {

@@ -26,6 +26,7 @@ impl Plugin for GameUIPlugin {
             .add_system(game_ui_button_system)
             .add_system(button_hover_system)
             .add_system(game_ui_text_system)
+            .add_system(scroll_bar_system)
             .add_system_set(SystemSet::on_enter(PlayerState::Clear).with_system(spawn_clear_ui))
             .add_system_set(SystemSet::on_exit(PlayerState::Clear).with_system(despawn_clear_ui));
     }
