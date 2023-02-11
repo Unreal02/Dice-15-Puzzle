@@ -134,6 +134,7 @@ fn spawn_clear_ui(
     mut commands: Commands,
     game_ui: Query<Entity, With<GameUI>>,
     asset_server: Res<AssetServer>,
+    game_mode: Res<State<GameMode>>,
 ) {
     let font = asset_server.load("fonts/Quicksand-Bold.ttf");
 
@@ -157,6 +158,22 @@ fn spawn_clear_ui(
             }),
             MyTextType::GameClear,
         ));
+
+        if *game_mode.current() == GameMode::DailyPuzzle {
+            // enroll score button
+            spawn_image_button(
+                parent,
+                UiRect {
+                    right: Val::Px(450.0),
+                    top: Val::Px(50.0),
+                    ..default()
+                },
+                MyButtonType::EnrollScore,
+                asset_server.load("images/button_enroll_score.png").into(),
+                "Enroll Score".to_string(),
+                font.clone(),
+            );
+        }
     });
 }
 
@@ -219,7 +236,7 @@ pub fn spawn_image_button(
     font: Handle<Font>,
 ) {
     let info_position = match button_type {
-        MyButtonType::Settings => Some(UiRect {
+        MyButtonType::Settings | MyButtonType::EnrollScore => Some(UiRect {
             bottom: Val::Px(-60.0),
             ..default()
         }),

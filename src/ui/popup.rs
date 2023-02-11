@@ -29,6 +29,13 @@ impl Plugin for PopupPlugin {
                     .with_system(spawn_popup_date_selection),
             )
             .add_system_set(
+                SystemSet::on_enter(PlayerState::RankingsPopup).with_system(spawn_popup_rankings),
+            )
+            .add_system_set(
+                SystemSet::on_enter(PlayerState::EnrollScorePopup)
+                    .with_system(spawn_popup_enroll_score),
+            )
+            .add_system_set(
                 SystemSet::on_update(PlayerState::SettingsPopup)
                     .with_system(popup_close_button_system),
             )
@@ -48,6 +55,14 @@ impl Plugin for PopupPlugin {
                     .with_system(popup_close_button_system),
             )
             .add_system_set(
+                SystemSet::on_update(PlayerState::RankingsPopup)
+                    .with_system(popup_close_button_system),
+            )
+            .add_system_set(
+                SystemSet::on_update(PlayerState::EnrollScorePopup)
+                    .with_system(popup_close_button_system),
+            )
+            .add_system_set(
                 SystemSet::on_exit(PlayerState::SettingsPopup).with_system(despawn_popup),
             )
             .add_system_set(
@@ -58,6 +73,12 @@ impl Plugin for PopupPlugin {
             )
             .add_system_set(
                 SystemSet::on_exit(PlayerState::DateSelectionPopup).with_system(despawn_popup),
+            )
+            .add_system_set(
+                SystemSet::on_exit(PlayerState::RankingsPopup).with_system(despawn_popup),
+            )
+            .add_system_set(
+                SystemSet::on_exit(PlayerState::EnrollScorePopup).with_system(despawn_popup),
             );
     }
 }
@@ -165,7 +186,7 @@ pub fn spawn_popup_panel(
                             ButtonInfoBundle::default(),
                         ))
                         .with_children(|parent| {
-                            spawn_button_info(parent, "Close".to_string(), None, font);
+                            spawn_button_info(parent, "Close (Esc)".to_string(), None, font);
                         });
                 })
                 .with_children(child_builder);

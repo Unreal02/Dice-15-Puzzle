@@ -141,7 +141,10 @@ pub fn game_ui_button_system(
                         let _ = player_state.push(PlayerState::DateSelectionPopup);
                     }
                     MyButtonType::Rankings => {
-                        info!("rankings\n");
+                        let _ = player_state.push(PlayerState::RankingsPopup);
+                    }
+                    MyButtonType::EnrollScore => {
+                        let _ = player_state.push(PlayerState::EnrollScorePopup);
                     }
                     MyButtonType::Restart => {
                         let _ = daily_puzzle_info.load_daily_puzzle(
