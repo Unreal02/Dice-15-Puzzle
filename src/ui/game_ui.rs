@@ -177,10 +177,19 @@ fn spawn_clear_ui(
     });
 }
 
-fn despawn_clear_ui(mut commands: Commands, my_ui_query: Query<(Entity, &MyTextType)>) {
-    for (ui, &ui_type) in &my_ui_query {
-        if ui_type == MyTextType::GameClear {
-            commands.entity(ui).despawn_recursive();
+fn despawn_clear_ui(
+    mut commands: Commands,
+    button_query: Query<(Entity, &MyButtonType)>,
+    text_query: Query<(Entity, &MyTextType)>,
+) {
+    for (button, button_type) in button_query.iter() {
+        if *button_type == MyButtonType::EnrollScore {
+            commands.entity(button).despawn_recursive();
+        }
+    }
+    for (text, &text_type) in text_query.iter() {
+        if text_type == MyTextType::GameClear {
+            commands.entity(text).despawn_recursive();
         }
     }
 }
