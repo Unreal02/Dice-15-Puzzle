@@ -219,14 +219,14 @@ fn response_waiting_system(
                             let mut content = vec![];
                             match ranking_type {
                                 RankingType::Time => {
-                                    for (i, (name, millis)) in
+                                    for (i, (name, micros)) in
                                         ranking.time_ranking.iter().enumerate()
                                     {
                                         content.push(format!(
                                             "{}. {} | {}",
                                             i + 1,
-                                            duration_to_string(Duration::from_millis(
-                                                *millis as u64
+                                            duration_to_string(Duration::from_micros(
+                                                *micros as u64
                                             )),
                                             name
                                         ));
