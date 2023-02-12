@@ -56,6 +56,7 @@ impl Plugin for PopupPlugin {
             )
             .add_system_set(
                 SystemSet::on_update(PlayerState::RankingsPopup)
+                    .with_system(popup_rankings_system)
                     .with_system(popup_close_button_system),
             )
             .add_system_set(

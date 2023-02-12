@@ -1,10 +1,7 @@
 use std::time::Duration;
 
-use bevy::input::mouse::{MouseScrollUnit, MouseWheel};
 use chrono::Datelike;
 use web_sys::window;
-
-const SCROLL_SPEED: f32 = 1.0;
 
 use crate::{
     buffered_input::{InputBuffer, InputHandler, InputInversionFlag, InputTimer, MoveImmediate},
@@ -280,43 +277,6 @@ pub fn button_hover_system(
             if hover_timer.0.just_finished() {
                 info_visibility.is_visible = true;
             }
-        }
-    }
-}
-
-pub fn scroll_bar_system(
-    mut scroll_events: EventReader<MouseWheel>,
-    mut scroll_bar_query: Query<(&mut ScrollBar, &Children, Entity)>,
-    mut text_query: Query<&mut Text>,
-) {
-    // scroll bar
-    if let Ok((mut scroll_bar, children, _)) = scroll_bar_query.get_single_mut() {
-        for scroll_event in scroll_events.iter() {
-            let dy = match scroll_event.unit {
-                MouseScrollUnit::Line => scroll_event.y,
-                MouseScrollUnit::Pixel => scroll_event.y / 20.0,
-            };
-            scroll_bar.position -= dy * SCROLL_SPEED;
-        }
-
-        scroll_bar.position = scroll_bar.position.clamp(
-            0.0,
-            (if scroll_bar.content.len() >= scroll_bar.max_items {
-                scroll_bar.content.len() - scroll_bar.max_items
-            } else {
-                0
-            } as f32),
-        );
-
-        let start_position = scroll_bar.position as usize;
-        for i in 0..children.len() {
-            let index = start_position + i;
-            text_query.get_mut(children[i]).unwrap().sections[0].value =
-                if index < scroll_bar.content.len() {
-                    scroll_bar.content[index].clone()
-                } else {
-                    "".to_string()
-                };
         }
     }
 }
