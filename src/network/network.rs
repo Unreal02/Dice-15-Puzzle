@@ -1,10 +1,16 @@
+use std::time::Duration;
+
 use bevy::{prelude::*, tasks::AsyncComputeTaskPool};
 use chrono::NaiveDate;
 use tokio::sync::mpsc::{unbounded_channel, UnboundedReceiver, UnboundedSender};
 
 use crate::{
-    daily_puzzle_info::DailyPuzzleInfo, game::GameState, network::*, player::PlayerState,
-    ui::MyTextType, utils::string_to_board,
+    daily_puzzle_info::DailyPuzzleInfo,
+    game::GameState,
+    network::*,
+    player::PlayerState,
+    ui::{MyTextType, RankingType, ScrollBar},
+    utils::{duration_to_string, string_to_board},
 };
 
 #[cfg(not(feature = "local_server"))]
@@ -89,6 +95,20 @@ impl Network {
             .unwrap();
         player_state.push(PlayerState::ResponseWaiting).unwrap();
     }
+
+    pub fn get_daily_ranking(
+        date: NaiveDate,
+        player_state: &mut ResMut<State<PlayerState>>,
+        network_channel: &Res<NetworkChannel>,
+    ) {
+        network_channel
+            .input
+            .send(RequestType::GetDailyRanking(date))
+            .unwrap();
+        player_state
+            .overwrite_push(PlayerState::ResponseWaiting)
+            .unwrap();
+    }
 }
 
 fn init_network_channel(mut commands: Commands) {
@@ -127,6 +147,7 @@ fn response_waiting_system(
     mut network_channel: ResMut<NetworkChannel>,
     mut daily_puzzle_info_query: Query<&mut DailyPuzzleInfo>,
     mut text_query: Query<(&mut Text, &MyTextType)>,
+    mut scroll_bar_query: Query<(&mut ScrollBar, &RankingType)>,
 ) {
     let mut game = game_query.single_mut();
     let mut daily_puzzle_info = daily_puzzle_info_query.single_mut();
@@ -190,7 +211,42 @@ fn response_waiting_system(
                     player_state.pop().unwrap();
                 }
             },
-            ResponseType::EnrollDailyScore(_) | ResponseType::GetDailyRanking(_) => todo!(),
+            ResponseType::EnrollDailyScore(_) => todo!(),
+            ResponseType::GetDailyRanking(result) => {
+                match result {
+                    Ok(ranking) => {
+                        for (mut scroll_bar, ranking_type) in scroll_bar_query.iter_mut() {
+                            let mut content = vec![];
+                            match ranking_type {
+                                RankingType::Time => {
+                                    for (i, (name, millis)) in
+                                        ranking.time_ranking.iter().enumerate()
+                                    {
+                                        content.push(format!(
+                                            "{}. {} | {}",
+                                            i + 1,
+                                            duration_to_string(Duration::from_millis(
+                                                *millis as u64
+                                            )),
+                                            name
+                                        ));
+                                    }
+                                }
+                                RankingType::Move => {
+                                    for (i, (name, moves)) in
+                                        ranking.move_ranking.iter().enumerate()
+                                    {
+                                        content.push(format!("{}. {} | {}", i + 1, moves, name));
+                                    }
+                                }
+                            };
+                            scroll_bar.content = content;
+                        }
+                    }
+                    Err(error) => info!("{:?}", error),
+                }
+                player_state.pop().unwrap();
+            }
         }
     }
 }

@@ -154,45 +154,20 @@ pub fn spawn_popup_statistics(
                     }
 
                     // scroll bar background
-                    parent
-                        .spawn((
-                            NodeBundle {
-                                style: Style {
-                                    position_type: PositionType::Absolute,
-                                    align_items: AlignItems::Center,
-                                    justify_content: JustifyContent::Center,
-                                    size: Size::new(Val::Px(275.0), Val::Px(450.0)),
-                                    position: UiRect {
-                                        right: Val::Px(25.0),
-                                        bottom: Val::Px(25.0),
-                                        ..default()
-                                    },
-                                    ..default()
-                                },
-                                background_color: Color::rgb(0.2, 0.2, 0.2).into(),
-                                ..default()
-                            },
-                            ScrollBar {
-                                content,
-                                max_items: SCROLL_BAR_MAX_ITEMS,
-                                position: 0.0,
-                            },
-                        ))
-                        .with_children(|parent| {
-                            for i in 0..SCROLL_BAR_MAX_ITEMS {
-                                spawn_text(
-                                    parent,
-                                    UiRect {
-                                        top: Val::Px(5.0 + 40.0 * i as f32),
-                                        left: Val::Px(25.0),
-                                        ..default()
-                                    },
-                                    "".to_string(),
-                                    font.clone(),
-                                    None,
-                                );
-                            }
-                        });
+                    spawn_scroll_bar(
+                        parent,
+                        Size::new(Val::Px(275.0), Val::Px(450.0)),
+                        UiRect {
+                            right: Val::Px(25.0),
+                            bottom: Val::Px(25.0),
+                            ..default()
+                        },
+                        content,
+                        SCROLL_BAR_MAX_ITEMS,
+                        font.clone(),
+                        true,
+                        None::<Node>, // 아무 타입이든 지정하긴 해야 되네
+                    );
                 }
             });
         });

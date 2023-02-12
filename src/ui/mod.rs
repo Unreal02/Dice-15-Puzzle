@@ -8,6 +8,7 @@ mod popup_mode_selection;
 mod popup_rankings;
 mod popup_settings;
 mod popup_statistics;
+mod scroll_bar;
 
 pub use bevy::prelude::*;
 pub use game_mode_ui::*;
@@ -20,6 +21,7 @@ pub use popup_mode_selection::*;
 pub use popup_rankings::*;
 pub use popup_settings::*;
 pub use popup_statistics::*;
+pub use scroll_bar::*;
 
 pub const TEXT_SIZE: f32 = 40.0;
 
