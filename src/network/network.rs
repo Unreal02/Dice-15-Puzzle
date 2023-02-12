@@ -247,6 +247,7 @@ fn response_waiting_system(
                 }
                 player_state.pop().unwrap();
             }
+            ResponseType::ClearRanking(_) => todo!(),
         }
     }
 }
