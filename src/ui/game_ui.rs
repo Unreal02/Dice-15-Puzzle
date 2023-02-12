@@ -26,6 +26,7 @@ impl Plugin for GameUIPlugin {
             .add_system(game_ui_button_system)
             .add_system(button_hover_system)
             .add_system(game_ui_text_system)
+            .add_system(scroll_bar_system)
             .add_system_set(SystemSet::on_enter(PlayerState::Clear).with_system(spawn_clear_ui))
             .add_system_set(SystemSet::on_exit(PlayerState::Clear).with_system(despawn_clear_ui));
     }
@@ -134,6 +135,7 @@ fn spawn_clear_ui(
     mut commands: Commands,
     game_ui: Query<Entity, With<GameUI>>,
     asset_server: Res<AssetServer>,
+    game_mode: Res<State<GameMode>>,
 ) {
     let font = asset_server.load("fonts/Quicksand-Bold.ttf");
 
@@ -157,13 +159,38 @@ fn spawn_clear_ui(
             }),
             MyTextType::GameClear,
         ));
+
+        if *game_mode.current() == GameMode::DailyPuzzle {
+            // enroll score button
+            spawn_image_button(
+                parent,
+                UiRect {
+                    right: Val::Px(450.0),
+                    top: Val::Px(50.0),
+                    ..default()
+                },
+                MyButtonType::EnrollScore,
+                asset_server.load("images/button_enroll_score.png").into(),
+                "Enroll Score".to_string(),
+                font.clone(),
+            );
+        }
     });
 }
 
-fn despawn_clear_ui(mut commands: Commands, my_ui_query: Query<(Entity, &MyTextType)>) {
-    for (ui, &ui_type) in &my_ui_query {
-        if ui_type == MyTextType::GameClear {
-            commands.entity(ui).despawn_recursive();
+fn despawn_clear_ui(
+    mut commands: Commands,
+    button_query: Query<(Entity, &MyButtonType)>,
+    text_query: Query<(Entity, &MyTextType)>,
+) {
+    for (button, button_type) in button_query.iter() {
+        if *button_type == MyButtonType::EnrollScore {
+            commands.entity(button).despawn_recursive();
+        }
+    }
+    for (text, &text_type) in text_query.iter() {
+        if text_type == MyTextType::GameClear {
+            commands.entity(text).despawn_recursive();
         }
     }
 }
@@ -219,7 +246,7 @@ pub fn spawn_image_button(
     font: Handle<Font>,
 ) {
     let info_position = match button_type {
-        MyButtonType::Settings => Some(UiRect {
+        MyButtonType::Settings | MyButtonType::EnrollScore => Some(UiRect {
             bottom: Val::Px(-60.0),
             ..default()
         }),

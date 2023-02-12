@@ -4,6 +4,8 @@ stages:
 
 build:
   stage: build
+  only:
+    - master
   image: rust:latest
   script:
     - rustup target install wasm32-unknown-unknown
@@ -25,6 +27,8 @@ build:
 # GitLab Pages Deploy
 docker-daegunju:
   stage: deploy
+  only:
+    - master
   image: docker/compose:latest
   services:
     - docker:19.03.8-dind
