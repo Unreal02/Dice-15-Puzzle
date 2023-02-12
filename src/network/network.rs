@@ -190,7 +190,7 @@ fn response_waiting_system(
                     player_state.pop().unwrap();
                 }
             },
-            ResponseType::EnrollDailyScore(_) | ResponseType::GetDailyRanking(_) => todo!(),
+            ResponseType::EnrollDailyScore(_) | ResponseType::GetDailyRanking(_) | ResponseType::ClearRanking(_) => todo!(),
         }
     }
 }
