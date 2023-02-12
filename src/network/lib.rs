@@ -14,11 +14,11 @@ use serde::{Deserialize, Serialize};
 /// index: number written on block (0 means empty)
 pub struct BoardString(pub [(u8, u8); 16]);
 
-#[derive(Serialize, Deserialize, Default, Debug, Clone, Hash)]
+#[derive(Serialize, Deserialize, Default, Debug, Clone)]
 pub struct DailyRanking {
     pub date: NaiveDate,
-    pub time_ranking: Vec<(String, u128)>, //u128 == Duration.to_micros()
-    pub move_ranking: Vec<(String, usize)>,
+    pub time_ranking: Vec<(String, i64)>, //i64 => Duration.to_micros()
+    pub move_ranking: Vec<(String, f32)>,
 }
 
 #[derive(Copy, Serialize, Deserialize, Clone, Debug)]
@@ -92,6 +92,7 @@ pub enum RequestType {
     GetPuzzleState(String),
     EnrollDailyScore(NaiveDate, String, Duration, usize), // zadd 사용해서 처리하면 될듯함
     GetDailyRanking(NaiveDate),
+    ClearRanking(NaiveDate),
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -103,4 +104,5 @@ pub enum ResponseType {
     GetPuzzleState(Result<BoardString, NetworkError>),
     EnrollDailyScore(Result<(), NetworkError>),
     GetDailyRanking(Result<DailyRanking, NetworkError>),
+    ClearRanking(Result<(), NetworkError>),
 }
