@@ -235,7 +235,9 @@ fn response_waiting_system(
                         Ok(_) => "Enroll success!",
                         Err(network_error) => match network_error {
                             NetworkError::KeyAlreadyExist => todo!(),
-                            NetworkError::NoEntry => "Can't enroll score of previous daily puzzles",
+                            NetworkError::NoEntry => {
+                                "Can't enroll score of\nprevious daily puzzles"
+                            }
                             NetworkError::NameAlreadyExist => "Name already exists",
                         },
                     }

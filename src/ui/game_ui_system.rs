@@ -151,17 +151,19 @@ pub fn game_ui_button_system(
                         for (text, &text_type) in text_query.iter() {
                             if let MyTextType::TextInputBox(_) = text_type {
                                 let user_name = text.sections[0].value.clone();
-                                let player_info = player_info_query.single().get_player_info();
-                                info!("Enroll Score: {}", user_name);
-                                let daily_puzzle_info = daily_puzzle_info_query.single();
-                                let _ = crate::network::Network::enroll_daily_ranking(
-                                    daily_puzzle_info.current_date,
-                                    user_name,
-                                    player_info.0,
-                                    player_info.1,
-                                    &mut player_state,
-                                    &network_channel,
-                                );
+                                if !user_name.is_empty() {
+                                    let player_info = player_info_query.single().get_player_info();
+                                    info!("Enroll Score: {}", user_name);
+                                    let daily_puzzle_info = daily_puzzle_info_query.single();
+                                    let _ = crate::network::Network::enroll_daily_ranking(
+                                        daily_puzzle_info.current_date,
+                                        user_name,
+                                        player_info.0,
+                                        player_info.1,
+                                        &mut player_state,
+                                        &network_channel,
+                                    );
+                                }
                             }
                         }
                     }
