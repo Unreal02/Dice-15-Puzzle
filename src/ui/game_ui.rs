@@ -169,7 +169,7 @@ fn spawn_clear_ui(
                     top: Val::Px(50.0),
                     ..default()
                 },
-                MyButtonType::EnrollScore,
+                MyButtonType::PopupEnrollScore,
                 asset_server.load("images/button_enroll_score.png").into(),
                 "Enroll Score".to_string(),
                 font.clone(),
@@ -184,7 +184,7 @@ fn despawn_clear_ui(
     text_query: Query<(Entity, &MyTextType)>,
 ) {
     for (button, button_type) in button_query.iter() {
-        if *button_type == MyButtonType::EnrollScore {
+        if *button_type == MyButtonType::PopupEnrollScore {
             commands.entity(button).despawn_recursive();
         }
     }
@@ -246,7 +246,7 @@ pub fn spawn_image_button(
     font: Handle<Font>,
 ) {
     let info_position = match button_type {
-        MyButtonType::Settings | MyButtonType::EnrollScore => Some(UiRect {
+        MyButtonType::Settings | MyButtonType::PopupEnrollScore => Some(UiRect {
             bottom: Val::Px(-60.0),
             ..default()
         }),

@@ -162,45 +162,17 @@ pub fn spawn_popup_settings(
                     );
 
                     // load URL text
-                    parent
-                        .spawn(NodeBundle {
-                            style: Style {
-                                position_type: PositionType::Absolute,
-                                position: UiRect {
-                                    bottom: Val::Px(175.0),
-                                    left: Val::Px(170.0),
-                                    ..default()
-                                },
-                                size: Size::new(Val::Px(380.0), Val::Px(40.0)),
-                                ..default()
-                            },
-                            background_color: Color::GRAY.into(),
+                    spawn_text_input_box(
+                        parent,
+                        UiRect {
+                            bottom: Val::Px(175.0),
+                            left: Val::Px(170.0),
                             ..default()
-                        })
-                        .with_children(|parent| {
-                            parent.spawn((
-                                TextBundle::from_section(
-                                    "",
-                                    TextStyle {
-                                        font: font.clone(),
-                                        font_size: TEXT_SIZE,
-                                        color: Color::BLACK,
-                                    },
-                                )
-                                .with_text_alignment(TextAlignment::CENTER_LEFT)
-                                .with_style(Style {
-                                    position_type: PositionType::Absolute,
-                                    position: UiRect {
-                                        left: Val::Px(5.0),
-                                        right: Val::Px(5.0),
-                                        top: Val::Px(0.0),
-                                        bottom: Val::Px(0.0),
-                                    },
-                                    ..default()
-                                }),
-                                MyTextType::LoadURL,
-                            ));
-                        });
+                        },
+                        Size::new(Val::Px(380.0), Val::Px(40.0)),
+                        font.clone(),
+                        12,
+                    );
                 }
             });
         });

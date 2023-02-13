@@ -96,6 +96,21 @@ impl Network {
         player_state.push(PlayerState::ResponseWaiting).unwrap();
     }
 
+    pub fn enroll_daily_ranking(
+        date: NaiveDate,
+        user_name: String,
+        time: Duration,
+        moves: usize,
+        player_state: &mut ResMut<State<PlayerState>>,
+        network_channel: &Res<NetworkChannel>,
+    ) {
+        network_channel
+            .input
+            .send(RequestType::EnrollDailyScore(date, user_name, time, moves))
+            .unwrap();
+        player_state.push(PlayerState::ResponseWaiting).unwrap();
+    }
+
     pub fn get_daily_ranking(
         date: NaiveDate,
         player_state: &mut ResMut<State<PlayerState>>,
@@ -211,7 +226,23 @@ fn response_waiting_system(
                     player_state.pop().unwrap();
                 }
             },
-            ResponseType::EnrollDailyScore(_) => todo!(),
+            ResponseType::EnrollDailyScore(result) => {
+                for (mut text, _) in text_query
+                    .iter_mut()
+                    .filter(|(_, text_type)| **text_type == MyTextType::EnrollDailyScoreResult)
+                {
+                    text.sections[0].value = match result {
+                        Ok(_) => "Enroll success!",
+                        Err(network_error) => match network_error {
+                            NetworkError::KeyAlreadyExist => todo!(),
+                            NetworkError::NoEntry => "Can't enroll score of previous daily puzzles",
+                            NetworkError::NameAlreadyExist => "Name already exists",
+                        },
+                    }
+                    .to_string();
+                }
+                player_state.pop().unwrap();
+            }
             ResponseType::GetDailyRanking(result) => {
                 match result {
                     Ok(ranking) => {

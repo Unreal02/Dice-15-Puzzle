@@ -9,6 +9,7 @@ mod popup_rankings;
 mod popup_settings;
 mod popup_statistics;
 mod scroll_bar;
+mod text_input_box;
 
 pub use bevy::prelude::*;
 pub use game_mode_ui::*;
@@ -22,6 +23,7 @@ pub use popup_rankings::*;
 pub use popup_settings::*;
 pub use popup_statistics::*;
 pub use scroll_bar::*;
+pub use text_input_box::*;
 
 pub const TEXT_SIZE: f32 = 40.0;
 
@@ -45,6 +47,7 @@ pub enum MyButtonType {
     Statistics,
     DateSelection,
     Rankings,
+    PopupEnrollScore,
     EnrollScore,
     Restart,
     Export,
@@ -59,5 +62,6 @@ pub enum MyTextType {
     GameClear,
     Date,
     ShareURL,
-    LoadURL,
+    TextInputBox(usize),
+    EnrollDailyScoreResult,
 }

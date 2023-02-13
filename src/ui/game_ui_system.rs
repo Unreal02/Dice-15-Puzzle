@@ -41,6 +41,7 @@ pub fn game_ui_button_system(
     daily_puzzle_info_query: Query<&DailyPuzzleInfo>,
     network_channel: Res<NetworkChannel>,
     mut delete_statistics_event: EventWriter<DeleteStatisticsEvent>,
+    player_info_query: Query<&PlayerInfo>,
 ) {
     let mut game = game_query.single_mut();
     let daily_puzzle_info = daily_puzzle_info_query.single();
@@ -143,8 +144,26 @@ pub fn game_ui_button_system(
                     MyButtonType::Rankings => {
                         let _ = player_state.push(PlayerState::RankingsPopup);
                     }
-                    MyButtonType::EnrollScore => {
+                    MyButtonType::PopupEnrollScore => {
                         let _ = player_state.push(PlayerState::EnrollScorePopup);
+                    }
+                    MyButtonType::EnrollScore => {
+                        for (text, &text_type) in text_query.iter() {
+                            if let MyTextType::TextInputBox(_) = text_type {
+                                let user_name = text.sections[0].value.clone();
+                                let player_info = player_info_query.single().get_player_info();
+                                info!("Enroll Score: {}", user_name);
+                                let daily_puzzle_info = daily_puzzle_info_query.single();
+                                let _ = crate::network::Network::enroll_daily_ranking(
+                                    daily_puzzle_info.current_date,
+                                    user_name,
+                                    player_info.0,
+                                    player_info.1,
+                                    &mut player_state,
+                                    &network_channel,
+                                );
+                            }
+                        }
                     }
                     MyButtonType::Restart => {
                         let _ = daily_puzzle_info.load_daily_puzzle(
@@ -161,7 +180,7 @@ pub fn game_ui_button_system(
                     }
                     MyButtonType::LoadURL => {
                         for (text, &text_type) in text_query.iter() {
-                            if text_type == MyTextType::LoadURL {
+                            if let MyTextType::TextInputBox(_) = text_type {
                                 let url_key = &text.sections[0].value;
                                 info!("Load URL: {}", url_key);
                                 let _ = crate::network::Network::get_puzzle_state(
@@ -216,7 +235,6 @@ pub fn game_ui_text_system(
                     move_count
                 );
             }
-            MyTextType::GameClear => {}
             MyTextType::Date => {
                 let current_date = daily_puzzle_info.current_date;
                 text.sections[0].value = format!(
@@ -226,17 +244,17 @@ pub fn game_ui_text_system(
                     current_date.day()
                 );
             }
-            MyTextType::ShareURL => {}
-            MyTextType::LoadURL => {
+            MyTextType::TextInputBox(max_len) => {
                 if keyboard_input.just_pressed(KeyCode::Back) {
                     text.sections[0].value.pop();
                 }
                 for ev in char_evr.iter() {
-                    if text.sections[0].value.len() < 12 {
+                    if text.sections[0].value.len() < max_len {
                         text.sections[0].value.push(ev.char);
                     }
                 }
             }
+            _ => {}
         }
     }
 }
