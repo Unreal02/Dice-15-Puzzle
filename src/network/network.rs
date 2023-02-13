@@ -236,7 +236,12 @@ fn response_waiting_system(
                                     for (i, (name, moves)) in
                                         ranking.move_ranking.iter().enumerate()
                                     {
-                                        content.push(format!("{}. {} | {}", i + 1, moves, name));
+                                        content.push(format!(
+                                            "{}. {} | {}",
+                                            i + 1,
+                                            moves.floor(),
+                                            name
+                                        ));
                                     }
                                 }
                             };
