@@ -87,7 +87,7 @@ pub fn spawn_popup_settings(
                     },
                     MyButtonType::Share,
                     asset_server.load("images/button_share.png").into(),
-                    "Share URL".to_string(),
+                    "Share URL of current game".to_string(),
                     font.clone(),
                 );
 
