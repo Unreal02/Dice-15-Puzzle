@@ -9,59 +9,50 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400&display=swap" rel="stylesheet">
 
     <style>
         body {
-            padding-left: 30px;
+            padding-left: 20px;
             padding-right: 30px;
             min-width: 800px;
-            font-family: 'Nanum Gothic', sans-serif;
-        }
-        img {
-            border: solid 5px black;
+            font-family: 'Quicksand', sans-serif;
         }
     </style>
 </head>
 
 <body>
     <h1 id="dice-15-puzzle">Dice 15 Puzzle</h1>
-    <h2 id="-">해법</h2>
-    <p>작성 중입니다.</p>
-    <h3 id="-">기호 표기법</h3>
-    <p>Input 옵션이 Normal인 경우를 기준으로 합니다.</p>
+    <h2 id="-">How to solve</h2>
+    <h3 id="-">Notations</h3>
+    <p>Assuming that <strong>Input Inversion</strong> option is off.</p>
     <ul>
-    <li>U: 위로 이동</li>
-    <li>D: 아래로 이동</li>
-    <li>L: 왼쪽으로 이동</li>
-    <li>R: 오른쪽으로 이동</li>
+    <li>U: Move up</li>
+    <li>D: Move down</li>
+    <li>L: Move left</li>
+    <li>R: Move right</li>
     </ul>
-    <h3 id="-">유용한 공식들</h3>
-    <h4 id="-180-">윗면 180도 돌리기</h4>
-    <p>11 블록을 180도 돌립니다.</p>
+    <h3 id="-">Useful moves</h3>
+    <h4 id="-180-">Rotate 180 degrees</h4>
     <p>(D R U L) x 3 / (D L U R) x 3 / (R D L U) x 3 / (L D R U) x 3</p>
     <p><img src="./images/tip0.png" height="250"/>
     <img src="./images/tip1.png" height="250"/></p>
-    <h4 id="-1-">윗면과 아랫면 뒤집기 (1)</h4>
-    <p>11 블록의 윗면과 아랫면을 뒤집고 180도 돌립니다.</p>
+    <h4 id="-1-">Flip block (1)</h4>
     <p>(D R U L) x 3 / (L D R U) x 3 / (R D L U) x 3 / (D L U R) x 3</p>
     <p><img src="./images/tip0.png" height="250"/>
     <img src="./images/tip2.png" height="250"/></p>
-    <h4 id="-2-">윗면과 아랫면 뒤집기 (2)</h4>
-    <p>11 블록의 윗면과 아랫면을 뒤집습니다.</p>
+    <h4 id="-2-">Flip block (2)</h4>
     <p>(D R U L) x 3 / (D L U R) x 3 / (D R U L) x 3 / (L D R U) x 3 / (D R U L) x 3</p>
     <p><img src="./images/tip0.png" height="250"/>
     <img src="./images/tip3.png" height="250"/></p>
-    <h4 id="-">옆면으로 돌리기</h4>
-    <p>15 블록을 다른 방향으로 90도씩 2번 돌립니다.</p>
+    <h4 id="-">Rotate sidewards</h4>
     <p>(D R R U L L) x 2 / D R R U L D L U / (R R D L L U) x 2 / R D L U</p>
     <p><img src="./images/tip4.png" height="250"/>
     <img src="./images/tip5.png" height="250"/></p>
-    <h2 id="-">만든 사람들</h2>
-    <ul>
-    <li><a href="https://haje.org" target="_blank"><strong>KAIST HAJE</strong></a></li>
-    <li><strong>총괄(기획/프로그래밍/아트)</strong>: 박성지</li>
-    <li><strong>프로그래밍</strong>: 곽찬신</li>
-    <li><strong>도움 주신 분들</strong>: 김대현, 김지원, 김경완</li>
-    </ul>      
+    <br>
+    <h2 id="-">Made by</h2>
+    <p><a href="https://haje.org" target="_blank"><img src="./images/haje_logo.png" height="100"/></a></p>
+    <br>
+    <h2 id="-">Powered by</h2>
+    <p><a href="https://bevyengine.org" target="_blank"><img src="./images/bevy_logo_light_dark_and_dimmed.svg" height="70"/></a></p>
 </body>
