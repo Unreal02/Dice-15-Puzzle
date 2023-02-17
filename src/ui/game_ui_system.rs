@@ -1,12 +1,12 @@
 use std::time::Duration;
 
 use chrono::Datelike;
-use web_sys::window;
 
 use crate::{
     buffered_input::{InputBuffer, InputHandler, InputInversionFlag, InputTimer, MoveImmediate},
     daily_puzzle_info::DailyPuzzleInfo,
     game::{GameState, MoveTimer},
+    local_storage::LocalStorage,
     network::NetworkChannel,
     player::{PlayLog, PlayerInfo, PlayerState},
     statistics_manager::StatisticsManager,
@@ -83,10 +83,7 @@ pub fn game_ui_button_system(
                                     asset_server.load("images/button_toggle_off.png");
                             }
                         }
-                        let local_storage = window().unwrap().local_storage().unwrap().unwrap();
-                        local_storage
-                            .set_item("move_immediate", &move_immediate.0.to_string())
-                            .unwrap();
+                        LocalStorage::set_move_immediate(&move_immediate.0);
                     }
                     MyButtonType::InputInversion => {
                         play_log.single_mut().reset();
@@ -102,10 +99,7 @@ pub fn game_ui_button_system(
                                     asset_server.load("images/button_toggle_on.png");
                             }
                         }
-                        let local_storage = window().unwrap().local_storage().unwrap().unwrap();
-                        local_storage
-                            .set_item("input_inversion", &input_reveresion_flag.0.to_string())
-                            .unwrap();
+                        LocalStorage::set_input_inversion(&input_reveresion_flag.0);
                     }
                     MyButtonType::ModeSelection => {
                         let _ = player_state.push(PlayerState::ModeSelectionPopup);

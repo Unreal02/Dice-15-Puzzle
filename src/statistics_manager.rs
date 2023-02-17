@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 use std::time::Duration;
 
 use crate::{
+    local_storage::LocalStorage,
     player::{PlayerInfo, PlayerState},
     ui::GameMode,
     utils::duration_to_string,
@@ -31,10 +32,7 @@ impl StatisticsManager {
     }
 
     fn save_storage(&self) {
-        let local_storage = web_sys::window().unwrap().local_storage().unwrap().unwrap();
-        local_storage
-            .set_item("statistics", &serde_json::to_string(self).unwrap())
-            .unwrap();
+        LocalStorage::set_statistics(self);
     }
 
     pub fn push(&mut self, info: &PlayerInfo) {
@@ -136,16 +134,7 @@ impl Plugin for StatisticsManagerPlugin {
 }
 
 fn spawn_statistics_manager(mut commands: Commands) {
-    // saved statistics
-    let local_storage = web_sys::window().unwrap().local_storage().unwrap().unwrap();
-    let statistics_manager =
-        if let Some(clear_history) = local_storage.get_item("statistics").unwrap() {
-            serde_json::from_str(&clear_history).unwrap()
-        } else {
-            StatisticsManager::default()
-        };
-
-    commands.spawn(statistics_manager);
+    commands.spawn(LocalStorage::get_statistics().unwrap_or_default());
 }
 
 fn on_game_clear(

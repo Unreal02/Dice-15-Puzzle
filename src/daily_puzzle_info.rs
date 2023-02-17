@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     game::GameState,
+    local_storage::LocalStorage,
     network::{BoardString, Network, NetworkChannel},
     player::PlayerState,
     ui::GameMode,
@@ -113,12 +114,8 @@ fn init_daily_puzzle_info(mut commands: Commands) {
     let mut daily_puzzle_info = DailyPuzzleInfo::default();
 
     // clear history
-    let local_storage = web_sys::window().unwrap().local_storage().unwrap().unwrap();
-    if let Some(clear_history) = local_storage
-        .get_item("daily_puzzle_clear_history")
-        .unwrap()
-    {
-        daily_puzzle_info.clear_history = serde_json::from_str(&clear_history).unwrap();
+    if let Some(clear_history) = LocalStorage::get_daily_puzzle_clear_history() {
+        daily_puzzle_info.clear_history = clear_history;
     }
 
     commands.spawn(daily_puzzle_info);
@@ -136,11 +133,5 @@ fn on_clear_daily_puzzle(
     let date = daily_puzzle_info.current_date;
     daily_puzzle_info.clear_history.set(date, true);
 
-    let local_storage = web_sys::window().unwrap().local_storage().unwrap().unwrap();
-    local_storage
-        .set_item(
-            "daily_puzzle_clear_history",
-            &serde_json::to_string(&daily_puzzle_info.clear_history).unwrap(),
-        )
-        .unwrap();
+    LocalStorage::set_daily_puzzle_clear_history(&daily_puzzle_info.clear_history);
 }

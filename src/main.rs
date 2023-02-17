@@ -2,6 +2,7 @@ mod block;
 mod buffered_input;
 mod daily_puzzle_info;
 mod game;
+mod local_storage;
 mod network;
 mod player;
 mod statistics_manager;
