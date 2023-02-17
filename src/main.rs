@@ -36,6 +36,7 @@ fn main() {
         .add_plugin(GameModeUIPlugin)
         .add_plugin(StatisticsManagerPlugin)
         .add_plugin(DailyPuzzleInfoPlugin)
+        .add_plugin(HowToPlayPlugin)
         .run();
 }
 

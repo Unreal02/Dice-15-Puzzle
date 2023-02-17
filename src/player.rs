@@ -18,6 +18,7 @@ pub enum PlayerState {
     DateSelectionPopup,
     RankingsPopup,
     EnrollScorePopup,
+    HowToPlayPopup,
     ResponseWaiting,
 }
 

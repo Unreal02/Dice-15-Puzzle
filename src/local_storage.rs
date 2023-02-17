@@ -1,9 +1,12 @@
-use crate::{daily_puzzle_info::ClearHistory, statistics_manager::StatisticsManager};
+use crate::{
+    daily_puzzle_info::ClearHistory, statistics_manager::StatisticsManager, ui::SkipHowToPlay,
+};
 
 const INPUT_INVERSION: &str = "input_inversion";
 const MOVE_IMMEDIATE: &str = "move_immediate";
 const DAILY_PUZZLE_CLEAR_HISTORY: &str = "daily_puzzle_clear_history";
 const STATISTICS: &str = "statistics";
+const SKIP_HOW_TO_PLAY: &str = "skip_how_to_play";
 
 pub struct LocalStorage;
 
@@ -66,5 +69,16 @@ impl LocalStorage {
 
     pub fn set_statistics(value: &StatisticsManager) {
         Self::set(STATISTICS, &serde_json::to_string(value).unwrap());
+    }
+
+    pub fn get_skip_how_to_play() -> Option<SkipHowToPlay> {
+        match Self::get(SKIP_HOW_TO_PLAY) {
+            Some(value) => Some(serde_json::from_str(&value).unwrap()),
+            None => None,
+        }
+    }
+
+    pub fn set_skip_how_to_play(value: &SkipHowToPlay) {
+        Self::set(SKIP_HOW_TO_PLAY, &serde_json::to_string(value).unwrap());
     }
 }
