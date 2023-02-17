@@ -7,6 +7,7 @@ use crate::{
     game::{GameError, GameState},
     local_storage::LocalStorage,
     player::{PlayLog, PlayerState},
+    ui::GameMode,
 };
 
 pub struct CustomInputPlugin;
@@ -136,9 +137,12 @@ fn input_keyboard(
     mut play_log: Query<&mut PlayLog>,
     time: Res<Time>,
     player_state: Res<State<PlayerState>>,
+    game_mode: Res<State<GameMode>>,
 ) {
-    if *player_state.current() == PlayerState::ModeSelectionPopup
-        || *player_state.current() == PlayerState::StatisticsPopup
+    if *player_state.current() != PlayerState::Idle
+        && *player_state.current() != PlayerState::Shuffled
+        && *player_state.current() != PlayerState::Solving
+        && *player_state.current() != PlayerState::Clear
     {
         return;
     }
@@ -182,19 +186,23 @@ fn input_keyboard(
                 &mut input_timer,
             );
         } else if keyboard_input.just_pressed(KeyCode::Z) {
-            InputHandler::undo(
-                inversion_flag.0,
-                &mut input_buffer,
-                &mut play_log,
-                &mut input_timer,
-            )
+            if *game_mode.current() == GameMode::Practice {
+                InputHandler::undo(
+                    inversion_flag.0,
+                    &mut input_buffer,
+                    &mut play_log,
+                    &mut input_timer,
+                )
+            }
         } else if keyboard_input.just_pressed(KeyCode::X) {
-            InputHandler::redo(
-                inversion_flag.0,
-                &mut input_buffer,
-                &mut play_log,
-                &mut input_timer,
-            )
+            if *game_mode.current() == GameMode::Practice {
+                InputHandler::redo(
+                    inversion_flag.0,
+                    &mut input_buffer,
+                    &mut play_log,
+                    &mut input_timer,
+                )
+            }
         }
     }
     input_timer.0.tick(time.delta());
