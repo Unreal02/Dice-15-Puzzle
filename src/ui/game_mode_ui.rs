@@ -158,7 +158,7 @@ fn spawn_game_mode_ui(
                     },
                     MyButtonType::Undo,
                     asset_server.load("images/button_undo.png").into(),
-                    "Undo".to_string(),
+                    "Undo (Z)".to_string(),
                     font.clone(),
                 );
 
@@ -172,7 +172,7 @@ fn spawn_game_mode_ui(
                     },
                     MyButtonType::Redo,
                     asset_server.load("images/button_redo.png").into(),
-                    "Redo".to_string(),
+                    "Redo (X)".to_string(),
                     font.clone(),
                 );
             }
