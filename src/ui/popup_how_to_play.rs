@@ -51,6 +51,7 @@ fn try_spawn_how_to_play(
     mut commands: Commands,
     mut game_mode_change: ResMut<GameModeChange>,
     mut player_state: ResMut<State<PlayerState>>,
+    asset_server: Res<AssetServer>,
 ) {
     if let Some(game_mode) = game_mode_change.0 {
         // skip
@@ -72,7 +73,6 @@ fn try_spawn_how_to_play(
             commands
                 .spawn((
                     ButtonBundle {
-                        background_color: Color::rgba(0.0, 0.0, 0.0, 0.7).into(),
                         style: Style {
                             align_items: AlignItems::Center,
                             justify_content: JustifyContent::Center,
@@ -85,6 +85,17 @@ fn try_spawn_how_to_play(
                             },
                             ..default()
                         },
+                        image: asset_server
+                            .load(format!(
+                                "images/how_to_play_{}.png",
+                                match game_mode {
+                                    GameMode::Practice => "practice",
+                                    GameMode::TimeAttack | GameMode::MinimalMovement =>
+                                        "time_attack",
+                                    GameMode::DailyPuzzle => "daily_puzzle",
+                                }
+                            ))
+                            .into(),
                         z_index: ZIndex::Global(1),
                         ..default()
                     },
