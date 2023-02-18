@@ -34,7 +34,7 @@ pub fn spawn_popup_rankings(
                 // daily puzzle rankings text
                 parent.spawn(
                     TextBundle::from_section(
-                        "Daily Puzzle Rankings (WIP)",
+                        "Daily Puzzle Rankings",
                         TextStyle {
                             font: font.clone(),
                             font_size: TEXT_SIZE,
