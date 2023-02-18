@@ -10,8 +10,11 @@ pub struct GameModeChange(Option<GameMode>);
 #[derive(Component)]
 pub struct HowToPlayPopup;
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Default)]
 pub struct SkipHowToPlay(HashSet<GameMode>);
+
+#[derive(Component)]
+struct SkipHowToPlayButton;
 
 pub struct HowToPlayPlugin;
 
@@ -102,41 +105,65 @@ fn try_spawn_how_to_play(
                     HowToPlayPopup,
                 ))
                 .with_children(|parent| {
-                    // all:
-                    // 조작법(방향키) 설명
-                    // mode selection button
-                    // player info text
-                    // settings button
-
-                    // practice:
-                    // undo(Z) button
-                    // redo(X) button
-
-                    // time attack, minimal movement mode:
-                    // statitsis popup
-
-                    // not daily puzzle:
-                    // shuffle button
-                    // reset button
-
-                    // daily puzzle:
-                    // current date text
-                    // date selection popup
-                    // rankings popup
-                    // restart button
+                    parent.spawn((
+                        ButtonBundle {
+                            image: asset_server.load("images/button_toggle_off.png").into(),
+                            style: Style {
+                                size: Size::new(Val::Px(40.0), Val::Px(40.0)),
+                                position_type: PositionType::Absolute,
+                                position: UiRect {
+                                    right: Val::Px(490.0),
+                                    bottom: Val::Px(20.0),
+                                    ..default()
+                                },
+                                ..default()
+                            },
+                            ..default()
+                        },
+                        SkipHowToPlayButton,
+                    ));
                 });
         }
     }
 }
 
 fn how_to_play_system(
-    button_interaction: Query<
+    popup_close_interaction: Query<
         &Interaction,
         (Changed<Interaction>, With<Button>, With<HowToPlayPopup>),
     >,
+    mut skip_button_interaction: Query<
+        (&Interaction, &mut BackgroundColor, &mut UiImage),
+        (
+            Changed<Interaction>,
+            With<Button>,
+            With<SkipHowToPlayButton>,
+        ),
+    >,
     mut player_state: ResMut<State<PlayerState>>,
+    game_mode: Res<State<GameMode>>,
+    asset_server: Res<AssetServer>,
 ) {
-    for interaction in button_interaction.iter() {
+    for (interaction, mut color, mut image) in skip_button_interaction.iter_mut() {
+        match *interaction {
+            Interaction::Clicked => {
+                let game_mode = game_mode.current();
+                let mut skip_how_to_play = LocalStorage::get_skip_how_to_play().unwrap_or_default();
+                if skip_how_to_play.0.contains(game_mode) {
+                    skip_how_to_play.0.remove(game_mode);
+                    image.0 = asset_server.load("images/button_toggle_off.png");
+                } else {
+                    skip_how_to_play.0.insert(*game_mode);
+                    image.0 = asset_server.load("images/button_toggle_on.png");
+                }
+                LocalStorage::set_skip_how_to_play(&skip_how_to_play);
+                *color = (BUTTON_WHITE * BUTTON_PRESS_MUL).into();
+            }
+            Interaction::Hovered => *color = (BUTTON_WHITE * BUTTON_HOVER_MUL).into(),
+            Interaction::None => *color = BUTTON_WHITE.into(),
+        }
+    }
+    for interaction in popup_close_interaction.iter() {
         if *interaction == Interaction::Clicked {
             assert_eq!(*player_state.current(), PlayerState::HowToPlayPopup);
             player_state.pop().unwrap();
