@@ -1,4 +1,4 @@
-use crate::{player::PlayerState, ui::*};
+use crate::{daily_puzzle_info::DailyPuzzleInfo, player::PlayerState, ui::*};
 
 #[derive(Component)]
 pub struct GameUI;
@@ -136,6 +136,7 @@ fn spawn_clear_ui(
     game_ui: Query<Entity, With<GameUI>>,
     asset_server: Res<AssetServer>,
     game_mode: Res<State<GameMode>>,
+    daily_puzzle_info_query: Query<&DailyPuzzleInfo>,
 ) {
     let font = asset_server.load("fonts/Quicksand-Bold.ttf");
 
@@ -161,19 +162,22 @@ fn spawn_clear_ui(
         ));
 
         if *game_mode.current() == GameMode::DailyPuzzle {
-            // enroll score button
-            spawn_image_button(
-                parent,
-                UiRect {
-                    right: Val::Px(450.0),
-                    top: Val::Px(50.0),
-                    ..default()
-                },
-                MyButtonType::PopupEnrollScore,
-                asset_server.load("images/button_enroll_score.png").into(),
-                "Enroll Score".to_string(),
-                font.clone(),
-            );
+            let daily_puzzle_info = daily_puzzle_info_query.single();
+            if daily_puzzle_info.current_date == daily_puzzle_info.last_date {
+                // enroll score button
+                spawn_image_button(
+                    parent,
+                    UiRect {
+                        right: Val::Px(450.0),
+                        top: Val::Px(50.0),
+                        ..default()
+                    },
+                    MyButtonType::PopupEnrollScore,
+                    asset_server.load("images/button_enroll_score.png").into(),
+                    "Enroll Score".to_string(),
+                    font.clone(),
+                );
+            }
         }
     });
 }
