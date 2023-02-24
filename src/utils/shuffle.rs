@@ -6,7 +6,7 @@ use crate::network::BoardString;
 
 const SHUFFLE_NUMBER: i32 = 1000;
 
-pub fn shuffle() -> BoardString {
+pub fn shuffle(size: usize) -> BoardString {
     #[derive(Clone, Copy, Debug)]
     struct Block {
         pub goal: i32,
@@ -15,15 +15,15 @@ pub fn shuffle() -> BoardString {
 
     // shuffle settings
     let mut board = Vec::new();
-    let mut x = 3;
-    let mut z = 3;
+    let mut x = size as i32 - 1;
+    let mut z = size as i32 - 1;
 
-    for x in 0..4 {
+    for x in 0..size {
         board.push(Vec::new());
-        for z in 0..4 {
-            board[x].push(if x != 3 || z != 3 {
+        for z in 0..size {
+            board[x].push(if x != size - 1 || z != size - 1 {
                 Some(Block {
-                    goal: (z * 4 + x + 1) as i32,
+                    goal: (z * size + x + 1) as i32,
                     transform: Transform::IDENTITY,
                 })
             } else {
@@ -34,7 +34,7 @@ pub fn shuffle() -> BoardString {
 
     // move_block function
     let mut move_block = |dx: i32, dz: i32| {
-        if x + dx < 0 || x + dx > 3 || z + dz < 0 || z + dz > 3 {
+        if x + dx < 0 || x + dx >= size as i32 || z + dz < 0 || z + dz >= size as i32 {
             return;
         }
 
@@ -68,10 +68,10 @@ pub fn shuffle() -> BoardString {
     }
 
     // convert to BoardString
-    let mut board_string = BoardString::default();
+    let mut board_string = BoardString::new(size);
 
-    for z in 0..4 {
-        for x in 0..4 {
+    for z in 0..size {
+        for x in 0..size {
             if let Some(block) = board[x][z] {
                 let i = block.goal as usize;
                 let rotation = block.transform.rotation;
@@ -87,10 +87,10 @@ pub fn shuffle() -> BoardString {
                         }
                 });
 
-                board_string.0[i].0 = (z * 4 + x + 1) as u8;
+                board_string.0[i].0 = (z * size + x + 1) as u8;
                 board_string.0[i].1 = rotation_byte;
             } else {
-                board_string.0[0].0 = (z * 4 + x + 1) as u8;
+                board_string.0[0].0 = (z * size + x + 1) as u8;
             }
         }
     }

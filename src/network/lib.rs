@@ -9,10 +9,10 @@ use std::{
 use chrono::NaiveDate;
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Default, Debug, Clone, Copy, Hash)]
+#[derive(Serialize, Deserialize, Debug, Clone, Hash)]
 /// (position, rotation)
 /// index: number written on block (0 means empty)
-pub struct BoardString(pub [(u8, u8); 16]);
+pub struct BoardString(pub Vec<(u8, u8)>);
 
 #[derive(Serialize, Deserialize, Default, Debug, Clone)]
 pub struct DailyRanking {
@@ -32,6 +32,10 @@ pub enum NetworkError {
 impl BoardString {
     const CORPUS: &[u8] =
         "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!#".as_bytes();
+
+    pub fn new(size: usize) -> BoardString {
+        Self(vec![(0, 0); size * size])
+    }
 
     fn into_hash(&self) -> u64 {
         let mut s = DefaultHasher::new();
@@ -64,18 +68,19 @@ impl BoardString {
         curr
     }
 
-    pub fn to_arr(&self) -> [u8; 32] {
-        let mut arr = [0 as u8; 32];
-        for i in 0..16 {
-            arr[i * 2] = self.0[i].0;
-            arr[i * 2 + 1] = self.0[i].1;
+    pub fn to_arr(&self) -> Vec<u8> {
+        let mut vec = Vec::new();
+        for i in self.0.iter() {
+            vec.push(i.0);
+            vec.push(i.1);
         }
-        arr
+        vec
     }
 
     pub fn from_arr(query_result: &Vec<u8>) -> Self {
-        let mut board_string = BoardString::default();
-        for i in 0..16 {
+        let size = (query_result.len() as f64).sqrt() as usize;
+        let mut board_string = BoardString::new(size);
+        for i in 0..size * size {
             board_string.0[i].0 = query_result[i * 2];
             board_string.0[i].1 = query_result[i * 2 + 1];
         }

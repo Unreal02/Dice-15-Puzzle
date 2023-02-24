@@ -12,7 +12,7 @@ pub struct BlockMesh;
 pub struct Block {
     pub entity: Entity,
     pub moving: Option<(Transform, Transform)>, // previous and next transform
-    /// (z * 4 + x + 1) as i32 % 16
+    /// (z * size + x + 1) as i32 % (size * size)
     pub goal: i32,
 }
 
@@ -20,6 +20,7 @@ pub struct Block {
 /// This function must be called in game setup
 pub fn spawn_meshes(
     commands: &mut Commands,
+    size: usize,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
     asset_server: Res<AssetServer>,
@@ -61,20 +62,14 @@ pub fn spawn_meshes(
     let cube_mesh = meshes.add(mesh);
 
     let mut mesh_entities = HashMap::new();
-    for x in 0..4 {
-        for z in 0..4 {
-            if x != 3 || z != 3 {
+    for x in 0..size {
+        for z in 0..size {
+            if x != size - 1 || z != size - 1 {
                 let texture =
-                    asset_server.load(format!("images/image{}.png", x + z * 4 + 1).as_str());
+                    asset_server.load(format!("images/image{}.png", x + z * size + 1).as_str());
                 let material = materials.add(StandardMaterial {
                     base_color_texture: Some(texture.clone()),
-                    base_color: match z {
-                        0 => Color::hsl(0.0, 1.0, 0.6),
-                        1 => Color::hsl(60.0, 1.0, 0.6),
-                        2 => Color::hsl(120.0, 1.0, 0.6),
-                        3 => Color::hsl(240.0, 1.0, 0.6),
-                        _ => Color::BLACK,
-                    },
+                    base_color: Color::hsl(360.0 * z as f32 / size as f32, 1.0, 0.6),
                     ..default()
                 });
                 mesh_entities.insert(

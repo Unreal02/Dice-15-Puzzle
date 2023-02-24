@@ -27,9 +27,9 @@ fn main() {
         .to_rgb8();
 
     // put in side faces
-    let mut img_goal_small = imageops::resize(&img_goal, 512, 512, FilterType::Nearest);
-    for x in 0..512 {
-        for y in 0..512 {
+    let mut img_goal_small = imageops::resize(&img_goal, 1024, 1024, FilterType::Nearest);
+    for x in 0..1024 {
+        for y in 0..1024 {
             let mut pixel = *img_goal_small.get_pixel(x, y);
             for i in 0..3 {
                 pixel.0[i] = ((pixel.0[i] as u32 + 128) * 2 / 3) as u8;
@@ -86,10 +86,10 @@ fn main() {
         }
     }
 
-    for i in 0..15 {
+    for i in 0..63 {
         for x in 0..256 {
             for y in 0..256 {
-                let goal_pixel = *img_goal.get_pixel(x + (i % 4) * 256, y + (i / 4) * 256);
+                let goal_pixel = *img_goal.get_pixel(x + (i % 8) * 256, y + (i / 8) * 256);
                 // goal
                 if x >= BORDER_WIDTH
                     && x < 256 - BORDER_WIDTH
@@ -103,7 +103,7 @@ fn main() {
         for x in 0..128 {
             for y in 0..128 {
                 let goal_small_pixel =
-                    *img_goal_small.get_pixel(x + (i % 4) * 128, y + (i / 4) * 128);
+                    *img_goal_small.get_pixel(x + (i % 8) * 128, y + (i / 8) * 128);
                 // up
                 img.put_pixel(256 + 64 + x, 64 + y, goal_small_pixel);
                 // down
@@ -116,6 +116,42 @@ fn main() {
                 img.put_pixel(768 + 64 + x, 256 + 64 + y, goal_small_pixel);
             }
         }
+
+        // let offsets = [
+        //     (256, 256),
+        //     (256, 0),
+        //     (0, 256),
+        //     (512, 256),
+        //     (256, 512),
+        //     (768, 256),
+        // ];
+        // for (idx, (x0, y0)) in offsets.iter().enumerate() {
+        //     let mut image: RgbImage = ImageBuffer::new(256, 256);
+        //     for x in 0..256 {
+        //         for y in 0..256 {
+        //             let mut pixel = *img.get_pixel(x0 + x, y0 + y);
+        //             const DARK: i32 = 18;
+        //             const BRIGHT: i32 = 60;
+        //             let multiplier = match i / 4 {
+        //                 0 => [BRIGHT, DARK, DARK],
+        //                 1 => [BRIGHT, BRIGHT, DARK],
+        //                 2 => [DARK, BRIGHT, DARK],
+        //                 3 => [DARK, DARK, BRIGHT],
+        //                 _ => unreachable!(),
+        //             };
+        //             for j in 0..3 {
+        //                 let mut t = pixel.0[j] as i32;
+        //                 t = t * multiplier[j] / BRIGHT;
+        //                 pixel.0[j] = t as u8;
+        //             }
+        //             image.put_pixel(x, y, pixel);
+        //         }
+        //     }
+        //     image
+        //         .save(format!("etc_images/image{}-{}.png", i + 1, idx))
+        //         .unwrap();
+        // }
+
         img.save(format!("assets/images/image{}.png", i + 1))
             .unwrap();
     }

@@ -216,7 +216,7 @@ fn response_waiting_system(
             }
             ResponseType::GetPuzzleState(result) => match result {
                 Ok(board_string) => {
-                    string_to_board(board_string, &mut transforms, &mut game);
+                    string_to_board(&board_string, &mut transforms, &mut game);
                     // inactive stack에 있는 것이 무엇이든 Shuffled로 바꾸기 위해 replace 사용
                     player_state.replace(PlayerState::Shuffled).unwrap();
                     info!("Load Success {:?}", board_string);

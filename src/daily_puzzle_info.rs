@@ -85,7 +85,7 @@ impl DailyPuzzleInfo {
         player_state: &mut ResMut<State<PlayerState>>,
         network_channel: &Res<NetworkChannel>,
     ) -> bool {
-        if let Some(&board_string) = self.daily_puzzles.get(&date) {
+        if let Some(board_string) = self.daily_puzzles.get(&date) {
             string_to_board(board_string, transforms, game);
             if *player_state.current() != PlayerState::Shuffled {
                 // inactive stack에 있는 것이 무엇이든 Shuffled로 바꾸기 위해 replace 사용

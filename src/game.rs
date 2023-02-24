@@ -18,7 +18,11 @@ use crate::{
     utils::{shuffle, string_to_board},
 };
 
+const INITIAL_BOARD_SIZE: usize = 4;
 const BLOCK_MOVE_TIME: f32 = 0.3;
+
+#[derive(Resource)]
+pub struct BoardSize(pub usize);
 
 #[derive(Resource, Default)]
 pub struct MoveTimer(pub Timer);
@@ -34,6 +38,7 @@ pub struct GamePlugin;
 #[derive(Default, Component)]
 #[cfg_attr(feature = "debug", derive(Inspectable))]
 pub struct GameState {
+    pub size: usize,
     pub x: i32,
     pub z: i32,
     pub board: Board,
@@ -55,7 +60,8 @@ pub struct UrlReqestInfo(Option<String>);
 
 impl Plugin for GamePlugin {
     fn build(&self, app: &mut App) {
-        app.add_startup_system(setup)
+        app.insert_resource(BoardSize(INITIAL_BOARD_SIZE))
+            .add_startup_system(setup)
             .add_system(update_block.label(GameStages::UpdateBlock))
             .add_system_set(
                 SystemSet::on_update(PlayerState::Solving).with_system(
@@ -69,14 +75,14 @@ impl Plugin for GamePlugin {
 
 impl GameState {
     /// init board
-    pub fn init(&mut self, mesh_entities: &HashMap<(usize, usize), Entity>) {
-        for x in 0..4 {
+    pub fn init(&mut self, size: usize, mesh_entities: &HashMap<(usize, usize), Entity>) {
+        for x in 0..size {
             self.board.0.push(Vec::new());
-            for z in 0..4 {
-                self.board.0[x].push(if x != 3 || z != 3 {
+            for z in 0..size {
+                self.board.0[x].push(if x != size - 1 || z != size - 1 {
                     Some(Block {
                         entity: mesh_entities.get(&(x, z)).unwrap().clone(),
-                        goal: (z * 4 + x + 1) as i32 % 16,
+                        goal: (z * size + x + 1) as i32 % (size * size) as i32,
                         moving: None,
                     })
                 } else {
@@ -84,8 +90,9 @@ impl GameState {
                 });
             }
         }
-        self.x = 3;
-        self.z = 3;
+        self.size = size;
+        self.x = size as i32 - 1;
+        self.z = size as i32 - 1;
     }
 
     /// swap `self.board.0[x0][z0]` and `self.board.0[x1][z1]`
@@ -109,9 +116,9 @@ impl GameState {
         transforms: &mut Query<&mut Transform>,
     ) {
         if self.x + dx < 0
-            || self.x + dx > 3
+            || self.x + dx >= self.size as i32
             || self.z + dz < 0
-            || self.z + dz > 3
+            || self.z + dz >= self.size as i32
             || !move_timer.0.finished()
         {
             return;
@@ -146,19 +153,21 @@ impl GameState {
         if !move_timer.0.finished() {
             return;
         }
-        for x in 0..4 {
-            for z in 0..4 {
+        for x in 0..self.size {
+            for z in 0..self.size {
                 loop {
                     let (x1, z1) = match &self.board.0[x][z] {
                         Some(block) => {
-                            let (goal_x, goal_z) =
-                                ((block.goal as usize - 1) % 4, (block.goal as usize - 1) / 4);
+                            let (goal_x, goal_z) = (
+                                (block.goal as usize - 1) % self.size,
+                                (block.goal as usize - 1) / self.size,
+                            );
                             let mut transform = transforms.get_mut(block.entity).unwrap();
                             transform.translation = vec3(goal_x as f32, 0.0, goal_z as f32);
                             transform.rotation = Quat::IDENTITY;
                             (goal_x, goal_z)
                         }
-                        None => (3, 3),
+                        None => (self.size - 1, self.size - 1),
                     };
                     if x == x1 && z == z1 {
                         break;
@@ -167,14 +176,14 @@ impl GameState {
                 }
             }
         }
-        self.x = 3;
-        self.z = 3;
+        self.x = self.size as i32 - 1;
+        self.z = self.size as i32 - 1;
         self.is_shuffled = false;
     }
 
     pub fn shuffle(&mut self, transforms: &mut Query<&mut Transform>) {
-        let board_string = shuffle();
-        string_to_board(board_string, transforms, self);
+        let board_string = shuffle(self.size);
+        string_to_board(&board_string, transforms, self);
     }
 }
 
@@ -184,10 +193,11 @@ fn setup(
     meshes: ResMut<Assets<Mesh>>,
     materials: ResMut<Assets<StandardMaterial>>,
     mut move_timer: ResMut<MoveTimer>,
+    board_size: Res<BoardSize>,
 ) {
-    let mesh_entities = spawn_meshes(&mut commands, meshes, materials, asset_server);
+    let mesh_entities = spawn_meshes(&mut commands, board_size.0, meshes, materials, asset_server);
     let mut new_game = GameState::default();
-    new_game.init(&mesh_entities);
+    new_game.init(board_size.0, &mesh_entities);
 
     *move_timer = MoveTimer(Timer::from_seconds(0.1, TimerMode::Once));
 
@@ -230,7 +240,19 @@ fn setup(
     // camera
     commands.spawn((
         Camera3dBundle {
-            transform: Transform::from_xyz(1.5, 5.0, 6.5).looking_at(vec3(1.5, 0.0, 1.5), Vec3::Y),
+            transform: Transform::from_xyz(
+                (board_size.0 as f32 - 1.0) / 2.0,
+                board_size.0 as f32 * 1.25,
+                (board_size.0 as f32 - 1.0) / 2.0 + board_size.0 as f32 * 1.25,
+            )
+            .looking_at(
+                vec3(
+                    (board_size.0 as f32 - 1.0) / 2.0,
+                    0.0,
+                    (board_size.0 as f32 - 1.0) / 2.0,
+                ),
+                Vec3::Y,
+            ),
             ..default()
         },
         PickingCameraBundle::default(),
@@ -344,9 +366,9 @@ fn check_clear(
     }
 
     let mut is_clear = true;
-    for x in 0..4 {
-        for z in 0..4 {
-            let curr = (z * 4 + x + 1) as i32 % 16;
+    for x in 0..game.size {
+        for z in 0..game.size {
+            let curr = (z * game.size + x + 1) as i32 % (game.size * game.size) as i32;
             if let Some(block) = &game.board.0[x][z] {
                 if (block.goal == curr) && block.moving.is_none() {
                     if let Ok(block_transform) = block_transforms.get(block.entity) {
@@ -360,7 +382,7 @@ fn check_clear(
                     break;
                 }
             } else {
-                if (x != 3) || (z != 3) {
+                if (x != game.size - 1) || (z != game.size - 1) {
                     is_clear = false;
                     break;
                 }
