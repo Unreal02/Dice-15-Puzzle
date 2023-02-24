@@ -42,7 +42,7 @@ pub fn spawn_popup_mode_selection(
                     parent,
                     Val::Px(400.0),
                     "Practice".to_string(),
-                    "Practice with\nundo and snapshots".to_string(),
+                    "Practice with\nundo and redo".to_string(),
                     font.clone(),
                     GameMode::Practice,
                     button_image.clone(),
