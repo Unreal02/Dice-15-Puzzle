@@ -26,8 +26,8 @@ impl GameMode {
         player_info: &mut PlayerInfo,
         game_state: &mut GameState,
         play_log: &mut PlayLog,
-        mut transforms: &mut Query<&mut Transform>,
-        mut move_timer: &mut ResMut<MoveTimer>,
+        transforms: &mut Query<&mut Transform>,
+        move_timer: &mut ResMut<MoveTimer>,
         player_state: &mut ResMut<State<PlayerState>>,
         network_channel: &mut Res<NetworkChannel>,
     ) {
@@ -49,8 +49,8 @@ impl GameMode {
                     player_info,
                     game_state,
                     play_log,
-                    &mut transforms,
-                    &mut move_timer,
+                    transforms,
+                    move_timer,
                 );
                 player_state.replace(PlayerState::Idle).unwrap();
             }
@@ -59,8 +59,8 @@ impl GameMode {
                     player_info,
                     game_state,
                     play_log,
-                    &mut transforms,
-                    &mut move_timer,
+                    transforms,
+                    move_timer,
                 );
                 player_state.replace(PlayerState::Idle).unwrap();
             }
@@ -69,8 +69,8 @@ impl GameMode {
                     player_info,
                     game_state,
                     play_log,
-                    &mut transforms,
-                    &mut move_timer,
+                    transforms,
+                    move_timer,
                 );
                 player_state.replace(PlayerState::Idle).unwrap();
             }
@@ -79,8 +79,8 @@ impl GameMode {
                     player_info,
                     game_state,
                     play_log,
-                    &mut transforms,
-                    &mut move_timer,
+                    transforms,
+                    move_timer,
                 );
                 Network::get_daily_puzzle_date(player_state, network_channel);
             }

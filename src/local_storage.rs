@@ -21,14 +21,11 @@ impl LocalStorage {
 
     fn set(key: &str, value: &str) {
         let local_storage = web_sys::window().unwrap().local_storage().unwrap().unwrap();
-        local_storage.set_item(&key, &value).unwrap();
+        local_storage.set_item(key, value).unwrap();
     }
 
     pub fn get_input_inversion() -> Option<bool> {
-        match Self::get(INPUT_INVERSION) {
-            Some(value) => Some(serde_json::from_str(&value).unwrap()),
-            None => None,
-        }
+        Self::get(INPUT_INVERSION).map(|value| serde_json::from_str(&value).unwrap())
     }
 
     pub fn set_input_inversion(value: &bool) {
@@ -36,10 +33,7 @@ impl LocalStorage {
     }
 
     pub fn get_move_immediate() -> Option<bool> {
-        match Self::get(MOVE_IMMEDIATE) {
-            Some(value) => Some(serde_json::from_str(&value).unwrap()),
-            None => None,
-        }
+        Self::get(MOVE_IMMEDIATE).map(|value| serde_json::from_str(&value).unwrap())
     }
 
     pub fn set_move_immediate(value: &bool) {
@@ -47,10 +41,7 @@ impl LocalStorage {
     }
 
     pub fn get_daily_puzzle_clear_history() -> Option<ClearHistory> {
-        match Self::get(DAILY_PUZZLE_CLEAR_HISTORY) {
-            Some(value) => Some(serde_json::from_str(&value).unwrap()),
-            None => None,
-        }
+        Self::get(DAILY_PUZZLE_CLEAR_HISTORY).map(|value| serde_json::from_str(&value).unwrap())
     }
 
     pub fn set_daily_puzzle_clear_history(value: &ClearHistory) {
@@ -61,10 +52,7 @@ impl LocalStorage {
     }
 
     pub fn get_statistics() -> Option<StatisticsManager> {
-        match Self::get(STATISTICS) {
-            Some(value) => Some(serde_json::from_str(&value).unwrap()),
-            None => None,
-        }
+        Self::get(STATISTICS).map(|value| serde_json::from_str(&value).unwrap())
     }
 
     pub fn set_statistics(value: &StatisticsManager) {
@@ -72,10 +60,7 @@ impl LocalStorage {
     }
 
     pub fn get_skip_how_to_play() -> Option<SkipHowToPlay> {
-        match Self::get(SKIP_HOW_TO_PLAY) {
-            Some(value) => Some(serde_json::from_str(&value).unwrap()),
-            None => None,
-        }
+        Self::get(SKIP_HOW_TO_PLAY).map(|value| serde_json::from_str(&value).unwrap())
     }
 
     pub fn set_skip_how_to_play(value: &SkipHowToPlay) {

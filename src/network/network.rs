@@ -177,9 +177,9 @@ fn response_waiting_system(
                     &mut transforms,
                     &mut game,
                     &mut player_state,
-                    &mut Res::from(network_channel),
+                    &Res::from(network_channel),
                 );
-                assert_eq!(load_result, true);
+                assert!(load_result);
             }
             ResponseType::GetDailyPuzzleDate { first, last } => {
                 daily_puzzle_info.first_date = first;
@@ -190,7 +190,7 @@ fn response_waiting_system(
                     &mut transforms,
                     &mut game,
                     &mut player_state,
-                    &mut Res::from(network_channel),
+                    &Res::from(network_channel),
                 );
             }
             ResponseType::GenerateDailyPuzzle(_) => unreachable!(),
@@ -199,7 +199,7 @@ fn response_waiting_system(
                     Ok(final_key) => {
                         let share_url = format!("dice15puzzle.haje.org/?{}", final_key);
                         let clipboard = web_sys::window().unwrap().navigator().clipboard().unwrap();
-                        let _ = clipboard.write_text(&share_url.clone());
+                        let _ = clipboard.write_text(&share_url);
                         for (mut text, _) in text_query
                             .iter_mut()
                             .filter(|(_, text_type)| **text_type == MyTextType::ShareURL)

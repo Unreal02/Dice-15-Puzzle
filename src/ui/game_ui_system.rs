@@ -110,7 +110,7 @@ pub fn game_ui_button_system(
                     MyButtonType::Share => {
                         let board_string = board_to_string(&transforms, &mut game);
                         let puzzle_key = board_string.into_key();
-                        let _ = crate::network::Network::enroll_puzzle_state(
+                        crate::network::Network::enroll_puzzle_state(
                             puzzle_key,
                             board_string,
                             &mut player_state,
@@ -149,7 +149,7 @@ pub fn game_ui_button_system(
                                     let player_info = player_info_query.single().get_player_info();
                                     info!("Enroll Score: {}", user_name);
                                     let daily_puzzle_info = daily_puzzle_info_query.single();
-                                    let _ = crate::network::Network::enroll_daily_ranking(
+                                    crate::network::Network::enroll_daily_ranking(
                                         daily_puzzle_info.current_date,
                                         user_name,
                                         player_info.0,
@@ -179,7 +179,7 @@ pub fn game_ui_button_system(
                             if let MyTextType::TextInputBox(_) = text_type {
                                 let url_key = &text.sections[0].value;
                                 info!("Load URL: {}", url_key);
-                                let _ = crate::network::Network::get_puzzle_state(
+                                crate::network::Network::get_puzzle_state(
                                     url_key.to_string(),
                                     &mut player_state,
                                     &network_channel,

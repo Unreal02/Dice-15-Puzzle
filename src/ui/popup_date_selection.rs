@@ -380,11 +380,7 @@ fn spawn_calendar_ui(
         } else {
             week
         };
-        let sunday_addition = if date.weekday().number_from_sunday() == 1 {
-            1
-        } else {
-            0
-        };
+        let sunday_addition = u32::from(date.weekday().number_from_sunday() == 1);
         year_border_corrected + sunday_addition
     };
     for date in calendar_first_date.iter_days() {

@@ -91,7 +91,7 @@ impl InputBuffer {
         if let Some(last_input) = self.last_input {
             if last_input == value {
                 if input_timer.0.finished() {
-                    self.push(value.clone());
+                    self.push(value);
                     playlog.add_log(value);
                     input_timer.0.reset();
                     Ok(())
@@ -99,12 +99,12 @@ impl InputBuffer {
                     Err(GameError::AbnormalInput)
                 }
             } else {
-                self.push(value.clone());
+                self.push(value);
                 playlog.add_log(value);
                 Ok(())
             }
         } else {
-            self.push(value.clone());
+            self.push(value);
             playlog.add_log(value);
             Ok(())
         }
@@ -194,15 +194,15 @@ fn input_keyboard(
                     &mut input_timer,
                 )
             }
-        } else if keyboard_input.just_pressed(KeyCode::X) {
-            if *game_mode.current() == GameMode::Practice {
-                InputHandler::redo(
-                    inversion_flag.0,
-                    &mut input_buffer,
-                    &mut play_log,
-                    &mut input_timer,
-                )
-            }
+        } else if keyboard_input.just_pressed(KeyCode::X)
+            && *game_mode.current() == GameMode::Practice
+        {
+            InputHandler::redo(
+                inversion_flag.0,
+                &mut input_buffer,
+                &mut play_log,
+                &mut input_timer,
+            )
         }
     }
     input_timer.0.tick(time.delta());
@@ -254,9 +254,8 @@ impl InputHandler {
         play_log: &mut PlayLog,
         input_timer: &mut ResMut<InputTimer>,
     ) {
-        match enqueue_input(dx, dz, inverse, input_buffer, play_log, input_timer) {
-            Ok(_) => play_log.clear_redo_buf(),
-            Err(_) => (),
+        if enqueue_input(dx, dz, inverse, input_buffer, play_log, input_timer).is_ok() {
+            play_log.clear_redo_buf();
         }
     }
 
@@ -314,37 +313,37 @@ fn enqueue_input(
     dz: i32,
     inverse: bool,
     input_buffer: &mut InputBuffer,
-    mut play_log: &mut PlayLog,
-    mut input_timer: &mut ResMut<InputTimer>,
+    play_log: &mut PlayLog,
+    input_timer: &mut ResMut<InputTimer>,
 ) -> Result<(), GameError> {
     if input_buffer.buffer.len() < BUFFER_MAX {
         match (dx, dz) {
             (0, 1) => {
                 if inverse {
-                    input_buffer.try_push(GameInput::Down(0, -1), &mut input_timer, &mut play_log)
+                    input_buffer.try_push(GameInput::Down(0, -1), input_timer, play_log)
                 } else {
-                    input_buffer.try_push(GameInput::Up(0, 1), &mut input_timer, &mut play_log)
+                    input_buffer.try_push(GameInput::Up(0, 1), input_timer, play_log)
                 }
             }
             (0, -1) => {
                 if inverse {
-                    input_buffer.try_push(GameInput::Up(0, 1), &mut input_timer, &mut play_log)
+                    input_buffer.try_push(GameInput::Up(0, 1), input_timer, play_log)
                 } else {
-                    input_buffer.try_push(GameInput::Down(0, -1), &mut input_timer, &mut play_log)
+                    input_buffer.try_push(GameInput::Down(0, -1), input_timer, play_log)
                 }
             }
             (1, 0) => {
                 if inverse {
-                    input_buffer.try_push(GameInput::Right(-1, 0), &mut input_timer, &mut play_log)
+                    input_buffer.try_push(GameInput::Right(-1, 0), input_timer, play_log)
                 } else {
-                    input_buffer.try_push(GameInput::Left(1, 0), &mut input_timer, &mut play_log)
+                    input_buffer.try_push(GameInput::Left(1, 0), input_timer, play_log)
                 }
             }
             (-1, 0) => {
                 if inverse {
-                    input_buffer.try_push(GameInput::Left(1, 0), &mut input_timer, &mut play_log)
+                    input_buffer.try_push(GameInput::Left(1, 0), input_timer, play_log)
                 } else {
-                    input_buffer.try_push(GameInput::Right(-1, 0), &mut input_timer, &mut play_log)
+                    input_buffer.try_push(GameInput::Right(-1, 0), input_timer, play_log)
                 }
             }
             _ => Err(GameError::InvalidInput),

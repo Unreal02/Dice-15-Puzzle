@@ -91,10 +91,8 @@ fn main() {
             for y in 0..256 {
                 let goal_pixel = *img_goal.get_pixel(x + (i % 8) * 256, y + (i / 8) * 256);
                 // goal
-                if x >= BORDER_WIDTH
-                    && x < 256 - BORDER_WIDTH
-                    && y >= BORDER_WIDTH
-                    && y < 256 - BORDER_WIDTH
+                if (BORDER_WIDTH..256 - BORDER_WIDTH).contains(&x)
+                    && (BORDER_WIDTH..256 - BORDER_WIDTH).contains(&y)
                 {
                     img.put_pixel(x + 256, y + 256, goal_pixel);
                 }

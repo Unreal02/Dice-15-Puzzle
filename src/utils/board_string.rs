@@ -11,7 +11,7 @@ pub fn board_to_string(transforms: &Query<&mut Transform>, game: &mut GameState)
                 let i = block.goal as usize;
                 let rotation = transforms.get(block.entity).unwrap().rotation;
 
-                let rotation_byte = rotation.to_array().iter().fold(0 as u8, |cur, &i| {
+                let rotation_byte = rotation.to_array().iter().fold(0_u8, |cur, &i| {
                     (cur << 2)
                         | if i > 0.3 {
                             1
@@ -54,7 +54,7 @@ pub fn string_to_board(
     game.x = (board_string.0[0].0 as i32 - 1) % game.size as i32;
     game.z = (board_string.0[0].0 as i32 - 1) / game.size as i32;
     game.board.0[game.x as usize][game.z as usize] = None;
-    for i in 1..game.size * game.size {
+    (1..game.size * game.size).for_each(|i| {
         let block = temp_vec[i].expect("temp_arr wrong");
         let (position, rotation) = board_string.0[block.goal as usize];
         let x = ((position - 1) % game.size as u8) as usize;
@@ -62,15 +62,15 @@ pub fn string_to_board(
         let mut transform = transforms.get_mut(block.entity).unwrap();
         transform.translation = vec3(x as f32, 0 as f32, z as f32);
         let mut rotation_arr = [0.0; 4];
-        for i in 0..4 {
-            let bits = rotation >> ((3 - i) * 2); // 0, 1, or 3
+        (0..4).for_each(|j| {
+            let bits = rotation >> ((3 - j) * 2); // 0, 1, or 3
             let num = (bits & 1) as f32;
             let sign = -((bits & 2) as f32) + 1.0; // 1 or -1
-            rotation_arr[i] = sign * num;
-        }
+            rotation_arr[j] = sign * num;
+        });
         transform.rotation = Quat::from_vec4(Vec4::from(rotation_arr).normalize());
         game.board.0[x][z] = temp_vec[i];
-    }
+    });
 
     game.is_shuffled = true;
 }

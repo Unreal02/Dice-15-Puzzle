@@ -81,7 +81,7 @@ impl GameState {
             for z in 0..size {
                 self.board.0[x].push(if x != size - 1 || z != size - 1 {
                     Some(Block {
-                        entity: mesh_entities.get(&(x, z)).unwrap().clone(),
+                        entity: *mesh_entities.get(&(x, z)).unwrap(),
                         goal: (z * size + x + 1) as i32 % (size * size) as i32,
                         moving: None,
                     })
@@ -131,7 +131,7 @@ impl GameState {
 
         // next transform of block
         let mut transform = transforms.get_mut(block.entity).unwrap();
-        let prev_transform = transform.clone();
+        let prev_transform = *transform;
         let mut next_transform = prev_transform;
         next_transform.translation += vec3(-dx as f32, 0.0, -dz as f32);
         next_transform.rotate_x(-dz as f32 * PI * 0.5);
@@ -269,18 +269,11 @@ pub fn try_url_load(
         info!("Try getting url reqeust {}", &url_key);
         url_key
     });
-    match query {
-        Ok(url_key) => {
-            if url_key.len() > 0 {
-                let _ = crate::network::Network::get_puzzle_state(
-                    url_key,
-                    &mut player_state,
-                    &network_channel,
-                );
-                return;
-            }
+    if let Ok(url_key) = query {
+        if !url_key.is_empty() {
+            crate::network::Network::get_puzzle_state(url_key, &mut player_state, &network_channel);
+            return;
         }
-        Err(_) => (),
     }
 
     assert_eq!(player_state.inactives().len(), 0);
@@ -304,7 +297,7 @@ fn update_block(
 
     let mut new_move_flag = true;
     for arr in game.board.0.iter_mut() {
-        for elem in arr {
+        arr.iter_mut().for_each(|elem| {
             if let Some(block) = elem {
                 if let Some((prev_transform, next_transform)) = block.moving {
                     // rotate block
@@ -319,14 +312,14 @@ fn update_block(
                         let angle = PI / 4.0 + elapsed_secs / BLOCK_MOVE_TIME * PI / 2.0;
                         transform.translation = prev_transform.translation.lerp(
                             next_transform.translation,
-                            -angle.cos() * (0.5 as f32).sqrt() + 0.5,
+                            -angle.cos() * 0.5_f32.sqrt() + 0.5,
                         );
-                        transform.translation.y = angle.sin() * (0.5 as f32).sqrt() - 0.5;
+                        transform.translation.y = angle.sin() * 0.5_f32.sqrt() - 0.5;
                         new_move_flag = false;
                     }
                 }
             }
-        }
+        });
     }
 
     if new_move_flag {
@@ -381,11 +374,9 @@ fn check_clear(
                     is_clear = false;
                     break;
                 }
-            } else {
-                if (x != game.size - 1) || (z != game.size - 1) {
-                    is_clear = false;
-                    break;
-                }
+            } else if (x != game.size - 1) || (z != game.size - 1) {
+                is_clear = false;
+                break;
             }
         }
     }

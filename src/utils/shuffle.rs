@@ -71,12 +71,12 @@ pub fn shuffle(size: usize) -> BoardString {
     let mut board_string = BoardString::new(size);
 
     for z in 0..size {
-        for x in 0..size {
+        (0..size).for_each(|x| {
             if let Some(block) = board[x][z] {
                 let i = block.goal as usize;
                 let rotation = block.transform.rotation;
 
-                let rotation_byte = rotation.to_array().iter().fold(0 as u8, |cur, &i| {
+                let rotation_byte = rotation.to_array().iter().fold(0_u8, |cur, &i| {
                     (cur << 2)
                         | if i > 0.3 {
                             1
@@ -92,7 +92,7 @@ pub fn shuffle(size: usize) -> BoardString {
             } else {
                 board_string.0[0].0 = (z * size + x + 1) as u8;
             }
-        }
+        });
     }
 
     board_string
