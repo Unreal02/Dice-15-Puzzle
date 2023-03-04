@@ -107,6 +107,9 @@ pub fn game_ui_button_system(
                     MyButtonType::Settings => {
                         let _ = player_state.push(PlayerState::SettingsPopup);
                     }
+                    MyButtonType::Difficulty => {
+                        let _ = player_state.push(PlayerState::DifficultyPopup);
+                    }
                     MyButtonType::Share => {
                         let board_string = board_to_string(&transforms, &mut game);
                         let puzzle_key = board_string.into_key();

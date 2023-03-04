@@ -13,6 +13,7 @@ pub enum PlayerState {
     Solving,
     Clear,
     SettingsPopup,
+    DifficultyPopup,
     ModeSelectionPopup,
     StatisticsPopup,
     DateSelectionPopup,

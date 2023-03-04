@@ -17,6 +17,10 @@ impl Plugin for PopupPlugin {
                 SystemSet::on_enter(PlayerState::SettingsPopup).with_system(spawn_popup_settings),
             )
             .add_system_set(
+                SystemSet::on_enter(PlayerState::DifficultyPopup)
+                    .with_system(spawn_popup_difficulty),
+            )
+            .add_system_set(
                 SystemSet::on_enter(PlayerState::ModeSelectionPopup)
                     .with_system(spawn_popup_mode_selection),
             )
@@ -37,6 +41,11 @@ impl Plugin for PopupPlugin {
             )
             .add_system_set(
                 SystemSet::on_update(PlayerState::SettingsPopup)
+                    .with_system(popup_close_button_system),
+            )
+            .add_system_set(
+                SystemSet::on_update(PlayerState::DifficultyPopup)
+                    .with_system(popup_system_difficulty)
                     .with_system(popup_close_button_system),
             )
             .add_system_set(
@@ -65,6 +74,9 @@ impl Plugin for PopupPlugin {
             )
             .add_system_set(
                 SystemSet::on_exit(PlayerState::SettingsPopup).with_system(despawn_popup),
+            )
+            .add_system_set(
+                SystemSet::on_exit(PlayerState::DifficultyPopup).with_system(despawn_popup),
             )
             .add_system_set(
                 SystemSet::on_exit(PlayerState::ModeSelectionPopup).with_system(despawn_popup),

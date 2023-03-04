@@ -107,6 +107,20 @@ fn setup_game_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
                 font.clone(),
             );
 
+            // difficulty button
+            spawn_image_button(
+                parent,
+                UiRect {
+                    right: Val::Px(50.0),
+                    top: Val::Px(170.0),
+                    ..default()
+                },
+                MyButtonType::Difficulty,
+                asset_server.load("images/button_medium.png").into(),
+                "Difficulty".to_string(),
+                font.clone(),
+            );
+
             // player info
             parent.spawn((
                 TextBundle::from_section(
@@ -250,10 +264,12 @@ pub fn spawn_image_button(
     font: Handle<Font>,
 ) {
     let info_position = match button_type {
-        MyButtonType::Settings | MyButtonType::PopupEnrollScore => Some(UiRect {
-            bottom: Val::Px(-60.0),
-            ..default()
-        }),
+        MyButtonType::Settings | MyButtonType::Difficulty | MyButtonType::PopupEnrollScore => {
+            Some(UiRect {
+                bottom: Val::Px(-60.0),
+                ..default()
+            })
+        }
         MyButtonType::DateSelection => Some(UiRect {
             top: Val::Px(-60.0),
             left: Val::Px(-40.0),

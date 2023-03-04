@@ -3,6 +3,7 @@ mod game_ui;
 mod game_ui_system;
 mod popup;
 mod popup_date_selection;
+mod popup_difficulty;
 mod popup_enroll_score;
 mod popup_how_to_play;
 mod popup_mode_selection;
@@ -18,6 +19,7 @@ pub use game_ui::*;
 pub use game_ui_system::*;
 pub use popup::*;
 pub use popup_date_selection::*;
+pub use popup_difficulty::*;
 pub use popup_enroll_score::*;
 pub use popup_how_to_play::*;
 pub use popup_mode_selection::*;
@@ -43,6 +45,7 @@ pub enum MyButtonType {
     InputInversion,
     ModeSelection,
     Settings,
+    Difficulty,
     Share,
     Undo,
     Redo,
