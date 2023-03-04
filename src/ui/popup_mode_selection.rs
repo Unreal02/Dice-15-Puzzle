@@ -11,7 +11,7 @@ pub fn spawn_popup_mode_selection(
     asset_server: Res<AssetServer>,
 ) {
     let font = asset_server.load("fonts/Quicksand-Bold.ttf");
-    let button_image = UiImage::from(asset_server.load("images/button.png"));
+    let button_image = UiImage::from(asset_server.load("images/button_big.png"));
     let button_close_image = UiImage::from(asset_server.load("images/button_close.png"));
 
     commands

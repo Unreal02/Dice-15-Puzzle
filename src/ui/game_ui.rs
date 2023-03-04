@@ -90,7 +90,7 @@ fn setup_game_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
                 font.clone(),
                 MyButtonType::ModeSelection,
                 Some(MyTextType::ModeSelection),
-                asset_server.load("images/button.png").into(),
+                asset_server.load("images/button_big.png").into(),
             );
 
             // settings button
