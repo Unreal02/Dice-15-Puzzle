@@ -1,5 +1,8 @@
 use crate::{
-    daily_puzzle_info::ClearHistory, statistics_manager::StatisticsManager, ui::SkipHowToPlay,
+    daily_puzzle_info::ClearHistory,
+    game::{BoardSize, Difficulty},
+    statistics_manager::StatisticsManager,
+    ui::SkipHowToPlay,
 };
 
 const INPUT_INVERSION: &str = "input_inversion";
@@ -7,6 +10,8 @@ const MOVE_IMMEDIATE: &str = "move_immediate";
 const DAILY_PUZZLE_CLEAR_HISTORY: &str = "daily_puzzle_clear_history";
 const STATISTICS: &str = "statistics";
 const SKIP_HOW_TO_PLAY: &str = "skip_how_to_play";
+const BOARD_SIZE: &str = "board_size";
+const DIFFICULTY: &str = "difficulty";
 
 pub struct LocalStorage;
 
@@ -65,5 +70,21 @@ impl LocalStorage {
 
     pub fn set_skip_how_to_play(value: &SkipHowToPlay) {
         Self::set(SKIP_HOW_TO_PLAY, &serde_json::to_string(value).unwrap());
+    }
+
+    pub fn get_board_size() -> Option<BoardSize> {
+        Self::get(BOARD_SIZE).map(|value| serde_json::from_str(&value).unwrap())
+    }
+
+    pub fn set_board_size(value: &BoardSize) {
+        Self::set(BOARD_SIZE, &serde_json::to_string(value).unwrap());
+    }
+
+    pub fn get_difficulty() -> Option<Difficulty> {
+        Self::get(DIFFICULTY).map(|value| serde_json::from_str(&value).unwrap())
+    }
+
+    pub fn set_difficulty(value: &Difficulty) {
+        Self::set(DIFFICULTY, &serde_json::to_string(value).unwrap());
     }
 }

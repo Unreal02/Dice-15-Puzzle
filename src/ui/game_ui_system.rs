@@ -195,6 +195,12 @@ pub fn game_ui_button_system(
                         statistics_manager.delete_statistics();
                         delete_statistics_event.send_default();
                     }
+                    MyButtonType::SetBoardSize(size) => {
+                        info!("set board size {}", size);
+                    }
+                    MyButtonType::SetDifficulty(difficulty) => {
+                        info!("set difficulty {}", difficulty)
+                    }
                 }
                 *color = (BUTTON_WHITE * BUTTON_PRESS_MUL).into();
             }

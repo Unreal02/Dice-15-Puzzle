@@ -9,20 +9,27 @@ use bevy::{math::vec3, prelude::*, utils::HashMap};
 #[cfg(feature = "debug")]
 use bevy_inspector_egui::Inspectable;
 use bevy_mod_picking::PickingCameraBundle;
+use serde::{Deserialize, Serialize};
 
 use crate::{
     block::{spawn_meshes, Block, BlockMesh},
     buffered_input::{InputBuffer, MoveImmediate},
+    local_storage::LocalStorage,
     network::NetworkChannel,
     player::{PlayerInfo, PlayerState},
     utils::{shuffle, string_to_board},
 };
 
 const INITIAL_BOARD_SIZE: usize = 4;
+pub const MIN_BOARD_SIZE: usize = 2;
+pub const MAX_BOARD_SIZE: usize = 8;
 const BLOCK_MOVE_TIME: f32 = 0.3;
 
-#[derive(Resource)]
+#[derive(Resource, Serialize, Deserialize)]
 pub struct BoardSize(pub usize);
+
+#[derive(Resource, Serialize, Deserialize)]
+pub struct Difficulty(pub bool);
 
 #[derive(Resource, Default)]
 pub struct MoveTimer(pub Timer);
@@ -60,16 +67,19 @@ pub struct UrlReqestInfo(Option<String>);
 
 impl Plugin for GamePlugin {
     fn build(&self, app: &mut App) {
-        app.insert_resource(BoardSize(INITIAL_BOARD_SIZE))
-            .add_startup_system(setup)
-            .add_system(update_block.label(GameStages::UpdateBlock))
-            .add_system_set(
-                SystemSet::on_update(PlayerState::Solving).with_system(
-                    check_clear
-                        .after(GameStages::UpdateBlock)
-                        .label(GameStages::CheckClear),
-                ),
-            );
+        app.insert_resource(
+            LocalStorage::get_board_size().unwrap_or(BoardSize(INITIAL_BOARD_SIZE)),
+        )
+        .insert_resource(LocalStorage::get_difficulty().unwrap_or(Difficulty(false)))
+        .add_startup_system(setup)
+        .add_system(update_block.label(GameStages::UpdateBlock))
+        .add_system_set(
+            SystemSet::on_update(PlayerState::Solving).with_system(
+                check_clear
+                    .after(GameStages::UpdateBlock)
+                    .label(GameStages::CheckClear),
+            ),
+        );
     }
 }
 
@@ -351,12 +361,24 @@ fn check_clear(
     block_transforms: Query<&Transform, With<BlockMesh>>,
     mut app_state: ResMut<State<PlayerState>>,
     game_query: Query<&GameState>,
+    difficulty: Res<Difficulty>,
 ) {
     let game = game_query.single();
 
     if !game.is_shuffled {
         return;
     }
+
+    let check_block_rotation = |mut transform: Transform| {
+        if transform.rotation.is_near_identity() {
+            true
+        } else if difficulty.0 {
+            transform.rotate_y(PI);
+            transform.rotation.is_near_identity()
+        } else {
+            false
+        }
+    };
 
     let mut is_clear = true;
     for x in 0..game.size {
@@ -365,7 +387,7 @@ fn check_clear(
             if let Some(block) = &game.board.0[x][z] {
                 if (block.goal == curr) && block.moving.is_none() {
                     if let Ok(block_transform) = block_transforms.get(block.entity) {
-                        if !block_transform.rotation.is_near_identity() {
+                        if !check_block_rotation(*block_transform) {
                             is_clear = false;
                             break;
                         }

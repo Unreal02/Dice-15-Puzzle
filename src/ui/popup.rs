@@ -45,7 +45,6 @@ impl Plugin for PopupPlugin {
             )
             .add_system_set(
                 SystemSet::on_update(PlayerState::DifficultyPopup)
-                    .with_system(popup_system_difficulty)
                     .with_system(popup_close_button_system),
             )
             .add_system_set(
