@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use rand::random;
 use std::f32::consts::PI;
 
-use crate::network::BoardString;
+use crate::{game::INITIAL_BOARD_SIZE, network::BoardString};
 
 const SHUFFLE_NUMBER: i32 = 1000;
 
@@ -57,7 +57,7 @@ pub fn shuffle(size: usize) -> BoardString {
     };
 
     // shuffle
-    for _ in 0..SHUFFLE_NUMBER {
+    for _ in 0..SHUFFLE_NUMBER as usize / INITIAL_BOARD_SIZE.pow(2) * size.pow(2) {
         match random::<u32>() % 4 {
             0 => move_block(0, 1),
             1 => move_block(0, -1),

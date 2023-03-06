@@ -5,7 +5,7 @@ use chrono::Datelike;
 use crate::{
     buffered_input::{InputBuffer, InputHandler, InputInversionFlag, InputTimer, MoveImmediate},
     daily_puzzle_info::DailyPuzzleInfo,
-    game::{GameState, MoveTimer},
+    game::{EasyMode, GameState, MoveTimer},
     local_storage::LocalStorage,
     network::NetworkChannel,
     player::{PlayLog, PlayerInfo, PlayerState},
@@ -195,12 +195,6 @@ pub fn game_ui_button_system(
                         statistics_manager.delete_statistics();
                         delete_statistics_event.send_default();
                     }
-                    MyButtonType::SetBoardSize(size) => {
-                        info!("set board size {}", size);
-                    }
-                    MyButtonType::SetDifficulty(difficulty) => {
-                        info!("set difficulty {}", difficulty)
-                    }
                 }
                 *color = (BUTTON_WHITE * BUTTON_PRESS_MUL).into();
             }
@@ -258,6 +252,16 @@ pub fn game_ui_text_system(
                         text.sections[0].value.push(ev.char);
                     }
                 }
+            }
+            MyTextType::Difficulty => {
+                let size = LocalStorage::get_board_size().unwrap_or_default().0;
+                let easy_mode = LocalStorage::get_easy_mode().unwrap_or(EasyMode(false)).0;
+                text.sections[0].value = format!(
+                    "{} x {}\n{}",
+                    size,
+                    size,
+                    if easy_mode { "Easy" } else { "Hard" }
+                );
             }
             _ => {}
         }

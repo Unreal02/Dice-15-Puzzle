@@ -58,8 +58,6 @@ pub enum MyButtonType {
     Export,
     LoadURL,
     DeleteStatistics,
-    SetBoardSize(usize),
-    SetDifficulty(bool),
 }
 
 #[derive(Debug, Component, PartialEq, Eq, Clone, Copy)]
@@ -71,4 +69,5 @@ pub enum MyTextType {
     ShareURL,
     TextInputBox(usize),
     EnrollDailyScoreResult,
+    Difficulty,
 }

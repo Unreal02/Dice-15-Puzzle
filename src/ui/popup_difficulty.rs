@@ -1,8 +1,17 @@
 use crate::{
-    game::{MAX_BOARD_SIZE, MIN_BOARD_SIZE},
+    block::{spawn_meshes, BlockMesh},
+    game::{BoardSize, EasyMode, GameState, MAX_BOARD_SIZE, MIN_BOARD_SIZE},
+    local_storage::LocalStorage,
+    player::PlayerState,
     ui::*,
 };
-use bevy::prelude::*;
+use bevy::{math::vec3, prelude::*};
+
+#[derive(Component)]
+pub enum DifficultyButtonType {
+    SetBoardSize(usize),
+    SetEasyMode(bool),
+}
 
 pub fn spawn_popup_difficulty(
     mut commands: Commands,
@@ -20,7 +29,7 @@ pub fn spawn_popup_difficulty(
                 // difficulty text
                 parent.spawn(
                     TextBundle::from_section(
-                        "Difficulty (WIP)",
+                        "Difficulty",
                         TextStyle {
                             font: font.clone(),
                             font_size: TEXT_SIZE,
@@ -68,7 +77,7 @@ pub fn spawn_popup_difficulty(
                         },
                         format!("{} x {}", i, i),
                         font.clone(),
-                        MyButtonType::SetBoardSize(i),
+                        DifficultyButtonType::SetBoardSize(i),
                         button_small_image.clone(),
                     );
                 }
@@ -102,9 +111,9 @@ pub fn spawn_popup_difficulty(
                         top: Val::Px(160.0),
                         ..default()
                     },
-                    format!("Easy"),
+                    "Easy".to_string(),
                     font.clone(),
-                    MyButtonType::SetDifficulty(true),
+                    DifficultyButtonType::SetEasyMode(true),
                     button_small_image.clone(),
                 );
                 spawn_small_button(
@@ -114,13 +123,117 @@ pub fn spawn_popup_difficulty(
                         top: Val::Px(220.0),
                         ..default()
                     },
-                    format!("Hard"),
+                    "Hard".to_string(),
                     font.clone(),
-                    MyButtonType::SetDifficulty(false),
+                    DifficultyButtonType::SetEasyMode(false),
                     button_small_image.clone(),
                 );
             })
         });
+}
+
+pub fn popup_system_difficulty(
+    mut interaction_query: Query<
+        (&Interaction, &mut BackgroundColor, &DifficultyButtonType),
+        (Changed<Interaction>, With<Button>),
+    >,
+) {
+    for (interaction, mut color, button_type) in &mut interaction_query {
+        match *interaction {
+            Interaction::Clicked => {
+                match button_type {
+                    DifficultyButtonType::SetBoardSize(size) => {
+                        LocalStorage::set_board_size(&BoardSize(*size));
+                    }
+                    DifficultyButtonType::SetEasyMode(value) => {
+                        LocalStorage::set_easy_mode(&EasyMode(*value));
+                    }
+                }
+                *color = (BUTTON_WHITE * BUTTON_PRESS_MUL).into();
+            }
+            Interaction::Hovered => *color = (BUTTON_WHITE * BUTTON_HOVER_MUL).into(),
+            Interaction::None => *color = BUTTON_WHITE.into(),
+        }
+    }
+}
+
+pub fn popup_difficulty_close_button_system(
+    mut commands: Commands,
+    mut interaction_query: Query<
+        (&Interaction, &mut BackgroundColor, Option<&Popup>),
+        (Changed<Interaction>, With<Button>, With<PopupCloseButton>),
+    >,
+    mut player_state: ResMut<State<PlayerState>>,
+    keyboard_input: Res<Input<KeyCode>>,
+    mut board_size: ResMut<BoardSize>,
+    mut easy_mode: ResMut<EasyMode>,
+    mut game_query: Query<&mut GameState>,
+    block_mesh_query: Query<Entity, With<BlockMesh>>,
+    asset_server: Res<AssetServer>,
+    meshes: ResMut<Assets<Mesh>>,
+    materials: ResMut<Assets<StandardMaterial>>,
+    mut camera_query: Query<&mut Transform, With<Camera>>,
+) {
+    let mut game = game_query.single_mut();
+    let mut close = false;
+
+    for (interaction, mut color, popup) in &mut interaction_query {
+        if *interaction == Interaction::Clicked {
+            close = true;
+        }
+        if popup.is_none() {
+            *color = match *interaction {
+                Interaction::Clicked => (BUTTON_WHITE * BUTTON_PRESS_MUL).into(),
+                Interaction::Hovered => (BUTTON_WHITE * BUTTON_HOVER_MUL).into(),
+                Interaction::None => BUTTON_WHITE.into(),
+            };
+        }
+    }
+
+    // press Esc: popup close
+    if keyboard_input.just_pressed(KeyCode::Escape) {
+        close = true;
+    }
+
+    if close {
+        let mut change = false;
+        if let Some(BoardSize(size)) = LocalStorage::get_board_size() {
+            if board_size.0 != size {
+                board_size.0 = size;
+                change = true;
+            }
+        }
+        if let Some(EasyMode(value)) = LocalStorage::get_easy_mode() {
+            if easy_mode.0 != value {
+                easy_mode.0 = value;
+                change = true;
+            }
+        }
+
+        if change {
+            // spawn new meshes
+            block_mesh_query.for_each(|entity| commands.entity(entity).despawn());
+            let mesh_entities =
+                spawn_meshes(&mut commands, board_size.0, meshes, materials, asset_server);
+            *camera_query.single_mut() = Transform::from_xyz(
+                (board_size.0 as f32 - 1.0) / 2.0,
+                board_size.0 as f32 * 1.25,
+                (board_size.0 as f32 - 1.0) / 2.0 + board_size.0 as f32 * 1.25,
+            )
+            .looking_at(
+                vec3(
+                    (board_size.0 as f32 - 1.0) / 2.0,
+                    0.0,
+                    (board_size.0 as f32 - 1.0) / 2.0,
+                ),
+                Vec3::Y,
+            );
+            game.init(board_size.0, &mesh_entities);
+            player_state.replace(PlayerState::Idle).unwrap();
+        } else {
+            player_state.pop().unwrap();
+        }
+    }
 }
 
 fn spawn_small_button(
@@ -128,7 +241,7 @@ fn spawn_small_button(
     position: UiRect,
     text: String,
     font: Handle<Font>,
-    button_type: MyButtonType,
+    button_type: DifficultyButtonType,
     image: UiImage,
 ) {
     parent

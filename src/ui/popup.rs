@@ -45,7 +45,8 @@ impl Plugin for PopupPlugin {
             )
             .add_system_set(
                 SystemSet::on_update(PlayerState::DifficultyPopup)
-                    .with_system(popup_close_button_system),
+                    .with_system(popup_system_difficulty)
+                    .with_system(popup_difficulty_close_button_system),
             )
             .add_system_set(
                 SystemSet::on_update(PlayerState::ModeSelectionPopup)
@@ -103,9 +104,11 @@ fn popup_close_button_system(
     mut player_state: ResMut<State<PlayerState>>,
     keyboard_input: Res<Input<KeyCode>>,
 ) {
+    let mut close = false;
+
     for (interaction, mut color, popup) in &mut interaction_query {
         if *interaction == Interaction::Clicked {
-            let _ = player_state.pop();
+            close = true;
         }
         if popup.is_none() {
             *color = match *interaction {
@@ -118,7 +121,11 @@ fn popup_close_button_system(
 
     // press Esc: popup close
     if keyboard_input.just_pressed(KeyCode::Escape) {
-        let _ = player_state.pop();
+        close = true;
+    }
+
+    if close {
+        player_state.pop().unwrap();
     }
 }
 

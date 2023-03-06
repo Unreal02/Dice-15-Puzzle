@@ -86,6 +86,7 @@ fn setup_game_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
                     top: Val::Px(50.0),
                     ..default()
                 },
+                Size::new(Val::Px(200.0), Val::Px(100.0)),
                 "Mode\nPractice".to_string(),
                 font.clone(),
                 MyButtonType::ModeSelection,
@@ -108,17 +109,19 @@ fn setup_game_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
             );
 
             // difficulty button
-            spawn_image_button(
+            spawn_button(
                 parent,
                 UiRect {
                     right: Val::Px(50.0),
                     top: Val::Px(170.0),
                     ..default()
                 },
-                MyButtonType::Difficulty,
-                asset_server.load("images/button_medium.png").into(),
+                Size::new(Val::Px(100.0), Val::Px(100.0)),
                 "Difficulty".to_string(),
                 font.clone(),
+                MyButtonType::Difficulty,
+                Some(MyTextType::Difficulty),
+                asset_server.load("images/button_medium.png").into(),
             );
 
             // player info
@@ -216,6 +219,7 @@ fn despawn_clear_ui(
 pub fn spawn_button(
     parent: &mut ChildBuilder,
     position: UiRect,
+    size: Size,
     text: String,
     font: Handle<Font>,
     button_type: MyButtonType,
@@ -228,7 +232,7 @@ pub fn spawn_button(
                 style: Style {
                     align_items: AlignItems::Center,
                     justify_content: JustifyContent::Center,
-                    size: Size::new(Val::Px(200.0), Val::Px(100.0)),
+                    size,
                     position_type: PositionType::Absolute,
                     position,
                     ..default()
