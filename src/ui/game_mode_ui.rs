@@ -82,10 +82,11 @@ impl Plugin for GameModeUIPlugin {
             .add_system_set(
                 SystemSet::on_enter(GameMode::DailyPuzzle)
                     .with_system(spawn_game_mode_ui)
-                    .with_system(hide_shuffle_reset_button),
+                    .with_system(hide_shuffle_reset_difficulty_button),
             )
             .add_system_set(
-                SystemSet::on_exit(GameMode::DailyPuzzle).with_system(show_shuffle_reset_button),
+                SystemSet::on_exit(GameMode::DailyPuzzle)
+                    .with_system(show_shuffle_reset_difficulty_button),
             );
     }
 }
@@ -235,10 +236,12 @@ fn spawn_game_mode_ui(
         });
 }
 
-fn hide_shuffle_reset_button(mut buttons_query: Query<(&mut Visibility, &MyButtonType)>) {
+fn hide_shuffle_reset_difficulty_button(
+    mut buttons_query: Query<(&mut Visibility, &MyButtonType)>,
+) {
     for (mut visibility, button_type) in buttons_query.iter_mut() {
         match button_type {
-            MyButtonType::Shuffle | MyButtonType::Reset => {
+            MyButtonType::Shuffle | MyButtonType::Reset | MyButtonType::Difficulty => {
                 visibility.is_visible = false;
             }
             _ => {}
@@ -246,10 +249,12 @@ fn hide_shuffle_reset_button(mut buttons_query: Query<(&mut Visibility, &MyButto
     }
 }
 
-fn show_shuffle_reset_button(mut buttons_query: Query<(&mut Visibility, &MyButtonType)>) {
+fn show_shuffle_reset_difficulty_button(
+    mut buttons_query: Query<(&mut Visibility, &MyButtonType)>,
+) {
     for (mut visibility, button_type) in buttons_query.iter_mut() {
         match button_type {
-            MyButtonType::Shuffle | MyButtonType::Reset => {
+            MyButtonType::Shuffle | MyButtonType::Reset | MyButtonType::Difficulty => {
                 visibility.is_visible = true;
             }
             _ => {}
