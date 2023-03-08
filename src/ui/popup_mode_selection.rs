@@ -1,5 +1,5 @@
 use crate::{
-    game::{GameState, MoveTimer},
+    game::{BoardSize, EasyMode, GameState, MoveTimer, INITIAL_BOARD_SIZE},
     network::NetworkChannel,
     player::{PlayLog, PlayerInfo, PlayerState},
     ui::*,
@@ -75,7 +75,7 @@ pub fn spawn_popup_mode_selection(
                     parent,
                     Val::Px(25.0),
                     "Daily Puzzle".to_string(),
-                    "Puzzle for\neveryday life".to_string(),
+                    "Puzzle for everyday\n4x4, Hard Only".to_string(),
                     font.clone(),
                     GameMode::DailyPuzzle,
                     button_image.clone(),
@@ -97,11 +97,19 @@ pub fn popup_system_mode_selection(
     mut move_timer: ResMut<MoveTimer>,
     mut game_query: Query<&mut GameState>,
     mut network_channel: Res<NetworkChannel>,
+    board_size: Res<BoardSize>,
+    easy_mode: Res<EasyMode>,
 ) {
     for (interaction, mut color, button_type) in &mut interaction_query {
         match *interaction {
             Interaction::Clicked => {
                 if button_type != game_mode.current() {
+                    if *button_type == GameMode::DailyPuzzle
+                        && (board_size.0 != INITIAL_BOARD_SIZE || easy_mode.0)
+                    {
+                        continue;
+                    }
+
                     let _ = game_mode.set(*button_type);
                     button_type.entry_handler(
                         &mut player_info.single_mut(),
